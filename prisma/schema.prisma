@@ -29,17 +29,18 @@ model User {
 }
 
 model CoinOrder {
-  id         String    @id @default(cuid())
-  userId     String
-  packageId  String
-  coins      Int
-  bonus      Int       @default(0)
-  price      Float
-  status     String    @default("PENDING") // PENDING | PAID | FAILED | CANCELLED
-  method     String?   // CARD | PROMPTPAY
-  paidAt     DateTime?
-  createdAt  DateTime  @default(now())
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String    @id @default(cuid())
+  userId         String
+  packageId      String
+  coins          Int
+  bonus          Int       @default(0)
+  price          Float
+  status         String    @default("PENDING") // PENDING | PAID | FAILED | CANCELLED
+  method         String?   // CARD | PROMPTPAY
+  paidAt         DateTime?
+  omiseChargeId  String?
+  createdAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {

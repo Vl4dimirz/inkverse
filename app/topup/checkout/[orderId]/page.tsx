@@ -40,7 +40,8 @@ export default async function CheckoutPage({
         packageName: pkg?.name ?? "แพ็กเกจเหรียญ",
       }}
       userCoins={order.user.coins}
-      isSandbox={!process.env.PAYMENT_GATEWAY || process.env.PAYMENT_GATEWAY === "sandbox"}
+      isSandbox={!process.env.OMISE_SECRET_KEY}
+      omisePublicKey={process.env.NEXT_PUBLIC_OMISE_PUBLIC_KEY}
     />
   );
 }

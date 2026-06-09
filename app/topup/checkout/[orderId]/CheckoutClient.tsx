@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Coins, CreditCard, Smartphone, ShieldCheck, ArrowLeft,
-  CheckCircle, AlertCircle, Lock,
+  AlertCircle, Lock, Loader2, RefreshCw,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -27,12 +28,35 @@ function formatExpiry(val: string) {
   return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
 }
 
+declare global {
+  interface Window {
+    Omise?: {
+      setPublicKey: (key: string) => void;
+      createToken: (
+        type: string,
+        card: {
+          name: string;
+          number: string;
+          expiration_month: string;
+          expiration_year: string;
+          security_code: string;
+        },
+        callback: (status: number, resp: { id?: string; message?: string }) => void
+      ) => void;
+    };
+  }
+}
+
 export default function CheckoutClient({
-  order, userCoins, isSandbox,
+  order,
+  userCoins,
+  isSandbox,
+  omisePublicKey,
 }: {
   order: Order;
   userCoins: number;
   isSandbox: boolean;
+  omisePublicKey?: string;
 }) {
   const router = useRouter();
   const total = order.coins + order.bonus;
@@ -41,35 +65,66 @@ export default function CheckoutClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Card fields
   const [cardNum, setCardNum] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [name, setName] = useState("");
 
-  // PromptPay confirm state
-  const [promptConfirm, setPromptConfirm] = useState(false);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  async function handlePay() {
+  // Load OmiseJS
+  useEffect(() => {
+    if (!omisePublicKey) return;
+    const script = document.createElement("script");
+    script.src = "https://cdn.omise.co/omise.js";
+    script.async = true;
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, [omisePublicKey]);
+
+  useEffect(() => {
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
+
+  function startPolling() {
+    setPolling(true);
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/coin/order/${order.id}/status`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === "PAID") {
+            clearInterval(pollRef.current!);
+            router.push(`/topup/success/${order.id}`);
+          }
+        }
+      } catch { /* ignore */ }
+    }, 3000);
+  }
+
+  async function loadPromptPayQR() {
+    setQrLoading(true);
     setError("");
-
-    if (method === "CARD") {
-      if (cardNum.replace(/\s/g, "").length < 16) return setError("กรุณากรอกหมายเลขบัตรให้ครบ 16 หลัก");
-      if (expiry.length < 5) return setError("กรุณากรอกวันหมดอายุ");
-      if (cvv.length < 3) return setError("กรุณากรอก CVV");
-      if (!name.trim()) return setError("กรุณากรอกชื่อบนบัตร");
+    try {
+      const res = await fetch(`/api/coin/order/${order.id}/promptpay`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "ไม่สามารถสร้าง QR ได้"); return; }
+      setQrUrl(data.qrUrl ?? null);
+      if (!data.sandbox) startPolling();
+    } finally {
+      setQrLoading(false);
     }
+  }
 
-    if (method === "PROMPTPAY" && !promptConfirm) {
-      return setError("กรุณายืนยันว่าชำระผ่าน PromptPay แล้ว");
-    }
-
-    setLoading(true);
+  async function chargeCard(omiseToken?: string) {
     try {
       const res = await fetch(`/api/coin/order/${order.id}/pay`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ method }),
+        body: JSON.stringify({ method: "CARD", omiseToken }),
       });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
@@ -84,18 +139,69 @@ export default function CheckoutClient({
     }
   }
 
+  async function handlePay() {
+    setError("");
+
+    if (method === "PROMPTPAY") {
+      if (isSandbox) {
+        setLoading(true);
+        try {
+          const res = await fetch(`/api/coin/order/${order.id}/pay`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ method: "PROMPTPAY" }),
+          });
+          if (res.ok) router.push(`/topup/success/${order.id}`);
+          else setError("เกิดข้อผิดพลาด");
+        } finally { setLoading(false); }
+      } else {
+        await loadPromptPayQR();
+      }
+      return;
+    }
+
+    if (cardNum.replace(/\s/g, "").length < 16) return setError("กรุณากรอกหมายเลขบัตรให้ครบ 16 หลัก");
+    if (expiry.length < 5) return setError("กรุณากรอกวันหมดอายุ");
+    if (cvv.length < 3) return setError("กรุณากรอก CVV");
+    if (!name.trim()) return setError("กรุณากรอกชื่อบนบัตร");
+
+    setLoading(true);
+
+    if (omisePublicKey && window.Omise) {
+      const [mm, yy] = expiry.split("/");
+      window.Omise.setPublicKey(omisePublicKey);
+      window.Omise.createToken(
+        "card",
+        {
+          name,
+          number: cardNum.replace(/\s/g, ""),
+          expiration_month: mm,
+          expiration_year: yy?.length === 2 ? `20${yy}` : yy,
+          security_code: cvv,
+        },
+        async (statusCode, resp) => {
+          if (statusCode !== 200 || !resp.id) {
+            setError(resp.message ?? "ข้อมูลบัตรไม่ถูกต้อง");
+            setLoading(false);
+            return;
+          }
+          await chargeCard(resp.id);
+        }
+      );
+      return;
+    }
+
+    // Sandbox: no tokenization
+    await chargeCard(undefined);
+  }
+
   return (
     <div className="min-h-screen bg-[#080a10] flex items-start justify-center px-4 py-10">
       <div className="w-full max-w-lg space-y-4">
-        {/* Back */}
-        <Link
-          href="/topup"
-          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors"
-        >
+        <Link href="/topup" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors">
           <ArrowLeft className="w-4 h-4" /> กลับ
         </Link>
 
-        {/* Sandbox banner */}
         {isSandbox && (
           <div className="flex items-center gap-2 px-4 py-2.5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -121,12 +227,9 @@ export default function CheckoutClient({
           )}
           <div className="border-t border-white/5 mt-3 pt-3 flex items-center justify-between">
             <span className="text-sm text-gray-400 flex items-center gap-1.5">
-              <Coins className="w-4 h-4 text-yellow-400" />
-              รวมได้รับ
+              <Coins className="w-4 h-4 text-yellow-400" /> รวมได้รับ
             </span>
-            <span className="font-bebas text-2xl text-yellow-400 tracking-wider">
-              {total.toLocaleString()} เหรียญ
-            </span>
+            <span className="font-bebas text-2xl text-yellow-400 tracking-wider">{total.toLocaleString()} เหรียญ</span>
           </div>
           <div className="flex items-center justify-between mt-1">
             <span className="text-xs text-gray-600">ยอดที่ต้องชำระ</span>
@@ -134,59 +237,46 @@ export default function CheckoutClient({
           </div>
         </div>
 
-        {/* Payment method tabs */}
+        {/* Payment tabs */}
         <div className="bg-[#141720] rounded-2xl border border-white/5 overflow-hidden">
           <div className="flex border-b border-white/5">
             {(["CARD", "PROMPTPAY"] as Method[]).map((m) => (
               <button
                 key={m}
-                onClick={() => { setMethod(m); setError(""); }}
+                onClick={() => { setMethod(m); setError(""); setQrUrl(null); }}
                 className={clsx(
                   "flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-medium transition-colors",
-                  method === m
-                    ? "bg-white/5 text-white"
-                    : "text-gray-500 hover:text-gray-300"
+                  method === m ? "bg-white/5 text-white" : "text-gray-500 hover:text-gray-300"
                 )}
               >
-                {m === "CARD" ? (
-                  <><CreditCard className="w-4 h-4" /> บัตรเครดิต/เดบิต</>
-                ) : (
-                  <><Smartphone className="w-4 h-4" /> PromptPay</>
-                )}
+                {m === "CARD"
+                  ? <><CreditCard className="w-4 h-4" /> บัตรเครดิต/เดบิต</>
+                  : <><Smartphone className="w-4 h-4" /> PromptPay</>}
               </button>
             ))}
           </div>
 
           <div className="p-5">
-            {/* ── CARD FORM ── */}
             {method === "CARD" && (
               <div className="space-y-3">
-                {/* Card number */}
                 <div>
                   <label className="text-xs text-gray-500 mb-1.5 block">หมายเลขบัตร</label>
                   <div className="relative">
                     <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="0000 0000 0000 0000"
-                      value={cardNum}
-                      onChange={(e) => setCardNum(formatCard(e.target.value))}
+                      type="text" inputMode="numeric" placeholder="0000 0000 0000 0000"
+                      value={cardNum} onChange={(e) => setCardNum(formatCard(e.target.value))}
                       maxLength={19}
                       className="w-full bg-[#1a1e2a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 font-mono tracking-widest"
                     />
                     <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">วันหมดอายุ</label>
                     <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="MM/YY"
-                      value={expiry}
-                      onChange={(e) => setExpiry(formatExpiry(e.target.value))}
+                      type="text" inputMode="numeric" placeholder="MM/YY"
+                      value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                       maxLength={5}
                       className="w-full bg-[#1a1e2a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 font-mono"
                     />
@@ -194,143 +284,59 @@ export default function CheckoutClient({
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">CVV</label>
                     <input
-                      type="password"
-                      inputMode="numeric"
-                      placeholder="•••"
-                      value={cvv}
-                      onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                      type="password" inputMode="numeric" placeholder="•••"
+                      value={cvv} onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
                       maxLength={4}
                       className="w-full bg-[#1a1e2a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 font-mono"
                     />
                   </div>
                 </div>
-
                 <div>
                   <label className="text-xs text-gray-500 mb-1.5 block">ชื่อบนบัตร</label>
                   <input
-                    type="text"
-                    placeholder="FIRSTNAME LASTNAME"
-                    value={name}
-                    onChange={(e) => setName(e.target.value.toUpperCase())}
+                    type="text" placeholder="FIRSTNAME LASTNAME"
+                    value={name} onChange={(e) => setName(e.target.value.toUpperCase())}
                     className="w-full bg-[#1a1e2a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 uppercase tracking-wider"
                   />
                 </div>
               </div>
             )}
 
-            {/* ── PROMPTPAY ── */}
             {method === "PROMPTPAY" && (
               <div className="flex flex-col items-center gap-4 py-2">
-                <p className="text-sm text-gray-400 text-center">
-                  สแกน QR Code ด้วยแอปธนาคารของคุณ
-                </p>
-                {/* Mock QR */}
-                <div className="relative bg-white p-4 rounded-2xl">
-                  <svg
-                    width="180" height="180" viewBox="0 0 180 180"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="block"
-                  >
-                    {/* Finder patterns */}
-                    <rect x="10" y="10" width="50" height="50" fill="black" rx="4"/>
-                    <rect x="16" y="16" width="38" height="38" fill="white" rx="2"/>
-                    <rect x="22" y="22" width="26" height="26" fill="black" rx="2"/>
-
-                    <rect x="120" y="10" width="50" height="50" fill="black" rx="4"/>
-                    <rect x="126" y="16" width="38" height="38" fill="white" rx="2"/>
-                    <rect x="132" y="22" width="26" height="26" fill="black" rx="2"/>
-
-                    <rect x="10" y="120" width="50" height="50" fill="black" rx="4"/>
-                    <rect x="16" y="126" width="38" height="38" fill="white" rx="2"/>
-                    <rect x="22" y="132" width="26" height="26" fill="black" rx="2"/>
-
-                    {/* Data modules (simplified pattern) */}
-                    {[70,76,82,88,94,100,106,112].map((x) =>
-                      [10,16,22,28,34,40,46].map((y) =>
-                        (x + y) % 18 === 0 ? (
-                          <rect key={`${x}-${y}`} x={x} y={y} width="5" height="5" fill="black"/>
-                        ) : null
-                      )
-                    )}
-                    {[10,16,22,28,34,40,46,52,58,64].map((x) =>
-                      [70,76,82,88,94,100,106,112,118].map((y) =>
-                        (x * y) % 17 === 0 ? (
-                          <rect key={`d${x}-${y}`} x={x} y={y} width="5" height="5" fill="black"/>
-                        ) : null
-                      )
-                    )}
-                    {[70,76,82,88,94,100,106,112,118].map((x) =>
-                      [70,76,82,88,94,100,106,112,118].map((y) =>
-                        (x + y) % 13 === 0 ? (
-                          <rect key={`m${x}-${y}`} x={x} y={y} width="5" height="5" fill="black"/>
-                        ) : null
-                      )
-                    )}
-                    {[120,126,132,138,144,150,156,162].map((x) =>
-                      [70,76,82,88,94,100,106,112,118].map((y) =>
-                        (x - y) % 11 === 0 ? (
-                          <rect key={`r${x}-${y}`} x={x} y={y} width="5" height="5" fill="black"/>
-                        ) : null
-                      )
-                    )}
-                    {[10,16,22,28,34,40,46,52,58,64].map((x) =>
-                      [120,126,132,138,144,150,156,162].map((y) =>
-                        (x + y) % 14 === 0 ? (
-                          <rect key={`b${x}-${y}`} x={x} y={y} width="5" height="5" fill="black"/>
-                        ) : null
-                      )
-                    )}
-                    {[70,76,82,88,94,100,106,112,118].map((x) =>
-                      [120,126,132,138,144,150,156,162].map((y) =>
-                        (x * y) % 19 === 0 ? (
-                          <rect key={`bl${x}-${y}`} x={x} y={y} width="5" height="5" fill="black"/>
-                        ) : null
-                      )
-                    )}
-                    {[120,126,132,138,144,150,156,162].map((x) =>
-                      [120,126,132,138,144,150,156,162].map((y) =>
-                        (x + y * 2) % 15 === 0 ? (
-                          <rect key={`br${x}-${y}`} x={x} y={y} width="5" height="5" fill="black"/>
-                        ) : null
-                      )
-                    )}
-
-                    {/* PromptPay logo area */}
-                    <rect x="75" y="75" width="30" height="30" fill="white" rx="4"/>
-                    <text x="90" y="95" fontSize="18" textAnchor="middle" fill="#1A56DB" fontWeight="bold">₿</text>
-                  </svg>
-                  {isSandbox && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-2xl">
-                      <span className="text-xs font-bold text-gray-500 rotate-[-15deg]">SANDBOX</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-white">฿{order.price.toFixed(0)}</p>
-                  <p className="text-xs text-gray-500 mt-1">INKVERSE · ชำระผ่าน PromptPay</p>
-                </div>
-
-                <label className="flex items-start gap-3 cursor-pointer group">
-                  <div
-                    onClick={() => setPromptConfirm(!promptConfirm)}
-                    className={clsx(
-                      "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all cursor-pointer",
-                      promptConfirm
-                        ? "bg-green-500 border-green-500"
-                        : "border-white/20 group-hover:border-white/40"
-                    )}
-                  >
-                    {promptConfirm && <CheckCircle className="w-3 h-3 text-white" />}
+                {qrLoading ? (
+                  <div className="flex flex-col items-center gap-3 py-8">
+                    <Loader2 className="w-8 h-8 text-[#ff2d55] animate-spin" />
+                    <p className="text-sm text-gray-400">กำลังสร้าง QR Code...</p>
                   </div>
-                  <span className="text-sm text-gray-400">
-                    ฉันได้ชำระเงินผ่าน PromptPay เรียบร้อยแล้ว
-                  </span>
-                </label>
+                ) : qrUrl ? (
+                  <>
+                    <p className="text-sm text-gray-400 text-center">สแกน QR Code ด้วยแอปธนาคารของคุณ</p>
+                    <div className="bg-white p-3 rounded-2xl">
+                      <Image src={qrUrl} alt="PromptPay QR" width={200} height={200} unoptimized />
+                    </div>
+                    <p className="text-2xl font-bold text-white">฿{order.price.toFixed(0)}</p>
+                    {polling && (
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <RefreshCw className="w-3 h-3 animate-spin" />
+                        กำลังรอการยืนยันการชำระเงิน...
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Smartphone className="w-12 h-12 text-[#ff2d55]" />
+                    <p className="text-sm text-gray-400 text-center">
+                      {isSandbox
+                        ? "Sandbox mode — กดยืนยันเพื่อจำลองการชำระผ่าน PromptPay"
+                        : "กดปุ่มด้านล่างเพื่อรับ QR Code สำหรับชำระผ่าน PromptPay"}
+                    </p>
+                    <p className="text-2xl font-bold text-white">฿{order.price.toFixed(0)}</p>
+                  </>
+                )}
               </div>
             )}
 
-            {/* Error */}
             {error && (
               <div className="mt-3 flex items-center gap-2 px-3 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
                 <AlertCircle className="w-4 h-4 shrink-0" />
@@ -338,25 +344,30 @@ export default function CheckoutClient({
               </div>
             )}
 
-            {/* Pay button */}
-            <button
-              onClick={handlePay}
-              disabled={loading}
-              className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-white font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              <Lock className="w-4 h-4" />
-              {loading
-                ? "กำลังดำเนินการ..."
-                : `ยืนยันชำระ ฿${order.price.toFixed(0)}`}
-            </button>
+            {!(method === "PROMPTPAY" && qrUrl && !isSandbox) && (
+              <button
+                onClick={handlePay}
+                disabled={loading || qrLoading}
+                className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-white font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {loading || qrLoading
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <Lock className="w-4 h-4" />}
+                {method === "PROMPTPAY" && !qrUrl && !isSandbox
+                  ? "รับ QR Code"
+                  : `ยืนยันชำระ ฿${order.price.toFixed(0)}`}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Security note */}
         <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>ข้อมูลของคุณถูกเข้ารหัสด้วย SSL 256-bit</span>
+          <span>{omisePublicKey ? "ชำระเงินปลอดภัยด้วย Omise · SSL 256-bit" : "ข้อมูลของคุณถูกเข้ารหัสด้วย SSL 256-bit"}</span>
         </div>
+        <p className="text-center text-xs text-gray-600">
+          เหรียญปัจจุบัน: <span className="text-yellow-400">{userCoins.toLocaleString()}</span> เหรียญ
+        </p>
       </div>
     </div>
   );

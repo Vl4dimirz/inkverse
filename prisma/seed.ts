@@ -194,8 +194,25 @@ const mangas = [
   },
 ];
 
+const coinPackages = [
+  { name: "Starter", coins: 100, price: 29, bonus: 0,   isPopular: false },
+  { name: "Value",   coins: 300, price: 79, bonus: 20,  isPopular: false },
+  { name: "Popular", coins: 600, price: 149, bonus: 60, isPopular: true  },
+  { name: "Mega",    coins: 1200, price: 249, bonus: 150, isPopular: false },
+];
+
 async function main() {
   console.log("🌱 Seeding database...");
+
+  // Coin packages
+  console.log("Creating coin packages...");
+  for (const pkg of coinPackages) {
+    await prisma.coinPackage.upsert({
+      where: { id: pkg.name.toLowerCase() },
+      create: { id: pkg.name.toLowerCase(), ...pkg, isActive: true },
+      update: pkg,
+    });
+  }
 
   // Create genres
   console.log("Creating genres...");
