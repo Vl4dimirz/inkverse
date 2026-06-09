@@ -73,6 +73,7 @@ export default function CheckoutClient({
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [polling, setPolling] = useState(false);
+  const [omiseReady, setOmiseReady] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Load OmiseJS
@@ -81,6 +82,7 @@ export default function CheckoutClient({
     const script = document.createElement("script");
     script.src = "https://cdn.omise.co/omise.js";
     script.async = true;
+    script.onload = () => setOmiseReady(true);
     document.head.appendChild(script);
     return () => { document.head.removeChild(script); };
   }, [omisePublicKey]);
@@ -167,7 +169,7 @@ export default function CheckoutClient({
 
     setLoading(true);
 
-    if (omisePublicKey && window.Omise) {
+    if (omisePublicKey && omiseReady && window.Omise) {
       const [mm, yy] = expiry.split("/");
       window.Omise.setPublicKey(omisePublicKey);
       window.Omise.createToken(

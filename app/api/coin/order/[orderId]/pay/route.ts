@@ -42,7 +42,14 @@ export async function POST(
         description: `INKVERSE ${order.coins + order.bonus} coins`,
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Payment error";
+      // Omise SDK throws plain objects, not Error instances
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err !== null && "message" in err
+          ? String((err as Record<string, unknown>).message)
+          : "เกิดข้อผิดพลาดในการชำระเงิน";
+      console.error("[Omise charge error]", err);
       return NextResponse.json({ error: msg }, { status: 402 });
     }
 
