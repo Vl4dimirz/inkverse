@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { cookies } from "next/headers";
 import StarRating from "@/components/ui/StarRating";
 import BookmarkButton from "@/components/ui/BookmarkButton";
 import ChapterRow from "@/components/ui/ChapterRow";
+import AgeGate from "@/components/ui/AgeGate";
 import { getUserCoins } from "@/lib/coins";
 import {
   BookOpen,
@@ -55,6 +57,15 @@ export default async function MangaProfilePage({ params }: Props) {
 
   if (!manga) notFound();
 
+  // Age gate for 18+ content
+  if (manga.contentRating === "ADULT") {
+    const cookieStore = await cookies();
+    const hasConsent = cookieStore.get("adult_consent")?.value === "1";
+    if (!hasConsent) {
+      return <AgeGate title={manga.title} coverUrl={manga.coverUrl} />;
+    }
+  }
+
   // Get user's coin balance + which chapters they've unlocked
   const [userCoins, unlockedSet] = await Promise.all([
     userId ? getUserCoins(userId) : Promise.resolve(0),
@@ -98,12 +109,12 @@ export default async function MangaProfilePage({ params }: Props) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] lg:grid-cols-4 gap-6 lg:gap-8">
         {/* Left — Cover + Info */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-20 space-y-4">
+        <div className="md:col-span-1 lg:col-span-1">
+          <div className="md:sticky md:top-20 space-y-4">
             {/* Cover */}
-            <div className="relative aspect-[3/4] w-full max-w-xs mx-auto lg:max-w-none rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+            <div className="relative aspect-[3/4] w-full max-w-[180px] mx-auto md:max-w-none rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
               {manga.coverUrl ? (
                 <Image
                   src={manga.coverUrl}
@@ -195,7 +206,7 @@ export default async function MangaProfilePage({ params }: Props) {
         </div>
 
         {/* Right — Details + Chapters */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="md:col-span-1 lg:col-span-3 space-y-6">
           {/* Header */}
           <div>
             <div className="flex flex-wrap gap-2 mb-2">
@@ -213,6 +224,16 @@ export default async function MangaProfilePage({ params }: Props) {
               <span className="text-xs px-2 py-1 rounded-lg bg-[#ff2d55]/20 text-[#ff2d55] border border-[#ff2d55]/30 font-medium">
                 {manga.type}
               </span>
+              {manga.contentRating === "ADULT" && (
+                <span className="text-xs px-2 py-1 rounded-lg bg-red-600/20 text-red-400 border border-red-600/30 font-bold">
+                  18+
+                </span>
+              )}
+              {manga.contentRating === "TEEN" && (
+                <span className="text-xs px-2 py-1 rounded-lg bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 font-medium">
+                  13+
+                </span>
+              )}
             </div>
 
             <h1 className="font-bebas text-4xl sm:text-5xl text-white tracking-wider leading-none mb-4">

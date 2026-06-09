@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Eye, BookOpen, Bookmark, Coins, Users, TrendingUp,
   Star, Crown, Lock, MessageSquare, ChevronRight, BarChart2,
-  Calendar, ArrowUpRight,
+  Calendar, ArrowUpRight, Settings,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -158,13 +158,22 @@ export default function DashboardClient({
             <p className="text-sm text-gray-500 mt-1">{translator.bio}</p>
           )}
         </div>
-        <Link
-          href="/upload"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <BookOpen className="w-4 h-4" />
-          อัปโหลดผลงานใหม่
-        </Link>
+        <div className="flex gap-2 flex-wrap">
+          <Link
+            href="/dashboard/earnings"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/10 transition-colors"
+          >
+            <Coins className="w-4 h-4 text-yellow-400" />
+            รายได้ & ถอนเงิน
+          </Link>
+          <Link
+            href="/upload"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <BookOpen className="w-4 h-4" />
+            อัปโหลดผลงานใหม่
+          </Link>
+        </div>
       </div>
 
       {/* Stats grid */}
@@ -237,13 +246,13 @@ export default function DashboardClient({
 
       {/* Tabs */}
       <div>
-        <div className="flex gap-2 mb-6 border-b border-white/5">
+        <div className="flex gap-2 mb-6 border-b border-white/5 overflow-x-auto scrollbar-none">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
               className={clsx(
-                "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-all",
+                "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-all whitespace-nowrap shrink-0",
                 activeTab === key
                   ? "border-[#ff2d55] text-white"
                   : "border-transparent text-gray-500 hover:text-gray-300"
@@ -336,12 +345,21 @@ export default function DashboardClient({
                       )}
                     </div>
 
-                    <Link
-                      href={`/content/${m.slug}`}
-                      className="shrink-0 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white transition-all"
-                    >
-                      <ArrowUpRight className="w-4 h-4" />
-                    </Link>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Link
+                        href={`/dashboard/manga/${m.slug}/chapters`}
+                        title="จัดการตอน (ล็อค/ฟรี, ราคา, จัดเรียงหน้า)"
+                        className="p-2 rounded-lg bg-white/5 hover:bg-[#ff6b2b]/20 text-gray-500 hover:text-[#ff6b2b] transition-all"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/content/${m.slug}`}
+                        className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white transition-all"
+                      >
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>

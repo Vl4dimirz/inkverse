@@ -87,6 +87,7 @@ model Manga {
   status        String      @default("ONGOING")
   type          String      @default("MANGA")
   totalViews    Int         @default(0)
+  contentRating String      @default("EVERYONE") // EVERYONE | TEEN | ADULT
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   genres        MangaGenre[]
@@ -122,6 +123,38 @@ model Translator {
   totalWorks Int     @default(0)
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   mangas     Manga[]
+  earnings           TranslatorEarning[]
+  withdrawalRequests WithdrawalRequest[]
+}
+
+model TranslatorEarning {
+  id           String     @id @default(cuid())
+  translatorId String
+  chapterId    String
+  mangaId      String
+  userId       String
+  coinsSpent   Int
+  amount       Float      // THB after 30% platform fee
+  createdAt    DateTime   @default(now())
+  translator   Translator @relation(fields: [translatorId], references: [id], onDelete: Cascade)
+}
+
+model WithdrawalRequest {
+  id               String     @id @default(cuid())
+  translatorId     String
+  amount           Float
+  status           String     @default("PENDING") // PENDING | PROCESSING | PAID | FAILED | REJECTED
+  paymentMethod    String     // PROMPTPAY | BANK_TRANSFER
+  accountName      String
+  accountNumber    String
+  bankName         String?
+  bankCode         String?    // Omise bank code: kbank, scb, bbl, etc.
+  adminNote        String?
+  omiseRecipientId String?
+  omiseTransferId  String?
+  requestedAt      DateTime   @default(now())
+  processedAt      DateTime?
+  translator       Translator @relation(fields: [translatorId], references: [id], onDelete: Cascade)
 }
 
 model Chapter {

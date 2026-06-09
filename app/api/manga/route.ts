@@ -84,8 +84,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const userId = (session.user as { id: string }).id;
+
+  // Resolve translator record (ADMIN may not have one)
+  let translatorId: string | null = null;
+  if (role === "TRANSLATOR") {
+    const translator = await prisma.translator.findUnique({ where: { userId } });
+    if (!translator) {
+      return NextResponse.json({ error: "Translator profile not found" }, { status: 403 });
+    }
+    translatorId = translator.id;
+  }
+
   const body = await req.json();
-  const { title, slug, description, originCountry, status, type, coverUrl, genreIds } = body;
+  const { title, slug, description, originCountry, status, type, coverUrl, genreIds, contentRating } = body;
 
   if (!title || !slug || !description) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -96,6 +108,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Slug already taken" }, { status: 409 });
   }
 
+  const validRatings = ["EVERYONE", "TEEN", "ADULT"];
+
   const manga = await prisma.manga.create({
     data: {
       title,
@@ -105,6 +119,8 @@ export async function POST(req: NextRequest) {
       status: status || "ONGOING",
       type: type || "MANGA",
       coverUrl: coverUrl || null,
+      contentRating: validRatings.includes(contentRating) ? contentRating : "EVERYONE",
+      translatorId,
       genres: genreIds
         ? { create: genreIds.map((id: string) => ({ genreId: id })) }
         : undefined,

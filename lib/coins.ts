@@ -22,13 +22,18 @@ export type UnlockResult =
   | { success: true; coinsLeft: number }
   | { success: false; error: "NOT_PREMIUM" | "ALREADY_UNLOCKED" | "INSUFFICIENT_COINS" | "NOT_FOUND" };
 
+const TRANSLATOR_SHARE = 0.70; // 70% to translator, 30% platform fee
+
 export async function unlockChapter(
   userId: string,
   chapterId: string
 ): Promise<UnlockResult> {
   const chapter = await prisma.chapter.findUnique({
     where: { id: chapterId },
-    select: { isPremium: true, coinCost: true, mangaId: true, chapterNum: true },
+    select: {
+      isPremium: true, coinCost: true, mangaId: true, chapterNum: true,
+      manga: { select: { translatorId: true } },
+    },
   });
 
   if (!chapter) return { success: false, error: "NOT_FOUND" };
@@ -45,16 +50,18 @@ export async function unlockChapter(
     return { success: false, error: "INSUFFICIENT_COINS" };
   }
 
-  // Atomic: deduct coins + create unlock + log transaction
-  const [updatedUser] = await prisma.$transaction([
-    prisma.user.update({
+  const translatorId = chapter.manga?.translatorId ?? null;
+  const earningAmount = parseFloat((chapter.coinCost * TRANSLATOR_SHARE).toFixed(2));
+
+  const updatedUser = await prisma.$transaction(async (tx) => {
+    const u = await tx.user.update({
       where: { id: userId },
       data: { coins: { decrement: chapter.coinCost } },
-    }),
-    prisma.unlockedChapter.create({
+    });
+    await tx.unlockedChapter.create({
       data: { userId, chapterId, coinSpent: chapter.coinCost },
-    }),
-    prisma.coinTransaction.create({
+    });
+    await tx.coinTransaction.create({
       data: {
         userId,
         amount: -chapter.coinCost,
@@ -62,8 +69,21 @@ export async function unlockChapter(
         description: `ปลดล็อกตอนที่ ${chapter.chapterNum}`,
         refId: chapterId,
       },
-    }),
-  ]);
+    });
+    if (translatorId) {
+      await tx.translatorEarning.create({
+        data: {
+          translatorId,
+          chapterId,
+          mangaId: chapter.mangaId,
+          userId,
+          coinsSpent: chapter.coinCost,
+          amount: earningAmount,
+        },
+      });
+    }
+    return u;
+  });
 
   return { success: true, coinsLeft: updatedUser.coins };
 }

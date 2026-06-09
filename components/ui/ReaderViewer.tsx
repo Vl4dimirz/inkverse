@@ -35,6 +35,8 @@ export default function ReaderViewer({
   const [brightness, setBrightness] = useState(100);
   const [showSettings, setShowSettings] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const goTo = useCallback(
     (idx: number) => {
@@ -54,6 +56,23 @@ export default function ReaderViewer({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [mode, currentPage, goTo]);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (mode !== "page" || touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx < 0) goTo(currentPage + 1);
+      else goTo(currentPage - 1);
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }
 
   const progress = pages.length > 0 ? ((currentPage + 1) / pages.length) * 100 : 0;
 
@@ -111,7 +130,7 @@ export default function ReaderViewer({
 
       {/* Settings panel */}
       {showSettings && (
-        <div className="fixed top-16 right-4 z-50 bg-[#141720] border border-white/10 rounded-xl p-4 w-64 shadow-2xl">
+        <div className="fixed top-16 right-2 sm:right-4 z-50 bg-[#141720] border border-white/10 rounded-xl p-4 w-64 max-w-[calc(100vw-1rem)] shadow-2xl">
           <h4 className="text-sm font-semibold text-white mb-3">ตั้งค่าการอ่าน</h4>
           <div className="space-y-3">
             <div>
@@ -172,7 +191,11 @@ export default function ReaderViewer({
             ))}
           </div>
         ) : (
-          <div className="relative min-h-screen flex items-center justify-center p-4">
+          <div
+            className="relative min-h-screen flex items-center justify-center p-4"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {pages[currentPage] && (
               <Image
                 src={pages[currentPage].imageUrl}
@@ -204,21 +227,21 @@ export default function ReaderViewer({
       </div>
 
       {/* Chapter navigation */}
-      <div className="sticky bottom-0 bg-[#080a10]/95 backdrop-blur border-t border-white/5 p-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+      <div className="sticky bottom-0 bg-[#080a10]/95 backdrop-blur border-t border-white/5 p-3 sm:p-4">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           {prevChapter != null ? (
             <Link
               href={`/content/${mangaSlug}/${prevChapter}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1a1e2a] border border-white/10 text-sm text-gray-300 hover:text-white hover:border-white/30 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2.5 sm:px-4 rounded-xl bg-[#1a1e2a] border border-white/10 text-sm text-gray-300 hover:text-white hover:border-white/30 transition-all"
             >
-              <ChevronLeft className="w-4 h-4" />
-              ตอนก่อน
+              <ChevronLeft className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">ตอนก่อน</span>
             </Link>
           ) : (
-            <div />
+            <div className="w-10" />
           )}
 
-          <span className="text-sm text-gray-500">
+          <span className="text-xs sm:text-sm text-gray-500 text-center">
             {mode === "page"
               ? `${currentPage + 1} / ${pages.length} หน้า`
               : `${pages.length} หน้า`}
@@ -227,13 +250,13 @@ export default function ReaderViewer({
           {nextChapter != null ? (
             <Link
               href={`/content/${mangaSlug}/${nextChapter}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-sm text-white hover:opacity-90 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2.5 sm:px-4 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-sm text-white hover:opacity-90 transition-all"
             >
-              ตอนถัดไป
-              <ChevronRight className="w-4 h-4" />
+              <span className="hidden sm:inline">ตอนถัดไป</span>
+              <ChevronRight className="w-4 h-4 shrink-0" />
             </Link>
           ) : (
-            <div />
+            <div className="w-10" />
           )}
         </div>
       </div>

@@ -21,6 +21,21 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "media.anilist.co",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "s4.anilist.co",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i.imgur.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "picsum.photos",
         pathname: "/**",
       },

@@ -14,6 +14,7 @@ const mangaSchema = z.object({
   originCountry: z.enum(["JP", "KR", "CN", "TH"]),
   status: z.enum(["ONGOING", "COMPLETED", "HIATUS"]),
   type: z.enum(["MANGA", "MANHWA", "MANHUA", "NOVEL"]),
+  contentRating: z.enum(["EVERYONE", "TEEN", "ADULT"]),
 });
 
 type MangaForm = z.infer<typeof mangaSchema>;
@@ -49,7 +50,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
 
   const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<MangaForm>({
     resolver: zodResolver(mangaSchema),
-    defaultValues: { originCountry: "JP", status: "ONGOING", type: "MANGA" },
+    defaultValues: { originCountry: "JP", status: "ONGOING", type: "MANGA", contentRating: "EVERYONE" },
   });
 
   useEffect(() => {
@@ -344,6 +345,21 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
                   <option value="NOVEL">Novel</option>
                 </select>
               </div>
+            </div>
+
+            {/* Content rating */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                เรตติ้งเนื้อหา
+              </label>
+              <select {...register("contentRating")} className={inputCls}>
+                <option value="EVERYONE">ทุกวัย (Everyone)</option>
+                <option value="TEEN">วัยรุ่น 13+ (Teen)</option>
+                <option value="ADULT">ผู้ใหญ่ 18+ (Adult)</option>
+              </select>
+              <p className="text-xs text-gray-600 mt-1">
+                เนื้อหา 18+ จะต้องผ่านการยืนยันอายุก่อนเข้าชม
+              </p>
             </div>
 
             {mangaError && (

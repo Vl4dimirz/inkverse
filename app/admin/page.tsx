@@ -79,13 +79,13 @@ export default async function AdminPage() {
         >
           ใบสมัครนักแปล
         </Link>
-        <RecalculateButton />
         <Link
-          href="/discover"
+          href="/admin/withdrawals"
           className="py-3 px-5 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm font-medium text-center hover:opacity-90 transition-opacity"
         >
-          จัดการเนื้อหา
+          คำขอถอนเงิน
         </Link>
+        <RecalculateButton />
       </div>
 
       {/* Recent manga table */}

@@ -22,6 +22,7 @@ export default async function GenrePage({ params }: Props) {
   const mangas = await prisma.manga.findMany({
     where: {
       genres: { some: { genreId: genreRecord.id } },
+      contentRating: { not: "ADULT" },
     },
     orderBy: { totalViews: "desc" },
     take: 24,

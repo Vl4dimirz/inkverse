@@ -16,6 +16,7 @@ async function getData() {
     await Promise.all([
       prisma.manga.findMany({
         take: 12,
+        where: { contentRating: { not: "ADULT" } },
         orderBy: { totalViews: "desc" },
         include: {
           genres: { include: { genre: true } },
@@ -30,6 +31,7 @@ async function getData() {
       prisma.chapter.findMany({
         take: 10,
         orderBy: { publishedAt: "desc" },
+        where: { manga: { contentRating: { not: "ADULT" } } },
         include: {
           manga: { select: { title: true, slug: true, coverUrl: true, type: true } },
         },

@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import MangaCard from "@/components/ui/MangaCard";
 import DiscoverFilters from "@/components/ui/DiscoverFilters";
-import { Search } from "lucide-react";
+import { Search, ShieldAlert } from "lucide-react";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "ค้นหามังงะ" };
@@ -14,6 +16,7 @@ interface SearchParams {
   country?: string;
   sort?: string;
   page?: string;
+  adult?: string;
 }
 
 export default async function DiscoverPage({
@@ -22,20 +25,28 @@ export default async function DiscoverPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const { q, genre, status, type, country, sort = "views", page = "1" } = params;
+  const { q, genre, status, type, country, sort = "views", page = "1", adult } = params;
   const pageNum = Number(page);
   const take = 24;
   const skip = (pageNum - 1) * take;
+
+  // Check adult consent
+  const cookieStore = await cookies();
+  const hasConsent = cookieStore.get("adult_consent")?.value === "1";
+  const showAdult = adult === "1" && hasConsent;
 
   const genres = await prisma.genre.findMany({ orderBy: { name: "asc" } });
 
   const where: Record<string, unknown> = {};
   if (q) {
-    where.title = { contains: q };
+    where.title = { contains: q, mode: "insensitive" };
   }
   if (status) where.status = status;
   if (type) where.type = type;
   if (country) where.originCountry = country;
+  if (!showAdult) {
+    where.contentRating = { not: "ADULT" };
+  }
   if (genre) {
     const g = await prisma.genre.findUnique({ where: { slug: genre } });
     if (g) where.genres = { some: { genreId: g.id } };
@@ -78,7 +89,7 @@ export default async function DiscoverPage({
   const totalPages = Math.ceil(total / take);
 
   function buildUrl(overrides: Partial<SearchParams>) {
-    const p = { q, genre, status, type, country, sort, page, ...overrides };
+    const p = { q, genre, status, type, country, sort, page, adult, ...overrides };
     const qs = Object.entries(p)
       .filter(([, v]) => v)
       .map(([k, v]) => `${k}=${encodeURIComponent(v!)}`)
@@ -119,15 +130,40 @@ export default async function DiscoverPage({
         />
       </div>
 
-      {/* Results */}
-      <p className="text-sm text-gray-500 mb-4">
-        {q && (
-          <span>
-            ผลการค้นหา &quot;<span className="text-white">{q}</span>&quot; —{" "}
-          </span>
-        )}
-        พบ {total} เรื่อง
-      </p>
+      {/* Adult content toggle */}
+      {hasConsent && (
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-500">
+            {q && (
+              <span>
+                ผลการค้นหา &quot;<span className="text-white">{q}</span>&quot; —{" "}
+              </span>
+            )}
+            พบ {total} เรื่อง
+          </p>
+          <Link
+            href={buildUrl({ adult: showAdult ? undefined : "1", page: "1" })}
+            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl border transition-all ${
+              showAdult
+                ? "bg-red-500/20 border-red-500/30 text-red-400"
+                : "bg-white/5 border-white/10 text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            เนื้อหา 18+{showAdult ? " (เปิดอยู่)" : ""}
+          </Link>
+        </div>
+      )}
+      {!hasConsent && (
+        <p className="text-sm text-gray-500 mb-4">
+          {q && (
+            <span>
+              ผลการค้นหา &quot;<span className="text-white">{q}</span>&quot; —{" "}
+            </span>
+          )}
+          พบ {total} เรื่อง
+        </p>
+      )}
 
       {mangas.length > 0 ? (
         <>
@@ -149,6 +185,7 @@ export default async function DiscoverPage({
                     views={manga.totalViews}
                     status={manga.status}
                     type={manga.type}
+                    contentRating={manga.contentRating}
                   />
                 </div>
               );

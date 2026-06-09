@@ -14,6 +14,7 @@ interface MangaCardProps {
   views?: number;
   status?: string;
   type?: string;
+  contentRating?: string;
   className?: string;
   variant?: "default" | "compact" | "large";
 }
@@ -27,6 +28,7 @@ export default function MangaCard({
   views,
   status,
   type,
+  contentRating,
   className,
   variant = "default",
 }: MangaCardProps) {
@@ -85,9 +87,16 @@ export default function MangaCard({
         )}
 
         {/* Type badge */}
-        {type && !isCompact && (
+        {type && !isCompact && contentRating !== "ADULT" && (
           <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-[#ff2d55]/90 text-white">
             {type}
+          </span>
+        )}
+
+        {/* 18+ badge */}
+        {contentRating === "ADULT" && (
+          <span className="absolute top-2 right-2 text-[10px] font-black px-1.5 py-0.5 rounded bg-red-600 text-white border border-red-400/50 shadow-lg">
+            18+
           </span>
         )}
       </div>

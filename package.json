@@ -11,6 +11,7 @@
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts",
+    "seed:anilist": "ts-node --project tsconfig.seed.json scripts/seed-anilist.ts",
     "db:setup": "prisma generate && prisma db push && npm run seed"
   },
   "prisma": {
