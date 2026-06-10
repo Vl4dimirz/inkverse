@@ -23,10 +23,11 @@ interface NavbarProps {
 
 const navLinks = [
   { href: "/manga", label: "เรื่องทั้งหมด" },
-  { href: "/discover", label: "ค้นหา" },
-  { href: "/manga/action", label: "Action" },
-  { href: "/manga/romance", label: "Romance" },
-  { href: "/apply", label: "สมัครนักแปล" },
+  { href: "/manga?type=MANGA", label: "มังงะ" },
+  { href: "/manga?type=MANHWA", label: "มังฮวา" },
+  { href: "/manga?type=MANHUA", label: "มังฮัว" },
+  { href: "/manga?type=NOVEL", label: "Novel" },
+  { href: "/apply", label: "สมัครเป็นนักแปล" },
 ];
 
 export default function Navbar({ user, userCoins = 0 }: NavbarProps) {
