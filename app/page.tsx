@@ -6,6 +6,7 @@ import UpdateRow from "@/components/ui/UpdateRow";
 import RankingPanel from "@/components/ui/RankingPanel";
 import GenreFilterBar from "@/components/ui/GenreFilterBar";
 import HeroBanner from "@/components/ui/HeroBanner";
+import ContinueReading from "@/components/ui/ContinueReading";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
@@ -74,6 +75,9 @@ export default async function HomePage() {
           latestChapter={featured.latestChapter}
         />
       )}
+
+      {/* Continue reading (per-user, client-fetched so the page stays cached) */}
+      <ContinueReading />
 
       {/* Genre chip filter */}
       <section className="mb-8">
