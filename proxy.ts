@@ -89,7 +89,7 @@ export const proxy = auth((req) => {
       );
     }
     if (role !== "TRANSLATOR" && role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/apply", req.url));
     }
   }
 
@@ -99,8 +99,9 @@ export const proxy = auth((req) => {
         new URL(`/auth/signin?callbackUrl=/upload`, req.url)
       );
     }
+    // Must be an approved translator to upload — otherwise send them to apply.
     if (role !== "TRANSLATOR" && role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/apply", req.url));
     }
   }
 
