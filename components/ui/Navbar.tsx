@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Search, User, Menu, X, LogIn } from "lucide-react";
 import Logo from "./Logo";
 import CoinBadge from "./CoinBadge";
 import NotificationBell from "./NotificationBell";
 import ThemeToggle from "./ThemeToggle";
+import SearchBox from "./SearchBox";
 import clsx from "clsx";
 
 interface NavbarProps {
@@ -29,24 +29,8 @@ const navLinks = [
 ];
 
 export default function Navbar({ user, userCoins = 0 }: NavbarProps) {
-  const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const router = useRouter();
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (search.trim()) {
-      router.push(`/discover?q=${encodeURIComponent(search.trim())}`);
-      setSearch("");
-      setSearchOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    if (searchOpen) searchRef.current?.focus();
-  }, [searchOpen]);
 
   return (
     <nav className="sticky top-0 z-50 bg-[var(--bg-primary)]/95 backdrop-blur-md border-b border-[var(--border)]">
@@ -70,19 +54,8 @@ export default function Navbar({ user, userCoins = 0 }: NavbarProps) {
         {/* Search + actions */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {/* Desktop search */}
-          <form onSubmit={handleSearch} className="hidden md:flex items-center">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="ค้นหามังงะ..."
-                className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 w-48 focus:outline-none focus:border-[#ff2d55]/50 focus:w-64 transition-all"
-              />
-            </div>
-          </form>
+          {/* Desktop search with live suggestions */}
+          <SearchBox className="hidden md:block" />
 
           {/* Mobile search toggle */}
           <button
@@ -142,25 +115,7 @@ export default function Navbar({ user, userCoins = 0 }: NavbarProps) {
       {/* Mobile search bar */}
       {searchOpen && (
         <div className="md:hidden px-4 pb-3">
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
-              <input
-                ref={searchRef}
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="ค้นหามังงะ..."
-                className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[#ff2d55]/50"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-medium"
-            >
-              ค้นหา
-            </button>
-          </form>
+          <SearchBox autoFocus onNavigate={() => setSearchOpen(false)} />
         </div>
       )}
 
