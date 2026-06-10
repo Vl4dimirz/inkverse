@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import ReaderViewer from "@/components/ui/ReaderViewer";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 import CommentSection from "@/components/ui/CommentSection";
 import PremiumGate from "@/components/ui/PremiumGate";
 import { getUserCoins, hasUnlockedChapter } from "@/lib/coins";
@@ -137,6 +138,7 @@ export default async function ReaderPage({ params }: Props) {
         prevChapter={prevChapter?.chapterNum ?? null}
         nextChapter={nextChapter?.chapterNum ?? null}
       />
+      <ScrollToTop />
 
       <div className="max-w-4xl mx-auto px-4 pb-16">
         <CommentSection
