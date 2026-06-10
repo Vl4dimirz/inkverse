@@ -136,6 +136,7 @@ export default async function MangaProfilePage({ params }: Props) {
     KR: "🇰🇷 เกาหลี",
     CN: "🇨🇳 จีน",
     TH: "🇹🇭 ไทย",
+    FR: "🇫🇷 ฝรั่งเศส",
   };
 
   return (
@@ -227,7 +228,7 @@ export default async function MangaProfilePage({ params }: Props) {
               </div>
               <div className="flex items-center gap-2 text-gray-400">
                 <Globe className="w-4 h-4 text-[#ff6b2b]" />
-                <span>{countryLabel[manga.originCountry]}</span>
+                <span>{countryLabel[manga.originCountry] ?? manga.originCountry}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-400">
                 <Calendar className="w-4 h-4 text-[#ff6b2b]" />
@@ -317,6 +318,32 @@ export default async function MangaProfilePage({ params }: Props) {
                 {manga.description}
               </p>
             </div>
+
+            {/* Attribution for openly-licensed works (CC-BY etc.) */}
+            {manga.license && (
+              <div className="bg-[#141720] rounded-xl p-3 border border-white/5 text-xs text-gray-400">
+                <span className="text-gray-500">ลิขสิทธิ์: </span>
+                {manga.author && (
+                  <>
+                    โดย <span className="text-gray-300">{manga.author}</span> ·{" "}
+                  </>
+                )}
+                เผยแพร่ภายใต้ <span className="text-[#ff6b2b]">{manga.license}</span>
+                {manga.sourceUrl && (
+                  <>
+                    {" · "}
+                    <a
+                      href={manga.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#ff6b2b] hover:underline"
+                    >
+                      ที่มา
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Chapter list */}

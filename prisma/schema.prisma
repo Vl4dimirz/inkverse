@@ -95,6 +95,10 @@ model Manga {
   type          String      @default("MANGA")
   totalViews    Int         @default(0)
   contentRating String      @default("EVERYONE") // EVERYONE | TEEN | ADULT
+  // Attribution for openly-licensed (e.g. CC-BY) imported works
+  author        String?
+  sourceUrl     String?
+  license       String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   genres        MangaGenre[]
