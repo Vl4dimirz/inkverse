@@ -40,7 +40,7 @@ export default function UserMenu({ user }: { user: MenuUser }) {
         aria-label="เมนูผู้ใช้"
         className="flex items-center gap-1 p-0.5 rounded-full hover:bg-white/10 transition-colors"
       >
-        <span className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-[#ff2d55] to-[#ff6b2b] flex items-center justify-center text-white text-sm font-semibold shrink-0">
+        <span className="w-8 h-8 rounded-full overflow-hidden bg-[var(--accent)] flex items-center justify-center text-white text-sm font-semibold shrink-0">
           {user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={user.image} alt="" className="w-full h-full object-cover" />

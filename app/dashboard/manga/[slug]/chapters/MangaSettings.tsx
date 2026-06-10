@@ -30,7 +30,7 @@ const RATING = [
   { v: "ADULT", l: "18+" },
 ];
 
-const sel = "w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ff2d55]/50";
+const sel = "w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]/50";
 
 export default function MangaSettings({ slug, manga }: { slug: string; manga: MangaData }) {
   const router = useRouter();
@@ -76,7 +76,7 @@ export default function MangaSettings({ slug, manga }: { slug: string; manga: Ma
         className="w-full flex items-center justify-between px-4 py-3 text-left"
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
-          <Settings className="w-4 h-4 text-[#ff6b2b]" /> ตั้งค่าเรื่อง
+          <Settings className="w-4 h-4 text-[var(--text-primary)]" /> ตั้งค่าเรื่อง
         </span>
         <ChevronDown className={clsx("w-4 h-4 text-[var(--text-secondary)] transition-transform", open && "rotate-180")} />
       </button>
@@ -118,7 +118,7 @@ export default function MangaSettings({ slug, manga }: { slug: string; manga: Ma
             <button
               onClick={save}
               disabled={saving}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : null}
               {saved ? "บันทึกแล้ว" : "บันทึก"}

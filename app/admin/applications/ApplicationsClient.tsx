@@ -112,8 +112,8 @@ export default function ApplicationsClient({
                   className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors text-left"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#ff2d55]/20 border border-[#ff2d55]/30 flex items-center justify-center">
-                      <span className="font-bebas text-[#ff6b2b] text-lg">
+                    <div className="w-10 h-10 rounded-full bg-[var(--text-primary)]/20 border border-[var(--text-primary)]/30 flex items-center justify-center">
+                      <span className="font-bebas text-[var(--text-primary)] text-lg">
                         {app.penName[0]?.toUpperCase()}
                       </span>
                     </div>
@@ -147,7 +147,7 @@ export default function ApplicationsClient({
                       </span>
                       {app.socialLink && (
                         <a href={app.socialLink} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-[#ff6b2b] hover:underline">
+                          className="flex items-center gap-1.5 text-[var(--text-primary)] hover:underline">
                           <LinkIcon className="w-3.5 h-3.5" />
                           โซเชียล
                         </a>
@@ -158,7 +158,7 @@ export default function ApplicationsClient({
                     {app.preferredGenres.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {app.preferredGenres.map((g) => (
-                          <span key={g} className="text-xs px-2 py-0.5 rounded-full bg-[#ff2d55]/10 text-[#ff6b2b] border border-[#ff2d55]/20">
+                          <span key={g} className="text-xs px-2 py-0.5 rounded-full bg-[var(--text-primary)]/10 text-[var(--text-primary)] border border-[var(--text-primary)]/20">
                             {g}
                           </span>
                         ))}

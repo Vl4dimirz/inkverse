@@ -99,7 +99,7 @@ export default function ApplyClient({ genres, prevApplication }: {
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-[#ff2d55]/10 border border-[#ff2d55]/30 rounded-full px-4 py-1.5 text-sm text-[#ff2d55] font-medium mb-4">
+        <div className="inline-flex items-center gap-2 bg-[var(--text-primary)]/10 border border-[var(--text-primary)]/30 rounded-full px-4 py-1.5 text-sm text-[var(--text-primary)] font-medium mb-4">
           <PenTool className="w-4 h-4" />
           สมัครเป็นนักแปล / นักเขียน
         </div>
@@ -136,15 +136,15 @@ export default function ApplyClient({ genres, prevApplication }: {
               )}>
                 <div className={clsx(
                   "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
-                  done  ? "bg-[#ff2d55] border-[#ff2d55] text-[var(--text-primary)]" :
-                  active ? "bg-[#ff2d55]/20 border-[#ff2d55] text-[#ff2d55]" :
+                  done  ? "bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--text-primary)]" :
+                  active ? "bg-[var(--text-primary)]/20 border-[var(--text-primary)] text-[var(--text-primary)]" :
                            "bg-[var(--bg-surface)] border-[var(--border)] text-[var(--text-secondary)]"
                 )}>
                   {done ? <Check className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                 </div>
                 <span className={clsx(
                   "text-xs mt-1.5 font-medium",
-                  active ? "text-[var(--text-primary)]" : done ? "text-[#ff6b2b]" : "text-[var(--text-muted)]"
+                  active ? "text-[var(--text-primary)]" : done ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"
                 )}>
                   {s.label}
                 </span>
@@ -152,7 +152,7 @@ export default function ApplyClient({ genres, prevApplication }: {
               {i < STEPS.length - 1 && (
                 <div className={clsx(
                   "h-0.5 flex-1 -mt-5 mx-2 transition-all",
-                  step > s.id ? "bg-[#ff2d55]" : "bg-white/10"
+                  step > s.id ? "bg-[var(--text-primary)]" : "bg-white/10"
                 )} />
               )}
             </div>
@@ -185,7 +185,7 @@ export default function ApplyClient({ genres, prevApplication }: {
                     className={clsx(
                       "text-left px-4 py-3 rounded-xl border text-sm transition-all",
                       form.experience === opt
-                        ? "border-[#ff2d55]/60 bg-[#ff2d55]/10 text-[var(--text-primary)]"
+                        ? "border-[var(--text-primary)]/60 bg-[var(--text-primary)]/10 text-[var(--text-primary)]"
                         : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-white/25"
                     )}
                   >
@@ -236,7 +236,7 @@ export default function ApplyClient({ genres, prevApplication }: {
                     className={clsx(
                       "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
                       form.preferredGenres.includes(g.slug)
-                        ? "bg-[#ff2d55]/20 border-[#ff2d55]/60 text-[#ff6b2b]"
+                        ? "bg-[var(--text-primary)]/20 border-[var(--text-primary)]/60 text-[var(--text-primary)]"
                         : "bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-secondary)] hover:border-white/25"
                     )}
                   >
@@ -275,21 +275,21 @@ export default function ApplyClient({ genres, prevApplication }: {
             {/* ── เงื่อนไข & ส่วนแบ่งรายได้ ── */}
             <div className="rounded-xl border border-[var(--border)] overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-3 bg-[var(--bg-card)] border-b border-[var(--border)]">
-                <FileText className="w-4 h-4 text-[#ff6b2b]" />
+                <FileText className="w-4 h-4 text-[var(--text-primary)]" />
                 <span className="text-sm font-semibold text-[var(--text-primary)]">เงื่อนไขสำหรับนักแปล</span>
               </div>
 
               {/* ส่วนแบ่งรายได้ — เน้น 20% */}
-              <div className="m-4 flex items-center gap-3 rounded-xl bg-gradient-to-r from-[#ff2d55]/15 to-[#ff6b2b]/15 border border-[#ff2d55]/30 px-4 py-3">
-                <div className="w-10 h-10 rounded-lg bg-[#ff2d55]/20 flex items-center justify-center shrink-0">
-                  <Percent className="w-5 h-5 text-[#ff6b2b]" />
+              <div className="m-4 flex items-center gap-3 rounded-xl bg-gradient-to-r from-[var(--accent)]/15 to-[var(--accent)]/15 border border-[var(--text-primary)]/30 px-4 py-3">
+                <div className="w-10 h-10 rounded-lg bg-[var(--text-primary)]/20 flex items-center justify-center shrink-0">
+                  <Percent className="w-5 h-5 text-[var(--text-primary)]" />
                 </div>
                 <div className="text-sm">
                   <p className="text-[var(--text-primary)] font-semibold">ส่วนแบ่งรายได้ 80 / 20</p>
                   <p className="text-[var(--text-secondary)] text-xs mt-0.5">
                     เมื่อผู้อ่านใช้เหรียญปลดล็อกตอนของคุณ คุณได้รับ{" "}
                     <span className="text-green-400 font-semibold">80%</span> ของมูลค่า และแพลตฟอร์มหัก{" "}
-                    <span className="text-[#ff6b2b] font-semibold">20%</span> เป็นค่าบริการ (ระบบ เซิร์ฟเวอร์ และการชำระเงิน)
+                    <span className="text-[var(--text-primary)] font-semibold">20%</span> เป็นค่าบริการ (ระบบ เซิร์ฟเวอร์ และการชำระเงิน)
                   </p>
                 </div>
               </div>
@@ -304,7 +304,7 @@ export default function ApplyClient({ genres, prevApplication }: {
                   "เงื่อนไขอาจมีการปรับปรุงได้ โดยจะแจ้งให้ทราบล่วงหน้า",
                 ].map((t, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="text-[#ff2d55] mt-0.5">•</span>
+                    <span className="text-[var(--text-primary)] mt-0.5">•</span>
                     <span>{t}</span>
                   </li>
                 ))}
@@ -315,7 +315,7 @@ export default function ApplyClient({ genres, prevApplication }: {
                 <span
                   className={clsx(
                     "mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all",
-                    acceptedTerms ? "bg-[#ff2d55] border-[#ff2d55]" : "border-white/25 bg-transparent"
+                    acceptedTerms ? "bg-[var(--text-primary)] border-[var(--text-primary)]" : "border-white/25 bg-transparent"
                   )}
                 >
                   {acceptedTerms && <Check className="w-3.5 h-3.5 text-[var(--text-primary)]" />}
@@ -357,7 +357,7 @@ export default function ApplyClient({ genres, prevApplication }: {
           <button
             onClick={() => setStep((s) => s + 1)}
             disabled={!canNext()}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ถัดไป
             <ChevronRight className="w-4 h-4" />
@@ -366,7 +366,7 @@ export default function ApplyClient({ genres, prevApplication }: {
           <button
             onClick={handleSubmit}
             disabled={loading || !form.motivation.trim() || !acceptedTerms}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? "กำลังส่ง..." : "ส่งใบสมัคร"}
             {!loading && <Check className="w-4 h-4" />}
@@ -397,4 +397,4 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 }
 
 const inputCls =
-  "w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[#ff2d55]/50 transition-colors";
+  "w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[var(--text-primary)]/50 transition-colors";

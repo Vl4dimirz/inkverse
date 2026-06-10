@@ -50,7 +50,7 @@ export default function PageReorderClient({
     e.dataTransfer.effectAllowed = "move";
     // Transparent drag ghost (keep card visible via CSS)
     const ghost = document.createElement("div");
-    ghost.style.cssText = "position:absolute;top:-9999px;width:80px;height:120px;background:#ff2d55;border-radius:8px;";
+    ghost.style.cssText = "position:absolute;top:-9999px;width:80px;height:120px;background:var(--text-primary);border-radius:8px;";
     document.body.appendChild(ghost);
     e.dataTransfer.setDragImage(ghost, 40, 60);
     setTimeout(() => document.body.removeChild(ghost), 0);
@@ -150,7 +150,7 @@ export default function PageReorderClient({
           <button
             onClick={save}
             disabled={saving || !hasChanges}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             {saving
               ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -185,9 +185,9 @@ export default function PageReorderClient({
               className={clsx(
                 "relative rounded-xl overflow-hidden border-2 cursor-grab active:cursor-grabbing select-none transition-all duration-150",
                 dragIndex === index
-                  ? "opacity-40 border-[#ff2d55]/60 scale-95"
+                  ? "opacity-40 border-[var(--text-primary)]/60 scale-95"
                   : overIndex === index && dragIndex !== null
-                  ? "border-[#ff2d55] shadow-lg shadow-[#ff2d55]/20 scale-[1.03]"
+                  ? "border-[var(--text-primary)] shadow-lg shadow-[var(--text-primary)]/20 scale-[1.03]"
                   : "border-[var(--border)] hover:border-white/30"
               )}
               style={{ aspectRatio: "3/4" }}
@@ -204,8 +204,8 @@ export default function PageReorderClient({
 
               {/* Drop indicator overlay */}
               {overIndex === index && dragIndex !== null && dragIndex !== index && (
-                <div className="absolute inset-0 bg-[#ff2d55]/10 flex items-center justify-center">
-                  <div className="w-8 h-1 bg-[#ff2d55] rounded-full" />
+                <div className="absolute inset-0 bg-[var(--text-primary)]/10 flex items-center justify-center">
+                  <div className="w-8 h-1 bg-[var(--text-primary)] rounded-full" />
                 </div>
               )}
 

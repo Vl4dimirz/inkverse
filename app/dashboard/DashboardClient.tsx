@@ -106,7 +106,7 @@ function ViewBar({ value, max }: { value: number; max: number }) {
     <div className="flex items-center gap-2 flex-1 min-w-0">
       <div className="flex-1 bg-white/5 rounded-full h-1.5">
         <div
-          className="h-1.5 rounded-full bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b]"
+          className="h-1.5 rounded-full bg-[var(--accent)]"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -148,8 +148,8 @@ export default function DashboardClient({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Crown className="w-5 h-5 text-[#ff6b2b]" />
-            <span className="text-sm text-[#ff6b2b] font-medium">Creator Dashboard</span>
+            <Crown className="w-5 h-5 text-[var(--text-primary)]" />
+            <span className="text-sm text-[var(--text-primary)] font-medium">Creator Dashboard</span>
           </div>
           <h1 className="font-bebas text-4xl text-[var(--text-primary)] tracking-wider">
             {translator.penName}
@@ -168,7 +168,7 @@ export default function DashboardClient({
           </Link>
           <Link
             href="/upload"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <BookOpen className="w-4 h-4" />
             อัปโหลดผลงานใหม่
@@ -182,13 +182,13 @@ export default function DashboardClient({
           label="ผลงานทั้งหมด"
           value={stats.mangaCount}
           icon={BookOpen}
-          color="bg-[#ff2d55]/80"
+          color="bg-[var(--text-primary)]/80"
         />
         <StatCard
           label="ยอดชมรวม"
           value={stats.totalViews}
           icon={Eye}
-          color="bg-[#ff6b2b]/80"
+          color="bg-[var(--text-primary)]/80"
         />
         <StatCard
           label="ตอนทั้งหมด"
@@ -222,7 +222,7 @@ export default function DashboardClient({
       {mangaStats.length > 0 && (
         <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5">
           <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            <BarChart2 className="w-4 h-4 text-[#ff6b2b]" />
+            <BarChart2 className="w-4 h-4 text-[var(--text-primary)]" />
             ยอดชมแต่ละผลงาน
           </h2>
           <div className="space-y-3">
@@ -254,7 +254,7 @@ export default function DashboardClient({
               className={clsx(
                 "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-all whitespace-nowrap shrink-0",
                 activeTab === key
-                  ? "border-[#ff2d55] text-[var(--text-primary)]"
+                  ? "border-[var(--text-primary)] text-[var(--text-primary)]"
                   : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
               )}
             >
@@ -299,7 +299,7 @@ export default function DashboardClient({
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <Link
                           href={`/content/${m.slug}`}
-                          className="font-semibold text-[var(--text-primary)] hover:text-[#ff6b2b] transition-colors truncate"
+                          className="font-semibold text-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors truncate"
                         >
                           {m.title}
                         </Link>
@@ -349,7 +349,7 @@ export default function DashboardClient({
                       <Link
                         href={`/dashboard/manga/${m.slug}/chapters`}
                         title="จัดการตอน (ล็อค/ฟรี, ราคา, จัดเรียงหน้า)"
-                        className="p-2 rounded-lg bg-white/5 hover:bg-[#ff6b2b]/20 text-[var(--text-secondary)] hover:text-[#ff6b2b] transition-all"
+                        className="p-2 rounded-lg bg-white/5 hover:bg-[var(--text-primary)]/20 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
                       >
                         <Settings className="w-4 h-4" />
                       </Link>
@@ -478,7 +478,7 @@ export default function DashboardClient({
             {mangaStats.some((m) => m.coinsEarned > 0) && (
               <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5">
                 <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[#ff6b2b]" />
+                  <TrendingUp className="w-4 h-4 text-[var(--text-primary)]" />
                   รายรับแยกตามผลงาน
                 </h3>
                 <div className="space-y-3">
@@ -523,7 +523,7 @@ export default function DashboardClient({
             <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] overflow-hidden">
               <div className="px-5 py-4 border-b border-[var(--border)]">
                 <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[#ff6b2b]" />
+                  <Calendar className="w-4 h-4 text-[var(--text-primary)]" />
                   รายการ Unlock ล่าสุด
                 </h3>
               </div>
@@ -583,7 +583,7 @@ function EmptyState({
       <p className="text-sm text-[var(--text-secondary)] mb-4">{sub}</p>
       <Link
         href={href}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
       >
         {cta}
         <ChevronRight className="w-4 h-4" />

@@ -35,7 +35,7 @@ export default async function GenrePage({ params }: Props) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
-        <p className="text-sm text-[#ff6b2b] font-medium mb-1">หมวดหมู่</p>
+        <p className="text-sm text-[var(--text-primary)] font-medium mb-1">หมวดหมู่</p>
         <h1 className="font-bebas text-5xl text-[var(--text-primary)] tracking-wider">
           {genreRecord.name}
         </h1>

@@ -69,7 +69,7 @@ export default function ProcessingPage({
           </p>
           <button
             onClick={() => router.push(orderId ? `/topup/checkout/${orderId}` : "/topup")}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="w-full py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
           >
             ลองใหม่
           </button>
@@ -82,8 +82,8 @@ export default function ProcessingPage({
     <div className="min-h-[70vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm text-center space-y-5">
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-full bg-[#ff2d55]/10 border border-[#ff2d55]/20 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-[#ff2d55] animate-spin" />
+          <div className="w-16 h-16 rounded-full bg-[var(--text-primary)]/10 border border-[var(--text-primary)]/20 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-[var(--text-primary)] animate-spin" />
           </div>
         </div>
         <h2 className="text-xl font-bold text-[var(--text-primary)]">กำลังตรวจสอบการชำระเงิน</h2>

@@ -17,7 +17,7 @@ export default function TranslatorRanking({ entries }: { entries: TranslatorRank
   return (
     <section className="mb-10">
       <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider mb-4 flex items-center gap-2">
-        <span className="w-1 h-6 bg-gradient-to-b from-[#ff2d55] to-[#ff6b2b] rounded-full" />
+        <span className="w-1 h-6 bg-[var(--accent)] rounded-full" />
         อันดับนักแปล
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -25,7 +25,7 @@ export default function TranslatorRanking({ entries }: { entries: TranslatorRank
           <Link
             key={t.username}
             href={`/profile/${t.username}`}
-            className="flex items-center gap-3 bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-3 hover:border-[#ff2d55]/40 transition-colors"
+            className="flex items-center gap-3 bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-3 hover:border-[var(--text-primary)]/40 transition-colors"
           >
             <span className={`font-bebas text-2xl w-7 text-center shrink-0 ${MEDAL[i] ?? "text-[var(--text-secondary)]"}`}>
               {i + 1}
@@ -35,7 +35,7 @@ export default function TranslatorRanking({ entries }: { entries: TranslatorRank
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={t.avatarUrl} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white bg-gradient-to-br from-[#ff2d55] to-[#ff6b2b]">
+                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white bg-[var(--accent)]">
                   {t.penName[0]?.toUpperCase()}
                 </div>
               )}

@@ -37,12 +37,12 @@ export default function BookmarkButton({
       className={clsx(
         "w-full py-3 rounded-xl border text-sm font-semibold flex items-center justify-center gap-2 transition-all",
         bookmarked
-          ? "bg-[#ff2d55]/20 border-[#ff2d55]/40 text-[#ff2d55]"
+          ? "bg-[var(--text-primary)]/20 border-[var(--text-primary)]/40 text-[var(--text-primary)]"
           : "bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-primary)] hover:border-white/30"
       )}
     >
       <Bookmark
-        className={clsx("w-4 h-4", bookmarked && "fill-[#ff2d55]")}
+        className={clsx("w-4 h-4", bookmarked && "fill-[var(--text-primary)]")}
       />
       {bookmarked ? "บุ๊กมาร์กแล้ว" : "เพิ่มบุ๊กมาร์ก"}
     </button>

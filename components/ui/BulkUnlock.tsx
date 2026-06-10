@@ -82,7 +82,7 @@ export default function BulkUnlock({
     <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#ff6b2b]" />
+          <Layers className="w-4 h-4 text-[var(--text-primary)]" />
           <span className="text-sm font-semibold text-[var(--text-primary)]">ปลดล็อกหลายตอน</span>
         </div>
         <span className="text-xs text-[var(--text-secondary)]">ล็อกอยู่ {total} ตอน</span>
@@ -97,7 +97,7 @@ export default function BulkUnlock({
             className={clsx(
               "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border",
               count === n
-                ? "bg-[#ff2d55]/20 text-[#ff2d55] border-[#ff2d55]/40"
+                ? "bg-[var(--text-primary)]/20 text-[var(--text-primary)] border-[var(--text-primary)]/40"
                 : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-white/30"
             )}
           >
@@ -109,7 +109,7 @@ export default function BulkUnlock({
           className={clsx(
             "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border",
             count === total
-              ? "bg-[#ff2d55]/20 text-[#ff2d55] border-[#ff2d55]/40"
+              ? "bg-[var(--text-primary)]/20 text-[var(--text-primary)] border-[var(--text-primary)]/40"
               : "bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-white/30"
           )}
         >
@@ -125,7 +125,7 @@ export default function BulkUnlock({
           max={total}
           value={count}
           onChange={(e) => setCount(Number(e.target.value))}
-          className="flex-1 accent-[#ff2d55]"
+          className="flex-1 accent-[var(--text-primary)]"
         />
         <span className="text-sm text-[var(--text-primary)] font-semibold w-16 text-right tabular-nums">
           {count} ตอน
@@ -155,14 +155,14 @@ export default function BulkUnlock({
 
       {/* Action */}
       {!isLoggedIn ? (
-        <a href="/auth/signin" className="block w-full py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm text-center hover:opacity-90 transition-opacity">
+        <a href="/auth/signin" className="block w-full py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm text-center hover:opacity-90 transition-opacity">
           เข้าสู่ระบบเพื่อปลดล็อก
         </a>
       ) : canAfford ? (
         <button
           onClick={unlock}
           disabled={loading || count < 1}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
           {loading ? "กำลังปลดล็อก..." : `ปลดล็อก ${count} ตอน · ${totalCost.toLocaleString()} เหรียญ`}

@@ -53,7 +53,7 @@ export default async function TopupPage() {
       {recentTx.length > 0 && (
         <div className="mt-12">
           <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider mb-4 flex items-center gap-2">
-            <History className="w-5 h-5 text-[#ff2d55]" />
+            <History className="w-5 h-5 text-[var(--text-primary)]" />
             ประวัติล่าสุด
           </h2>
           <div className="space-y-1">

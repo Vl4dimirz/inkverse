@@ -96,7 +96,7 @@ export default function SearchBox({
             onKeyDown={onKeyDown}
             onFocus={() => { if (results.length) setOpen(true); }}
             placeholder="ค้นหามังงะ..."
-            className="w-full md:w-48 md:focus:w-64 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl pl-9 pr-8 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[#ff2d55]/50 transition-all"
+            className="w-full md:w-48 md:focus:w-64 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl pl-9 pr-8 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[var(--text-primary)]/50 transition-all"
           />
           {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-secondary)] animate-spin" />}
         </div>
@@ -131,7 +131,7 @@ export default function SearchBox({
               ))}
               <button
                 onClick={() => go(`/discover?q=${encodeURIComponent(q.trim())}`)}
-                className="w-full text-center px-3 py-2.5 text-xs font-medium text-[#ff6b2b] border-t border-[var(--border)] hover:bg-[var(--bg-card)] transition-colors"
+                className="w-full text-center px-3 py-2.5 text-xs font-medium text-[var(--text-primary)] border-t border-[var(--border)] hover:bg-[var(--bg-card)] transition-colors"
               >
                 ดูผลการค้นหาทั้งหมด &ldquo;{q.trim()}&rdquo;
               </button>

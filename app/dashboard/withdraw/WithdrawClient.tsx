@@ -148,7 +148,7 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
 
           <button
             onClick={() => { setSubmitted(null); setAmount(""); }}
-            className="text-xs text-[#ff6b2b] hover:underline"
+            className="text-xs text-[var(--text-primary)] hover:underline"
           >
             ส่งคำขออีกครั้ง
           </button>
@@ -173,11 +173,11 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
                 type="number" min={MIN_GROSS} max={availableBalance} step={1}
                 value={amount} onChange={(e) => setAmount(e.target.value)}
                 placeholder={`ขั้นต่ำ ฿${MIN_GROSS}`}
-                className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50"
+                className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50"
               />
               <button
                 type="button" onClick={() => setAmount(String(availableBalance))}
-                className="px-3 py-2.5 text-xs text-[#ff6b2b] bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
+                className="px-3 py-2.5 text-xs text-[var(--text-primary)] bg-white/5 rounded-xl hover:bg-white/10 transition-colors"
               >
                 ทั้งหมด
               </button>
@@ -224,7 +224,7 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
                   className={clsx(
                     "flex flex-col items-start gap-1 px-3 py-3 rounded-xl border text-sm transition-all",
                     method === m.id
-                      ? "bg-[#ff2d55]/10 border-[#ff2d55]/50 text-[var(--text-primary)]"
+                      ? "bg-[var(--text-primary)]/10 border-[var(--text-primary)]/50 text-[var(--text-primary)]"
                       : "bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-secondary)] hover:border-white/20"
                   )}
                 >
@@ -251,7 +251,7 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
               <label className="text-xs text-[var(--text-secondary)] mb-1.5 block">ธนาคาร</label>
               <select
                 value={bankCode} onChange={(e) => setBankCode(e.target.value)}
-                className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ff2d55]/50"
+                className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]/50"
               >
                 {BANK_OPTIONS.map((b) => (
                   <option key={b.code} value={b.code}>{b.name}</option>
@@ -269,7 +269,7 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
               type="text" value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
               placeholder={method === "PROMPTPAY" ? "0XX-XXX-XXXX" : "XXX-X-XXXXX-X"}
-              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 font-mono"
+              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50 font-mono"
             />
           </div>
 
@@ -280,7 +280,7 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
               type="text" value={accountName}
               onChange={(e) => setAccountName(e.target.value)}
               placeholder="ชื่อ-นามสกุล (ภาษาไทยหรืออังกฤษ)"
-              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50"
+              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50"
             />
           </div>
 
@@ -300,7 +300,7 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
 
           <button
             type="submit" disabled={loading || !canSubmit}
-            className="w-full flex flex-col items-center gap-0.5 py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+            className="w-full flex flex-col items-center gap-0.5 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             <div className="flex items-center gap-2">
               {loading

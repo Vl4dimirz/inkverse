@@ -28,7 +28,7 @@ export default function ContinueReading() {
   return (
     <section className="mb-8">
       <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider mb-4 flex items-center gap-2">
-        <History className="w-5 h-5 text-[#ff6b2b]" /> อ่านต่อ
+        <History className="w-5 h-5 text-[var(--text-primary)]" /> อ่านต่อ
       </h2>
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
         {items.map((it) => (

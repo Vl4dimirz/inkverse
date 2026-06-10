@@ -39,8 +39,8 @@ export default async function AdminPage() {
 
   const stats = [
     { label: "ผู้ใช้ทั้งหมด", value: userCount, icon: Users, color: "text-blue-400" },
-    { label: "มังงะทั้งหมด", value: mangaCount, icon: BookOpen, color: "text-[#ff2d55]" },
-    { label: "ตอนทั้งหมด", value: chapterCount, icon: TrendingUp, color: "text-[#ff6b2b]" },
+    { label: "มังงะทั้งหมด", value: mangaCount, icon: BookOpen, color: "text-[var(--text-primary)]" },
+    { label: "ตอนทั้งหมด", value: chapterCount, icon: TrendingUp, color: "text-[var(--text-primary)]" },
     { label: "ความคิดเห็น", value: commentCount, icon: MessageSquare, color: "text-green-400" },
   ];
 
@@ -70,7 +70,7 @@ export default async function AdminPage() {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-10">
         <Link
           href="/upload"
-          className="py-3 px-5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-medium text-center hover:opacity-90 transition-opacity"
+          className="py-3 px-5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium text-center hover:opacity-90 transition-opacity"
         >
           อัปโหลดมังงะใหม่
         </Link>
@@ -117,7 +117,7 @@ export default async function AdminPage() {
                   <td className="px-4 py-3">
                     <Link
                       href={`/content/${manga.slug}`}
-                      className="text-[var(--text-primary)] hover:text-[#ff6b2b] transition-colors font-medium"
+                      className="text-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors font-medium"
                     >
                       {manga.title}
                     </Link>

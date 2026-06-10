@@ -39,7 +39,7 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <div className="flex items-center gap-3">
-        <Settings className="w-6 h-6 text-[#ff6b2b]" />
+        <Settings className="w-6 h-6 text-[var(--text-primary)]" />
         <h1 className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider">ตั้งค่าบัญชี</h1>
       </div>
 
@@ -61,10 +61,10 @@ export default async function SettingsPage() {
 
       {/* Quick links */}
       <div className="flex flex-wrap gap-2">
-        <Link href={`/profile/${user.username}`} className="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[#ff2d55]/40 transition-colors">
+        <Link href={`/profile/${user.username}`} className="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[var(--text-primary)]/40 transition-colors">
           ดูโปรไฟล์ของฉัน
         </Link>
-        <Link href="/topup" className="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[#ff2d55]/40 transition-colors">
+        <Link href="/topup" className="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[var(--text-primary)]/40 transition-colors">
           เติมเหรียญ
         </Link>
       </div>

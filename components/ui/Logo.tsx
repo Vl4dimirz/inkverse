@@ -21,17 +21,16 @@ function MonogramMark({ size = 36 }: { size?: number }) {
   return (
     <span
       aria-hidden
-      className="inline-flex items-center justify-center font-bebas text-[var(--text-primary)] shrink-0 leading-none"
+      className="inline-flex items-center justify-center font-bebas text-[var(--bg-primary)] shrink-0 leading-none"
       style={{
         width: size,
         height: size,
-        borderRadius: size * 0.28,
-        background: "linear-gradient(135deg,#ff2d55,#ff6b2b)",
+        borderRadius: size * 0.1,
+        background: "var(--text-primary)",
         fontSize: size * 0.54,
         letterSpacing: size * 0.08,
         paddingTop: size * 0.04,
         paddingLeft: size * 0.08, // offset trailing letter-spacing → stays centered
-        boxShadow: "0 2px 12px rgba(255,45,85,0.35)",
       }}
     >
       IV
@@ -53,7 +52,7 @@ export default function Logo({
       {variant !== "icon" && (
         <span
           className={clsx(
-            "font-bebas tracking-[0.18em] bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] bg-clip-text text-transparent",
+            "font-bebas tracking-[0.18em] text-[var(--text-primary)]",
             font
           )}
         >

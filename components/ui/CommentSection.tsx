@@ -69,11 +69,11 @@ function ReplyForm({
         onChange={(e) => setContent(e.target.value)}
         placeholder="ตอบกลับ..."
         rows={2}
-        className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 resize-none focus:outline-none focus:border-[#ff2d55]/50 transition-colors"
+        className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 resize-none focus:outline-none focus:border-[var(--text-primary)]/50 transition-colors"
       />
       <div className="flex items-center justify-between mt-1.5">
         <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
-          <input type="checkbox" checked={isSpoiler} onChange={(e) => setIsSpoiler(e.target.checked)} className="accent-[#ff2d55]" />
+          <input type="checkbox" checked={isSpoiler} onChange={(e) => setIsSpoiler(e.target.checked)} className="accent-[var(--text-primary)]" />
           มีสปอยล์
         </label>
         <div className="flex gap-2">
@@ -83,7 +83,7 @@ function ReplyForm({
           <button
             type="submit"
             disabled={!content.trim() || submitting}
-            className="px-3 py-1 rounded-lg text-xs text-[var(--text-primary)] font-medium bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] disabled:opacity-50 hover:opacity-90 transition-opacity"
+            className="px-3 py-1 rounded-lg text-xs text-[var(--text-primary)] font-medium bg-[var(--accent)] disabled:opacity-50 hover:opacity-90 transition-opacity"
           >
             {submitting ? "กำลังส่ง..." : "ตอบกลับ"}
           </button>
@@ -143,7 +143,7 @@ function CommentItem({
         {comment.user.avatarUrl ? (
           <Image src={comment.user.avatarUrl} alt={comment.user.username} fill className="object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-primary)] bg-gradient-to-br from-[#ff2d55]/40 to-[#ff6b2b]/40">
+          <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--text-primary)] bg-gradient-to-br from-[var(--accent)]/40 to-[var(--accent)]/40">
             {comment.user.username[0]?.toUpperCase()}
           </div>
         )}
@@ -179,7 +179,7 @@ function CommentItem({
             disabled={!currentUserId || liked}
             className={clsx(
               "flex items-center gap-1 text-xs transition-colors",
-              liked ? "text-[#ff2d55]" : "text-[var(--text-secondary)] hover:text-[#ff2d55]",
+              liked ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
               !currentUserId && "cursor-default"
             )}
           >
@@ -227,7 +227,7 @@ function CommentItem({
           <div className="mt-2">
             <button
               onClick={() => setShowReplies((v) => !v)}
-              className="flex items-center gap-1 text-xs text-[#ff6b2b] hover:text-[#ff2d55] transition-colors"
+              className="flex items-center gap-1 text-xs text-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors"
             >
               <ChevronDown className={clsx("w-3.5 h-3.5 transition-transform", showReplies && "rotate-180")} />
               {comment.replies.length} การตอบกลับ
@@ -313,7 +313,7 @@ export default function CommentSection({
   return (
     <section className="mt-10 border-t border-[var(--border)] pt-8">
       <h3 className="flex items-center gap-2 font-bebas text-2xl text-[var(--text-primary)] tracking-wider mb-6">
-        <MessageCircle className="w-5 h-5 text-[#ff2d55]" />
+        <MessageCircle className="w-5 h-5 text-[var(--text-primary)]" />
         ความคิดเห็น
         <span className="text-base text-[var(--text-secondary)] font-normal ml-1">({comments.length})</span>
       </h3>
@@ -322,7 +322,7 @@ export default function CommentSection({
       {currentUserId ? (
         <form onSubmit={handleSubmit} className="mb-8 bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-4">
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-[var(--text-primary)] bg-gradient-to-br from-[#ff2d55]/40 to-[#ff6b2b]/40">
+            <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-[var(--text-primary)] bg-gradient-to-br from-[var(--accent)]/40 to-[var(--accent)]/40">
               {currentUsername?.[0]?.toUpperCase() ?? "?"}
             </div>
             <div className="flex-1">
@@ -331,18 +331,18 @@ export default function CommentSection({
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="แสดงความคิดเห็น..."
                 rows={3}
-                className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-500 resize-none focus:outline-none focus:border-[#ff2d55]/50 transition-colors"
+                className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-500 resize-none focus:outline-none focus:border-[var(--text-primary)]/50 transition-colors"
               />
               {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
               <div className="flex items-center justify-between mt-2">
                 <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)] cursor-pointer select-none">
-                  <input type="checkbox" checked={isSpoiler} onChange={(e) => setIsSpoiler(e.target.checked)} className="accent-[#ff2d55]" />
+                  <input type="checkbox" checked={isSpoiler} onChange={(e) => setIsSpoiler(e.target.checked)} className="accent-[var(--text-primary)]" />
                   มีสปอยล์
                 </label>
                 <button
                   type="submit"
                   disabled={!content.trim() || submitting}
-                  className="px-5 py-1.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
+                  className="px-5 py-1.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
                 >
                   {submitting ? "กำลังส่ง..." : "ส่ง"}
                 </button>
@@ -352,7 +352,7 @@ export default function CommentSection({
         </form>
       ) : (
         <div className="mb-8 py-4 text-center text-sm text-[var(--text-secondary)] bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)]">
-          <a href="/auth/signin" className="text-[#ff6b2b] hover:text-[#ff2d55] transition-colors">เข้าสู่ระบบ</a>
+          <a href="/auth/signin" className="text-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors">เข้าสู่ระบบ</a>
           {" "}เพื่อแสดงความคิดเห็น
         </div>
       )}

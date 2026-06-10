@@ -41,7 +41,7 @@ export default function SignUpPage() {
   };
 
   const inputCls =
-    "w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl py-3 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[#ff2d55]/60 transition-colors";
+    "w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl py-3 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[var(--text-primary)]/60 transition-colors";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] px-4">
@@ -126,7 +126,7 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {loading ? "กำลังสมัคร..." : "สมัครสมาชิก"}
             </button>
@@ -134,7 +134,7 @@ export default function SignUpPage() {
 
           <p className="text-center text-sm text-[var(--text-secondary)] mt-6">
             มีบัญชีแล้ว?{" "}
-            <Link href="/auth/signin" className="text-[#ff6b2b] hover:text-[#ff2d55] transition-colors">
+            <Link href="/auth/signin" className="text-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors">
               เข้าสู่ระบบ
             </Link>
           </p>

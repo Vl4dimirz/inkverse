@@ -122,7 +122,7 @@ export default function NotificationBell() {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 flex items-center justify-center rounded-full bg-[#ff2d55] text-[var(--text-primary)] text-[10px] font-bold leading-none">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 flex items-center justify-center rounded-full bg-[var(--text-primary)] text-[var(--text-primary)] text-[10px] font-bold leading-none">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -136,7 +136,7 @@ export default function NotificationBell() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="flex items-center gap-1 text-xs text-[#ff6b2b] hover:text-[#ff2d55] transition-colors"
+                className="flex items-center gap-1 text-xs text-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <Check className="w-3 h-3" />
                 อ่านทั้งหมด
@@ -157,7 +157,7 @@ export default function NotificationBell() {
                   key={n.id}
                   className={clsx(
                     "flex items-start gap-3 px-4 py-3 group transition-colors",
-                    !n.isRead ? "bg-[#ff2d55]/5" : "hover:bg-white/5"
+                    !n.isRead ? "bg-[var(--text-primary)]/5" : "hover:bg-white/5"
                   )}
                 >
                   <div className="mt-0.5">{typeIcon(n.type)}</div>

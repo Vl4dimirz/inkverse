@@ -44,7 +44,7 @@ export default function Footer() {
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="p-2 rounded-lg bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#ff2d55]/20 transition-all"
+                  className="p-2 rounded-lg bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--text-primary)]/20 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -63,7 +63,7 @@ export default function Footer() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm text-[var(--text-secondary)] hover:text-[#ff6b2b] transition-colors"
+                      className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                     >
                       {item.label}
                     </Link>

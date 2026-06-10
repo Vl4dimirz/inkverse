@@ -124,7 +124,7 @@ export default function PremiumGate({
                 <button
                   onClick={handleUnlock}
                   disabled={loading}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="w-full py-3.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {loading ? "กำลังปลดล็อก..." : `ปลดล็อกด้วย ${coinCost} เหรียญ`}
                 </button>

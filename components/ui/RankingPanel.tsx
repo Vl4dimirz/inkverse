@@ -48,7 +48,7 @@ export default function RankingPanel({
     <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] overflow-hidden">
       <div className="p-4 border-b border-[var(--border)]">
         <h3 className="font-bebas text-xl text-[var(--text-primary)] tracking-wider flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-[#ff2d55]" />
+          <TrendingUp className="w-5 h-5 text-[var(--text-primary)]" />
           อันดับ
         </h3>
         <div className="flex gap-1 mt-3">
@@ -59,7 +59,7 @@ export default function RankingPanel({
               className={clsx(
                 "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-medium transition-all",
                 activeTab === key
-                  ? "bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)]"
+                  ? "bg-[var(--accent)] text-[var(--text-primary)]"
                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
               )}
             >

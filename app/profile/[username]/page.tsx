@@ -27,21 +27,21 @@ const ROLES = {
   TRANSLATOR: {
     label: "นักแปล",
     icon: PenTool,
-    chip: "bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-white",
-    ring: "ring-[#ff6b2b]",
+    chip: "bg-[var(--accent)] text-white",
+    ring: "ring-[var(--text-primary)]",
   },
   ADMIN: {
     label: "ผู้ดูแลระบบ",
     icon: Shield,
-    chip: "bg-gradient-to-r from-[#ff2d55] to-[#b91c47] text-white",
-    ring: "ring-[#ff2d55]",
+    chip: "bg-gradient-to-r from-[var(--accent)] to-[#b91c47] text-white",
+    ring: "ring-[var(--text-primary)]",
   },
 } as const;
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider mb-4 flex items-center gap-2">
-      <span className="w-1 h-6 bg-gradient-to-b from-[#ff2d55] to-[#ff6b2b] rounded-full" />
+      <span className="w-1 h-6 bg-[var(--accent)] rounded-full" />
       {children}
     </h2>
   );
@@ -120,13 +120,13 @@ export default async function ProfilePage({ params }: Props) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
       <div className="relative mb-8">
-        <div className="h-36 rounded-2xl bg-gradient-to-r from-[#ff2d55]/25 via-[var(--bg-card)] to-[#ff6b2b]/25 border border-[var(--border)]" />
+        <div className="h-36 rounded-2xl bg-gradient-to-r from-[var(--accent)]/25 via-[var(--bg-card)] to-[var(--accent)]/25 border border-[var(--border)]" />
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 px-4 sm:px-6 -mt-12">
           <div className={`relative w-24 h-24 rounded-full overflow-hidden ring-4 ${role.ring} border-4 border-[var(--bg-primary)] bg-[var(--bg-card)] shrink-0`}>
             {user.avatarUrl ? (
               <Image src={user.avatarUrl} alt={user.username} fill className="object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white bg-gradient-to-br from-[#ff2d55] to-[#ff6b2b]">
+              <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-white bg-[var(--accent)]">
                 {user.username[0]?.toUpperCase()}
               </div>
             )}
@@ -152,7 +152,7 @@ export default async function ProfilePage({ params }: Props) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
         {stats.map(({ icon: Icon, label, value }) => (
           <div key={label} className="bg-[var(--bg-surface)] rounded-xl p-4 border border-[var(--border)] text-center">
-            <Icon className="w-5 h-5 text-[#ff2d55] mx-auto mb-1.5" />
+            <Icon className="w-5 h-5 text-[var(--text-primary)] mx-auto mb-1.5" />
             <p className="text-xl font-bold text-[var(--text-primary)]">{value}</p>
             <p className="text-xs text-[var(--text-secondary)]">{label}</p>
           </div>
@@ -230,7 +230,7 @@ export default async function ProfilePage({ params }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[var(--text-primary)] line-clamp-1">{h.chapter.manga.title}</p>
-                  <p className="text-xs text-[#ff6b2b]">ตอนที่ {h.chapter.chapterNum}</p>
+                  <p className="text-xs text-[var(--text-primary)]">ตอนที่ {h.chapter.chapterNum}</p>
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] flex-shrink-0">
                   {new Date(h.readAt).toLocaleDateString("th-TH")}

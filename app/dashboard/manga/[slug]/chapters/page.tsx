@@ -66,7 +66,7 @@ export default async function MangaChaptersPage({ params }: Props) {
         </Link>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <BookOpen className="w-6 h-6 text-[#ff6b2b] mt-1 shrink-0" />
+            <BookOpen className="w-6 h-6 text-[var(--text-primary)] mt-1 shrink-0" />
             <div>
               <p className="text-xs text-[var(--text-secondary)] uppercase tracking-widest mb-0.5">จัดการตอน</p>
               <h1 className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider leading-none">
@@ -76,7 +76,7 @@ export default async function MangaChaptersPage({ params }: Props) {
           </div>
           <Link
             href={`/upload?manga=${slug}`}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-white text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
           >
             <Plus className="w-4 h-4" /> อัปโหลดตอนเพิ่ม
           </Link>

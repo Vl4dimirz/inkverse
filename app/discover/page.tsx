@@ -100,7 +100,7 @@ export default async function DiscoverPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <h1 className="font-bebas text-4xl text-[var(--text-primary)] tracking-wider mb-6 flex items-center gap-3">
-        <Search className="w-8 h-8 text-[#ff2d55]" />
+        <Search className="w-8 h-8 text-[var(--text-primary)]" />
         ค้นหามังงะ
       </h1>
 
@@ -113,12 +113,12 @@ export default async function DiscoverPage({
               name="q"
               defaultValue={q || ""}
               placeholder="ค้นหาชื่อเรื่อง..."
-              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[#ff2d55]/50"
+              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl pl-9 pr-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[var(--text-primary)]/50"
             />
           </div>
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-5 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
           >
             ค้นหา
           </button>
@@ -202,7 +202,7 @@ export default async function DiscoverPage({
                   ← ก่อนหน้า
                 </a>
               )}
-              <span className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm">
+              <span className="px-4 py-2 rounded-lg bg-[var(--accent)] text-[var(--text-primary)] text-sm">
                 {pageNum} / {totalPages}
               </span>
               {pageNum < totalPages && (

@@ -41,7 +41,7 @@ export default function MangaCard({
       className={clsx(
         "group relative flex flex-col rounded-xl overflow-hidden",
         "bg-[var(--bg-card)] border border-[var(--border)]",
-        "transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#ff2d55]/10 hover:border-[#ff2d55]/30",
+        "transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[var(--text-primary)]/10 hover:border-[var(--text-primary)]/30",
         isLarge ? "h-80" : isCompact ? "h-36 flex-row" : "h-auto",
         className
       )}
@@ -89,7 +89,7 @@ export default function MangaCard({
 
         {/* Type badge */}
         {type && !isCompact && contentRating !== "ADULT" && (
-          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-[#ff2d55]/90 text-[var(--text-primary)]">
+          <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-[var(--text-primary)]/90 text-[var(--text-primary)]">
             {type}
           </span>
         )}
@@ -125,7 +125,7 @@ export default function MangaCard({
 
         <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
           {latestChapter !== undefined && (
-            <span className="text-[#ff6b2b] font-medium">
+            <span className="text-[var(--text-primary)] font-medium">
               Ch.{latestChapter}
             </span>
           )}

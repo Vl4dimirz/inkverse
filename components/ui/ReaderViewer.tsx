@@ -121,7 +121,7 @@ export default function ReaderViewer({
         {mode === "page" && (
           <div className="h-0.5 bg-white/10">
             <div
-              className="h-full bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] transition-all duration-300"
+              className="h-full bg-[var(--accent)] transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -143,7 +143,7 @@ export default function ReaderViewer({
                 max={150}
                 value={brightness}
                 onChange={(e) => setBrightness(Number(e.target.value))}
-                className="w-full accent-[#ff2d55]"
+                className="w-full accent-[var(--text-primary)]"
               />
             </div>
             <div>
@@ -156,7 +156,7 @@ export default function ReaderViewer({
                     className={clsx(
                       "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
                       mode === m
-                        ? "bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)]"
+                        ? "bg-[var(--accent)] text-[var(--text-primary)]"
                         : "bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     )}
                   >
@@ -250,7 +250,7 @@ export default function ReaderViewer({
           {nextChapter != null ? (
             <Link
               href={`/content/${mangaSlug}/${nextChapter}`}
-              className="flex items-center gap-1.5 px-3 py-2.5 sm:px-4 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-sm text-[var(--text-primary)] hover:opacity-90 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2.5 sm:px-4 rounded-xl bg-[var(--accent)] text-sm text-[var(--text-primary)] hover:opacity-90 transition-all"
             >
               <span className="hidden sm:inline">ตอนถัดไป</span>
               <ChevronRight className="w-4 h-4 shrink-0" />

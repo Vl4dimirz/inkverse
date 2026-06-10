@@ -20,7 +20,7 @@ export default function ScrollToTop() {
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="เลื่อนขึ้นบนสุด"
       title="ขึ้นบนสุด"
-      className="fixed bottom-20 right-5 z-40 w-12 h-12 rounded-full bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] shadow-lg flex items-center justify-center hover:bg-[var(--bg-card)] hover:border-[#ff2d55]/60 transition-colors"
+      className="fixed bottom-20 right-5 z-40 w-12 h-12 rounded-full bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] shadow-lg flex items-center justify-center hover:bg-[var(--bg-card)] hover:border-[var(--text-primary)]/60 transition-colors"
     >
       <ArrowUp className="w-5 h-5" />
     </button>

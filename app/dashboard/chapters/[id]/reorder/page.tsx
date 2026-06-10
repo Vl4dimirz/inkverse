@@ -60,7 +60,7 @@ export default async function PageReorderPage({ params }: Props) {
           <ArrowLeft className="w-3.5 h-3.5" /> จัดการตอน
         </Link>
         <div className="flex items-start gap-3">
-          <LayoutGrid className="w-6 h-6 text-[#ff6b2b] mt-0.5 shrink-0" />
+          <LayoutGrid className="w-6 h-6 text-[var(--text-primary)] mt-0.5 shrink-0" />
           <div>
             <p className="text-xs text-[var(--text-secondary)] mb-0.5">{chapter.manga.title}</p>
             <h1 className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider leading-none">

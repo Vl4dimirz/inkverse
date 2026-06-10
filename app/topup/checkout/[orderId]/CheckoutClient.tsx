@@ -302,7 +302,7 @@ export default function CheckoutClient({
                 onClick={() => { setMethod(tab.id); setError(""); setSelectedBank(""); }}
                 className={clsx(
                   "flex items-center gap-1.5 whitespace-nowrap px-4 py-3.5 text-xs font-medium transition-colors shrink-0",
-                  method === tab.id ? "bg-white/5 text-[var(--text-primary)] border-b-2 border-[#ff2d55]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  method === tab.id ? "bg-white/5 text-[var(--text-primary)] border-b-2 border-[var(--text-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 )}
               >
                 {tab.icon}
@@ -322,7 +322,7 @@ export default function CheckoutClient({
                       type="text" inputMode="numeric" placeholder="0000 0000 0000 0000"
                       value={cardNum} onChange={(e) => setCardNum(formatCard(e.target.value))}
                       maxLength={19}
-                      className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 font-mono tracking-widest"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50 font-mono tracking-widest"
                     />
                     <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                   </div>
@@ -334,7 +334,7 @@ export default function CheckoutClient({
                       type="text" inputMode="numeric" placeholder="MM/YY"
                       value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                       maxLength={5}
-                      className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 font-mono"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50 font-mono"
                     />
                   </div>
                   <div>
@@ -343,7 +343,7 @@ export default function CheckoutClient({
                       type="password" inputMode="numeric" placeholder="•••"
                       value={cvv} onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
                       maxLength={4}
-                      className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 font-mono"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50 font-mono"
                     />
                   </div>
                 </div>
@@ -352,7 +352,7 @@ export default function CheckoutClient({
                   <input
                     type="text" placeholder="FIRSTNAME LASTNAME"
                     value={name} onChange={(e) => setName(e.target.value.toUpperCase())}
-                    className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50 uppercase tracking-wider"
+                    className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50 uppercase tracking-wider"
                   />
                 </div>
               </div>
@@ -393,7 +393,7 @@ export default function CheckoutClient({
                         className={clsx(
                           "flex flex-col items-center justify-center gap-2 w-full rounded-xl border border-dashed cursor-pointer transition-colors",
                           slipPreview
-                            ? "border-[#ff2d55]/40 bg-[var(--bg-card)] p-3"
+                            ? "border-[var(--text-primary)]/40 bg-[var(--bg-card)] p-3"
                             : "border-white/15 bg-[var(--bg-card)] hover:border-white/30 py-8 px-4"
                         )}
                       >
@@ -437,7 +437,7 @@ export default function CheckoutClient({
                       className={clsx(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all",
                         selectedBank === bank.id
-                          ? "border-[#ff2d55]/60 ring-1 ring-[#ff2d55]/40"
+                          ? "border-[var(--text-primary)]/60 ring-1 ring-[var(--text-primary)]/40"
                           : "bg-[var(--bg-card)] border-[var(--border)] hover:border-white/20"
                       )}
                     >
@@ -499,7 +499,7 @@ export default function CheckoutClient({
                 <button
                   onClick={verifySlip}
                   disabled={verifying || !slipFile}
-                  className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {verifying
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> กำลังตรวจสอบสลิป...</>
@@ -510,7 +510,7 @@ export default function CheckoutClient({
               <button
                 onClick={handlePay}
                 disabled={loading}
-                className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {loading
                   ? <Loader2 className="w-4 h-4 animate-spin" />

@@ -22,7 +22,7 @@ function StatCard({
       </div>
       <p className="text-2xl font-bold text-[var(--text-primary)]">{value}</p>
       <p className="text-xs text-[var(--text-secondary)] mt-0.5">{label}</p>
-      {sub && <p className="text-xs text-[#ff6b2b] mt-1">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-primary)] mt-1">{sub}</p>}
     </div>
   );
 }
@@ -112,7 +112,7 @@ export default async function EarningsPage() {
         {available >= 100 && (
           <Link
             href="/dashboard/withdraw"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             <Wallet className="w-4 h-4" />
             ถอนเงิน ฿{available.toFixed(0)}
@@ -128,7 +128,7 @@ export default async function EarningsPage() {
           value={`฿${totalEarned.toFixed(2)}`}
           sub={`${earningsAgg._count} ครั้ง`}
           icon={TrendingUp}
-          color="bg-[#ff2d55]/80"
+          color="bg-[var(--text-primary)]/80"
         />
         <StatCard
           label="ยอดที่ถอนได้"
@@ -182,7 +182,7 @@ export default async function EarningsPage() {
       {recentEarnings.length > 0 && (
         <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5">
           <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#ff6b2b]" />
+            <TrendingUp className="w-4 h-4 text-[var(--text-primary)]" />
             รายการรายได้ล่าสุด
           </h2>
           <div className="divide-y divide-white/5">
@@ -209,10 +209,10 @@ export default async function EarningsPage() {
         <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
-              <Wallet className="w-4 h-4 text-[#ff2d55]" />
+              <Wallet className="w-4 h-4 text-[var(--text-primary)]" />
               ประวัติการถอนเงิน
             </h2>
-            <Link href="/dashboard/withdraw" className="text-xs text-[#ff6b2b] hover:underline">
+            <Link href="/dashboard/withdraw" className="text-xs text-[var(--text-primary)] hover:underline">
               ขอถอนเงิน →
             </Link>
           </div>

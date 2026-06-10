@@ -35,7 +35,7 @@ export default function HeroBanner({
           sizes="100vw"
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#ff2d55]/20 via-[var(--bg-card)] to-[#ff6b2b]/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/20 via-[var(--bg-card)] to-[var(--accent)]/10" />
       )}
 
       {/* Animated gradient overlay */}
@@ -43,8 +43,8 @@ export default function HeroBanner({
       <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent" />
 
       {/* Animated accent blobs */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#ff2d55]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-      <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-[#ff6b2b]/10 rounded-full blur-3xl translate-y-1/2" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--text-primary)]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+      <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-[var(--text-primary)]/10 rounded-full blur-3xl translate-y-1/2" />
 
       {/* Content */}
       <div className="relative h-full flex items-end pb-8 px-6 sm:px-10 lg:px-14 max-w-3xl">
@@ -54,7 +54,7 @@ export default function HeroBanner({
             {genres.slice(0, 4).map((g) => (
               <span
                 key={g}
-                className="text-xs px-2 py-0.5 rounded-full bg-[#ff2d55]/80 text-[var(--text-primary)] font-medium"
+                className="text-xs px-2 py-0.5 rounded-full bg-[var(--text-primary)]/80 text-[var(--text-primary)] font-medium"
               >
                 {g}
               </span>
@@ -81,7 +81,7 @@ export default function HeroBanner({
             )}
             {latestChapter !== undefined && (
               <span className="flex items-center gap-1">
-                <BookOpen className="w-4 h-4 text-[#ff6b2b]" />
+                <BookOpen className="w-4 h-4 text-[var(--text-primary)]" />
                 {latestChapter} ตอน
               </span>
             )}
@@ -91,7 +91,7 @@ export default function HeroBanner({
           <div className="flex items-center gap-3">
             <Link
               href={`/content/${slug}`}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-[#ff2d55]/25"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-[var(--text-primary)]/25"
             >
               <Play className="w-4 h-4 fill-white" />
               อ่านเลย

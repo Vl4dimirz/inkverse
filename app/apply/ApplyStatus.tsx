@@ -60,7 +60,7 @@ export default function ApplyStatus({ application }: { application: Application 
             </p>
             <Link
               href="/upload"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] font-semibold hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold hover:opacity-90 transition-opacity"
             >
               <PenTool className="w-4 h-4" />
               เริ่มอัปโหลดผลงาน

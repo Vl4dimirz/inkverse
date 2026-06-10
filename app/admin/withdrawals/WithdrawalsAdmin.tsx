@@ -179,7 +179,7 @@ function RequestCard({ req, onAction }: { req: Request; onAction: () => void }) 
             <input
               type="text" value={note} onChange={(e) => setNote(e.target.value)}
               placeholder="หมายเหตุถึงนักแปล..."
-              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[#ff2d55]/50"
+              className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-gray-600 focus:outline-none focus:border-[var(--text-primary)]/50"
             />
           )}
           <div className="flex gap-2">

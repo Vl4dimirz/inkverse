@@ -27,7 +27,7 @@ export default function FeaturedSpotlight({
   return (
     <section className="mb-10">
       <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider mb-4 flex items-center gap-2">
-        <span className="w-1 h-6 bg-gradient-to-b from-[#ff2d55] to-[#ff6b2b] rounded-full" />
+        <span className="w-1 h-6 bg-[var(--accent)] rounded-full" />
         แนะนำพิเศษ
       </h2>
 
@@ -35,7 +35,7 @@ export default function FeaturedSpotlight({
         {/* Main featured — 2/3 width */}
         <Link
           href={`/content/${featured.slug}`}
-          className="lg:col-span-2 relative h-64 lg:h-80 rounded-2xl overflow-hidden group border border-[var(--border)] hover:border-[#ff2d55]/40 transition-all"
+          className="lg:col-span-2 relative h-64 lg:h-80 rounded-2xl overflow-hidden group border border-[var(--border)] hover:border-[var(--text-primary)]/40 transition-all"
         >
           {featured.coverUrl ? (
             <Image
@@ -48,7 +48,7 @@ export default function FeaturedSpotlight({
               sizes="(max-width: 1024px) 100vw, 66vw"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#ff2d55]/20 to-[#ff6b2b]/20" />
+            <div className="w-full h-full bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/20" />
           )}
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
@@ -58,7 +58,7 @@ export default function FeaturedSpotlight({
               {featured.genres?.slice(0, 3).map((g) => (
                 <span
                   key={g}
-                  className="text-xs px-2 py-0.5 rounded-full bg-[#ff2d55]/80 text-[var(--text-primary)] font-medium"
+                  className="text-xs px-2 py-0.5 rounded-full bg-[var(--text-primary)]/80 text-[var(--text-primary)] font-medium"
                 >
                   {g}
                 </span>
@@ -106,7 +106,7 @@ export default function FeaturedSpotlight({
             <Link
               key={manga.slug}
               href={`/content/${manga.slug}`}
-              className="relative h-[calc(50%-8px)] min-h-[140px] rounded-2xl overflow-hidden group border border-[var(--border)] hover:border-[#ff2d55]/40 transition-all"
+              className="relative h-[calc(50%-8px)] min-h-[140px] rounded-2xl overflow-hidden group border border-[var(--border)] hover:border-[var(--text-primary)]/40 transition-all"
             >
               {manga.coverUrl ? (
                 <Image
@@ -126,7 +126,7 @@ export default function FeaturedSpotlight({
                   {manga.title}
                 </h4>
                 {manga.latestChapter !== undefined && (
-                  <p className="text-xs text-[#ff6b2b] mt-0.5">
+                  <p className="text-xs text-[var(--text-primary)] mt-0.5">
                     Ch.{manga.latestChapter}
                   </p>
                 )}

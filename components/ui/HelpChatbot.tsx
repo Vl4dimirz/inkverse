@@ -111,7 +111,7 @@ export default function HelpChatbot() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="ช่วยเหลือ"
-        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] shadow-lg flex items-center justify-center hover:opacity-90 transition-opacity"
+        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-[var(--accent)] text-[var(--text-primary)] shadow-lg flex items-center justify-center hover:opacity-90 transition-opacity"
       >
         {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
       </button>
@@ -119,7 +119,7 @@ export default function HelpChatbot() {
       {/* Panel */}
       {open && (
         <div className="fixed bottom-24 right-5 z-50 w-[min(92vw,360px)] h-[min(70vh,520px)] flex flex-col rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b]">
+          <div className="flex items-center gap-2 px-4 py-3 bg-[var(--accent)]">
             <Bot className="w-5 h-5 text-[var(--text-primary)]" />
             <span className="text-[var(--text-primary)] font-semibold text-sm">ผู้ช่วย INKVERSE</span>
           </div>
@@ -130,13 +130,13 @@ export default function HelpChatbot() {
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
                     m.from === "user"
-                      ? "bg-[#ff2d55] text-[var(--text-primary)] rounded-br-sm"
+                      ? "bg-[var(--text-primary)] text-[var(--text-primary)] rounded-br-sm"
                       : "bg-[var(--bg-card)] text-gray-200 rounded-bl-sm"
                   }`}
                 >
                   {m.text}
                   {m.link && (
-                    <a href={m.link.href} className="block mt-2 text-[#ff6b2b] font-medium hover:underline">
+                    <a href={m.link.href} className="block mt-2 text-[var(--text-primary)] font-medium hover:underline">
                       → {m.link.label}
                     </a>
                   )}
@@ -151,7 +151,7 @@ export default function HelpChatbot() {
                   <button
                     key={f.topic}
                     onClick={() => ask(f.topic)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-primary)] hover:border-[#ff2d55]/40 hover:text-[var(--text-primary)] transition-colors"
+                    className="text-xs px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--text-primary)]/40 hover:text-[var(--text-primary)] transition-colors"
                   >
                     {f.topic}
                   </button>
@@ -169,11 +169,11 @@ export default function HelpChatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="พิมพ์คำถาม..."
-              className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[#ff2d55]/50"
+              className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:border-[var(--text-primary)]/50"
             />
             <button
               type="submit"
-              className="w-9 h-9 rounded-xl bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] flex items-center justify-center shrink-0 hover:opacity-90"
+              className="w-9 h-9 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] flex items-center justify-center shrink-0 hover:opacity-90"
             >
               <Send className="w-4 h-4" />
             </button>

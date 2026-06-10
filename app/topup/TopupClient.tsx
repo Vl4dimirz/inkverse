@@ -64,13 +64,13 @@ export default function TopupClient({ packages }: { packages: CoinPackage[] }) {
               key={pkg.id}
               className={`relative bg-[var(--bg-surface)] rounded-2xl border p-5 flex flex-col gap-4 transition-all ${
                 pkg.isPopular
-                  ? "border-[#ff2d55]/50 shadow-lg shadow-[#ff2d55]/10"
+                  ? "border-[var(--text-primary)]/50 shadow-lg shadow-[var(--text-primary)]/10"
                   : "border-[var(--border)] hover:border-white/15"
               }`}
             >
               {/* Popular badge */}
               {pkg.isPopular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] rounded-full text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[var(--accent)] rounded-full text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1">
                   <Star className="w-3 h-3 fill-white" />
                   ยอดนิยม
                 </div>
@@ -113,7 +113,7 @@ export default function TopupClient({ packages }: { packages: CoinPackage[] }) {
                 disabled={!!loading}
                 className={`w-full py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 ${
                   pkg.isPopular
-                    ? "bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] hover:opacity-90"
+                    ? "bg-[var(--accent)] text-[var(--text-primary)] hover:opacity-90"
                     : "bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-primary)] hover:border-white/30"
                 }`}
               >

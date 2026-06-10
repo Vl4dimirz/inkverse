@@ -1,31 +1,43 @@
 @import "tailwindcss";
 
+/* Balenciaga-style: flatten the global corner radius for a brutalist look. */
+@theme {
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 3px;
+  --radius-2xl: 4px;
+  --radius-3xl: 6px;
+}
+
 @layer base {
-  /* Dark theme (default) */
+  /* Dark theme (default) — stark monochrome */
   :root,
   [data-theme="dark"] {
-    --bg-primary: #080a10;
-    --bg-surface: #141720;
-    --bg-card: #1a1e2a;
-    --accent-from: #ff2d55;
-    --accent-to: #ff6b2b;
+    --bg-primary: #000000;
+    --bg-surface: #0c0c0c;
+    --bg-card: #161616;
+    --accent: #2f2f2f;
+    --accent-from: #ffffff;
+    --accent-to: #ffffff;
     --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
-    --text-muted: #6b7280;
-    --border: rgba(255, 255, 255, 0.08);
+    --text-secondary: #9a9a9a;
+    --text-muted: #6a6a6a;
+    --border: rgba(255, 255, 255, 0.16);
   }
 
-  /* Light theme */
+  /* Light theme — stark monochrome */
   [data-theme="light"] {
-    --bg-primary: #f6f7fb;
+    --bg-primary: #ffffff;
     --bg-surface: #ffffff;
-    --bg-card: #eceef3;
-    --accent-from: #ff2d55;
-    --accent-to: #ff6b2b;
-    --text-primary: #14161d;
-    --text-secondary: #4b5160;
-    --text-muted: #707684;
-    --border: rgba(0, 0, 0, 0.10);
+    --bg-card: #f3f3f3;
+    --accent: #ececec;
+    --accent-from: #000000;
+    --accent-to: #000000;
+    --text-primary: #000000;
+    --text-secondary: #5a5a5a;
+    --text-muted: #8a8a8a;
+    --border: rgba(0, 0, 0, 0.16);
   }
 
   * {
@@ -71,10 +83,7 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #ff2d55, #ff6b2b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
   }
 
   .glass {

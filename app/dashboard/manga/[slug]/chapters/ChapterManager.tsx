@@ -108,7 +108,7 @@ function ChapterRow({
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") saveTitle(); if (e.key === "Escape") setEditingTitle(false); }}
-              className="flex-1 bg-[var(--bg-surface)] border border-white/20 rounded-lg px-2 py-1 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#ff2d55]/50"
+              className="flex-1 bg-[var(--bg-surface)] border border-white/20 rounded-lg px-2 py-1 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]/50"
               placeholder="ชื่อตอน..."
             />
             <button onClick={saveTitle} disabled={loading} className="p-1 text-green-400 hover:text-green-300">
@@ -251,7 +251,7 @@ export default function ChapterManager({
       {/* Chapter list */}
       {chapters.length === 0 ? (
         <div className="text-center py-16 text-[var(--text-muted)] text-sm">
-          ยังไม่มีตอน — <Link href="/upload" className="text-[#ff6b2b] hover:underline">อัปโหลดตอนแรก</Link>
+          ยังไม่มีตอน — <Link href="/upload" className="text-[var(--text-primary)] hover:underline">อัปโหลดตอนแรก</Link>
         </div>
       ) : (
         <div className="space-y-2">

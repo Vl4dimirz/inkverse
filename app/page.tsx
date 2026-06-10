@@ -149,12 +149,12 @@ export default async function HomePage() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider flex items-center gap-2">
-                <span className="w-1 h-6 bg-gradient-to-b from-[#ff2d55] to-[#ff6b2b] rounded-full" />
+                <span className="w-1 h-6 bg-[var(--accent)] rounded-full" />
                 อัปเดตล่าสุด
               </h2>
               <Link
                 href="/manga"
-                className="text-sm text-[#ff6b2b] hover:text-[#ff2d55] flex items-center gap-0.5 transition-colors"
+                className="text-sm text-[var(--text-primary)] hover:text-[var(--text-primary)] flex items-center gap-0.5 transition-colors"
               >
                 ดูทั้งหมด <ChevronRight className="w-4 h-4" />
               </Link>
@@ -180,12 +180,12 @@ export default async function HomePage() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider flex items-center gap-2">
-                <span className="w-1 h-6 bg-gradient-to-b from-[#ff2d55] to-[#ff6b2b] rounded-full" />
+                <span className="w-1 h-6 bg-[var(--accent)] rounded-full" />
                 ยอดนิยมสัปดาห์นี้
               </h2>
               <Link
                 href="/manga"
-                className="text-sm text-[#ff6b2b] hover:text-[#ff2d55] flex items-center gap-0.5 transition-colors"
+                className="text-sm text-[var(--text-primary)] hover:text-[var(--text-primary)] flex items-center gap-0.5 transition-colors"
               >
                 ดูทั้งหมด <ChevronRight className="w-4 h-4" />
               </Link>

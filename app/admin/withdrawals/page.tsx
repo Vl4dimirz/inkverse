@@ -58,7 +58,7 @@ export default async function AdminWithdrawalsPage() {
             <ArrowLeft className="w-3.5 h-3.5" /> Admin
           </Link>
           <h1 className="font-bebas text-4xl text-[var(--text-primary)] tracking-wider flex items-center gap-3">
-            <Wallet className="w-7 h-7 text-[#ff6b2b]" />
+            <Wallet className="w-7 h-7 text-[var(--text-primary)]" />
             คำขอถอนเงิน
           </h1>
         </div>

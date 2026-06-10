@@ -54,7 +54,7 @@ export default function UpdateRow({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-[var(--text-primary)] line-clamp-1 group-hover:text-[#ff6b2b] transition-colors">
+          <p className="text-sm font-semibold text-[var(--text-primary)] line-clamp-1 group-hover:text-[var(--text-primary)] transition-colors">
             {title}
           </p>
           {type && (
@@ -67,7 +67,7 @@ export default function UpdateRow({
           <span
             className={clsx(
               "text-xs font-medium",
-              isPremium ? "text-yellow-400" : "text-[#ff6b2b]"
+              isPremium ? "text-yellow-400" : "text-[var(--text-primary)]"
             )}
           >
             {isPremium ? "🔒 " : ""}ตอนที่ {chapterNum}
