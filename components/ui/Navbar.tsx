@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, User, Menu, X, LogIn } from "lucide-react";
+import { Search, Menu, X, LogIn } from "lucide-react";
 import Logo from "./Logo";
 import CoinBadge from "./CoinBadge";
 import NotificationBell from "./NotificationBell";
 import ThemeToggle from "./ThemeToggle";
 import SearchBox from "./SearchBox";
+import UserMenu from "./UserMenu";
 import clsx from "clsx";
 
 interface NavbarProps {
@@ -69,28 +70,7 @@ export default function Navbar({ user, userCoins = 0 }: NavbarProps) {
             <>
               <CoinBadge initialCoins={userCoins} />
               <NotificationBell />
-              <Link
-                href={`/profile/${user.name}`}
-                className="p-2 rounded-lg hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <User className="w-5 h-5" />
-              </Link>
-              {(user.role === "ADMIN" || user.role === "TRANSLATOR") && (
-                <div className="hidden sm:flex items-center gap-1.5">
-                  <Link
-                    href="/dashboard"
-                    className="flex items-center px-3 py-1.5 rounded-lg bg-white/5 border border-[var(--border)] text-[var(--text-primary)] text-xs font-medium hover:bg-white/10 transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href={user.role === "ADMIN" ? "/admin" : "/upload"}
-                    className="flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] text-[var(--text-primary)] text-xs font-medium hover:opacity-90 transition-opacity"
-                  >
-                    {user.role === "ADMIN" ? "แอดมิน" : "อัปโหลด"}
-                  </Link>
-                </div>
-              )}
+              <UserMenu user={user} />
             </>
           ) : (
             <Link
