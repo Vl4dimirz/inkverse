@@ -211,27 +211,49 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
         const p = prepared[i];
         setUploadProgress(`กำลังอัปโหลดหน้า ${i + 1}/${uploads.length}...`);
 
-        const putRes = await fetch(u.uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": u.contentType },
-          body: p.blob,
-        });
-        if (!putRes.ok) {
-          setChapterError(`สร้างตอนแล้ว แต่อัปโหลดหน้า ${i + 1} ล้มเหลว (อัปสำเร็จ ${i} หน้า — เพิ่มที่เหลือได้ที่จัดการตอน)`);
-          return;
+        // Try direct-to-R2 first; if the browser can't reach R2 (CORS/network),
+        // fall back to uploading through our own API (same-origin, no CORS).
+        let directOk = false;
+        try {
+          const putRes = await fetch(u.uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": u.contentType },
+            body: p.blob,
+          });
+          directOk = putRes.ok;
+        } catch {
+          directOk = false;
         }
-        registered.push({ pageNum: u.pageNum, key: u.key, width: p.width, height: p.height });
+
+        if (directOk) {
+          registered.push({ pageNum: u.pageNum, key: u.key, width: p.width, height: p.height });
+        } else {
+          const fd = new FormData();
+          fd.append("chapterId", chapter.id);
+          fd.append("startPage", String(u.pageNum));
+          fd.append("files", new File([p.blob], `${u.pageNum}.webp`, { type: p.contentType }));
+          const fb = await fetch("/api/upload/pages", { method: "POST", body: fd });
+          if (!fb.ok) {
+            const msg = fb.status === 413 ? `หน้า ${i + 1} ไฟล์ใหญ่เกินไป` : `อัปโหลดหน้า ${i + 1} ล้มเหลว`;
+            setChapterError(`สร้างตอนแล้ว แต่${msg} (สำเร็จ ${i} หน้า — เพิ่มที่เหลือได้ที่จัดการตอน)`);
+            return;
+          }
+          // The server path already created the Page record.
+        }
       }
 
-      setUploadProgress("กำลังบันทึก...");
-      const regRes = await fetch("/api/upload/pages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chapterId: chapter.id, pages: registered }),
-      });
-      if (!regRes.ok) {
-        setChapterError("อัปโหลดรูปสำเร็จ แต่บันทึกหน้าไม่สำเร็จ");
-        return;
+      // Register the pages that uploaded directly to R2.
+      if (registered.length > 0) {
+        setUploadProgress("กำลังบันทึก...");
+        const regRes = await fetch("/api/upload/pages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chapterId: chapter.id, pages: registered }),
+        });
+        if (!regRes.ok) {
+          setChapterError("อัปโหลดรูปสำเร็จ แต่บันทึกหน้าไม่สำเร็จ");
+          return;
+        }
       }
 
       setChapterSuccess({ mangaSlug: selectedSlug, chapterNum: parseFloat(chapterNum) });
