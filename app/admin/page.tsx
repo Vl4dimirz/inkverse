@@ -14,12 +14,13 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const [userCount, mangaCount, chapterCount, commentCount, recentMangas] =
+  const [userCount, mangaCount, chapterCount, commentCount, pendingApps, recentMangas] =
     await Promise.all([
       prisma.user.count(),
       prisma.manga.count(),
       prisma.chapter.count(),
       prisma.comment.count(),
+      prisma.translatorApplication.count({ where: { status: "PENDING" } }),
       prisma.manga.findMany({
         take: 10,
         orderBy: { createdAt: "desc" },
@@ -75,9 +76,14 @@ export default async function AdminPage() {
         </Link>
         <Link
           href="/admin/applications"
-          className="py-3 px-5 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-[var(--text-primary)] text-sm font-medium text-center hover:opacity-90 transition-opacity"
+          className="relative py-3 px-5 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-[var(--text-primary)] text-sm font-medium text-center hover:opacity-90 transition-opacity"
         >
           ใบสมัครนักแปล
+          {pendingApps > 0 && (
+            <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center shadow-lg">
+              {pendingApps}
+            </span>
+          )}
         </Link>
         <Link
           href="/admin/withdrawals"
