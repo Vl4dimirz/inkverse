@@ -15,6 +15,10 @@ model User {
   avatarUrl        String?
   coins            Int               @default(0)
   createdAt        DateTime          @default(now())
+  // Fields required by @auth/prisma-adapter for OAuth (Google) sign-in
+  name             String?
+  image            String?
+  emailVerified    DateTime?
   accounts         Account[]
   sessions         Session[]
   bookmarks        Bookmark[]

@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { Adapter, AdapterUser } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
@@ -7,9 +8,37 @@ import bcrypt from "bcryptjs";
 import { authConfig } from "./auth.config";
 import { rateLimit } from "@/lib/rate-limit";
 
+// Our User model has a required, unique `username` that the default adapter
+// doesn't provide on OAuth sign-up. Wrap createUser to synthesise a unique
+// username (and mirror the avatar into avatarUrl) so Google sign-in works.
+const adapter: Adapter = {
+  ...PrismaAdapter(prisma),
+  createUser: async (data) => {
+    const seed =
+      (data.email?.split("@")[0] || "user").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20) ||
+      "user";
+    let username = seed;
+    while (await prisma.user.findUnique({ where: { username } })) {
+      username = `${seed}${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+    const user = await prisma.user.create({
+      data: {
+        email: data.email!,
+        username,
+        name: data.name ?? null,
+        image: data.image ?? null,
+        avatarUrl: data.image ?? null,
+        emailVerified: data.emailVerified ?? null,
+        role: "READER",
+      },
+    });
+    return user as AdapterUser;
+  },
+};
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
+  adapter,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
