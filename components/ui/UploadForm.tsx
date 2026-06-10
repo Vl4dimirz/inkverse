@@ -28,11 +28,12 @@ interface MangaOption { id: string; title: string; slug: string; latestChapter?:
 async function compressImage(
   file: File
 ): Promise<{ blob: Blob; contentType: string; width: number; height: number }> {
-  // Keep pages well under the serverless request-body limit (~4.5MB) so the
-  // through-server fallback works even when direct-to-R2 is unavailable, and to
-  // cut R2 storage. 1600px wide is plenty for reading.
-  const MAX_WIDTH = 1600;
-  const QUALITY = 0.82;
+  // High-fidelity: upload goes straight to R2 (presigned PUT, no serverless body
+  // limit), so we keep pages crisp. Only cap extreme scans at 2560px wide
+  // (retina/4K-ready); most pages keep their native resolution. WebP q0.92 is
+  // visually near-lossless at a fraction of PNG/JPEG size.
+  const MAX_WIDTH = 2560;
+  const QUALITY = 0.92;
   const original = { blob: file, contentType: file.type || "image/jpeg", width: 0, height: 0 };
   try {
     const bitmap = await createImageBitmap(file);
@@ -47,11 +48,14 @@ async function compressImage(
     canvas.height = height;
     const ctx = canvas.getContext("2d");
     if (!ctx) { bitmap.close(); return { ...original, width: bitmap.width, height: bitmap.height }; }
+    // Best-quality resampling when downscaling.
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, 0, 0, width, height);
     bitmap.close();
     const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/webp", QUALITY));
-    // Prefer the re-encoded WebP whenever we produced one (normalises format and
-    // size); only keep the original if encoding failed entirely.
+    // Prefer the re-encoded WebP whenever we produced one (normalises format);
+    // only keep the original if encoding failed entirely.
     if (!blob) return { ...original, width, height };
     return { blob, contentType: "image/webp", width, height };
   } catch {

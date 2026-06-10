@@ -186,6 +186,7 @@ export default function ReaderViewer({
                   height={page.height || 1200}
                   className="w-full h-auto"
                   loading="lazy"
+                  unoptimized
                 />
               </div>
             ))}
@@ -204,6 +205,7 @@ export default function ReaderViewer({
                 height={pages[currentPage].height || 1200}
                 className="max-h-[calc(100vh-120px)] w-auto object-contain"
                 priority
+                unoptimized
               />
             )}
 

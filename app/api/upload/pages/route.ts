@@ -114,7 +114,8 @@ export async function POST(req: NextRequest) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const image = sharp(buffer);
       const meta = await image.metadata();
-      const webpBuffer = await image.webp({ quality: 85 }).toBuffer();
+      // Keep native resolution; high-quality WebP for crisp pages.
+      const webpBuffer = await image.webp({ quality: 92 }).toBuffer();
 
       const key = `pages/${chapterId}/${pageNum}.webp`;
       const url = await uploadToR2(key, webpBuffer, "image/webp");
