@@ -39,6 +39,34 @@ const adapter: Adapter = {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter,
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as { role?: string }).role;
+        token.id = user.id;
+        token.username = (user as { username?: string }).username ?? user.name ?? undefined;
+      }
+      // Backfill username for sessions issued before it was added to the token
+      // (so existing logins get it without having to sign out/in).
+      if (token.id && !token.username) {
+        const u = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { username: true },
+        });
+        if (u) token.username = u.username;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as { role?: string }).role = token.role as string;
+        (session.user as { id?: string }).id = token.id as string;
+        (session.user as { username?: string }).username = token.username as string;
+      }
+      return session;
+    },
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
