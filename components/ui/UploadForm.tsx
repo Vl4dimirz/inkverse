@@ -55,7 +55,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
 
   useEffect(() => {
     if (tab === "chapter" && !mangasFetched) {
-      fetch("/api/manga?mine=1")
+      fetch("/api/manga?mine=1", { cache: "no-store" })
         .then(r => r.json())
         .then(data => { setMyMangas(data.data || []); setMangasFetched(true); })
         .catch(() => setMangasFetched(true));
@@ -110,6 +110,9 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
         setCoverFile(null);
         setCoverPreview("");
         setSelectedGenreIds([]);
+        // New manga won't be in the cached dropdown list — force a refetch
+        // so it appears when the translator switches to the "chapter" tab.
+        setMangasFetched(false);
       } else {
         const j = await res.json();
         setMangaError(j.error || "เกิดข้อผิดพลาด");
