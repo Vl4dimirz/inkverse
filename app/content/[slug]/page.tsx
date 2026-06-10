@@ -291,9 +291,25 @@ export default async function MangaProfilePage({ params }: Props) {
               )}
             </div>
 
-            <h1 className="font-bebas text-4xl sm:text-5xl text-[var(--text-primary)] tracking-wider leading-none mb-4">
+            <h1 className="font-bebas text-4xl sm:text-5xl text-[var(--text-primary)] tracking-wider leading-none mb-3">
               {manga.title}
             </h1>
+
+            {/* Uploaded by */}
+            {manga.translator ? (
+              <Link
+                href={`/profile/${manga.translator.user.username}`}
+                className="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[#ff6b2b] mb-4 transition-colors"
+              >
+                <User className="w-4 h-4 text-[#ff6b2b]" />
+                ลงโดย <span className="text-[var(--text-primary)] font-medium">{manga.translator.penName}</span>
+              </Link>
+            ) : manga.author ? (
+              <p className="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] mb-4">
+                <User className="w-4 h-4 text-[#ff6b2b]" />
+                โดย <span className="text-[var(--text-primary)] font-medium">{manga.author}</span>
+              </p>
+            ) : null}
 
             {/* Genres */}
             <div className="flex flex-wrap gap-1.5 mb-4">
