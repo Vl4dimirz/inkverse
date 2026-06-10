@@ -63,6 +63,87 @@ async function compressImage(
   }
 }
 
+const IMG_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
+
+// Group a folder selection (webkitdirectory) into chapters by the sub-folder
+// name that contains a number (e.g. "ตอนที่ 12" → 12). Pages sorted naturally.
+function groupFilesByChapter(files: File[]): { num: number; files: File[] }[] {
+  const groups = new Map<number, File[]>();
+  for (const f of files) {
+    if (!IMG_RE.test(f.name)) continue;
+    const rel = (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name;
+    const parts = rel.split("/");
+    const folder = parts.length >= 2 ? parts[parts.length - 2] : "";
+    const m = folder.match(/[\d.]+/);
+    if (!m) continue;
+    const num = parseFloat(m[0]);
+    if (isNaN(num)) continue;
+    if (!groups.has(num)) groups.set(num, []);
+    groups.get(num)!.push(f);
+  }
+  const natSort = (a: File, b: File) => {
+    const na = parseInt(a.name), nb = parseInt(b.name);
+    if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+    return a.name.localeCompare(b.name, undefined, { numeric: true });
+  };
+  return [...groups.entries()]
+    .map(([num, fs]) => ({ num, files: fs.sort(natSort) }))
+    .sort((a, b) => a.num - b.num);
+}
+
+// Upload all page images for ONE chapter: direct-to-R2 (presigned PUT) with a
+// through-server fallback. Same path as single-chapter upload.
+async function uploadPagesToChapter(
+  chapterId: string,
+  files: File[],
+  onProgress?: (msg: string) => void
+): Promise<{ ok: boolean; error?: string }> {
+  const prepared = [];
+  for (let i = 0; i < files.length; i++) {
+    onProgress?.(`บีบอัด ${i + 1}/${files.length}`);
+    prepared.push(await compressImage(files[i]));
+  }
+  const presignRes = await fetch("/api/upload/presign", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chapterId, files: prepared.map((p, i) => ({ pageNum: i + 1, contentType: p.contentType })) }),
+  });
+  if (!presignRes.ok) return { ok: false, error: "เตรียมอัปโหลดไม่สำเร็จ" };
+  const { uploads } = (await presignRes.json()) as {
+    uploads: { pageNum: number; key: string; contentType: string; uploadUrl: string }[];
+  };
+  const registered: { pageNum: number; key: string; width: number; height: number }[] = [];
+  for (let i = 0; i < uploads.length; i++) {
+    const u = uploads[i], p = prepared[i];
+    onProgress?.(`อัปหน้า ${i + 1}/${uploads.length}`);
+    let directOk = false;
+    try {
+      const put = await fetch(u.uploadUrl, { method: "PUT", headers: { "Content-Type": u.contentType }, body: p.blob });
+      directOk = put.ok;
+    } catch { directOk = false; }
+    if (directOk) {
+      registered.push({ pageNum: u.pageNum, key: u.key, width: p.width, height: p.height });
+    } else {
+      const fd = new FormData();
+      fd.append("chapterId", chapterId);
+      fd.append("startPage", String(u.pageNum));
+      fd.append("files", new File([p.blob], `${u.pageNum}.webp`, { type: p.contentType }));
+      const fb = await fetch("/api/upload/pages", { method: "POST", body: fd });
+      if (!fb.ok) {
+        const d = await fb.json().catch(() => ({} as { error?: string }));
+        return { ok: false, error: d?.error || `อัปหน้า ${i + 1} ล้มเหลว` };
+      }
+    }
+  }
+  if (registered.length > 0) {
+    const reg = await fetch("/api/upload/pages", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chapterId, pages: registered }),
+    });
+    if (!reg.ok) return { ok: false, error: "บันทึกหน้าไม่สำเร็จ" };
+  }
+  return { ok: true };
+}
+
 export default function UploadForm({ genres }: { genres: Genre[] }) {
   const [tab, setTab] = useState<"manga" | "chapter">("manga");
 
@@ -89,6 +170,13 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
   const [chapterSuccess, setChapterSuccess] = useState<{ mangaSlug: string; chapterNum: number } | null>(null);
   const [uploadProgress, setUploadProgress] = useState("");
   const [preselect, setPreselect] = useState<string | null>(null);
+
+  // --- Bulk (multi-chapter by folder) ---
+  const [chapterMode, setChapterMode] = useState<"single" | "bulk">("single");
+  const [bulkChapters, setBulkChapters] = useState<{ num: number; files: File[] }[]>([]);
+  const [bulkPremium, setBulkPremium] = useState(false);
+  const [bulkCoinCost, setBulkCoinCost] = useState("5");
+  const [bulkResult, setBulkResult] = useState<{ ok: number; skipped: number; failed: number; errors: string[] } | null>(null);
 
   const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<MangaForm>({
     resolver: zodResolver(mangaSchema),
@@ -142,6 +230,44 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
     URL.revokeObjectURL(pagePreviews[index]);
     setPageFiles(prev => prev.filter((_, i) => i !== index));
     setPagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleBulkFolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setBulkChapters(groupFilesByChapter(files));
+    setBulkResult(null);
+    e.target.value = "";
+  };
+
+  const onSubmitBulk = async () => {
+    setChapterError("");
+    if (!selectedSlug) { setChapterError("กรุณาเลือกมังงะ"); return; }
+    if (bulkChapters.length === 0) { setChapterError("กรุณาเลือกโฟลเดอร์ที่มีตอน (เช่น 'ตอนที่ 1')"); return; }
+    setChapterLoading(true);
+    setChapterSuccess(null);
+    setBulkResult(null);
+    let ok = 0, skipped = 0, failed = 0;
+    const errors: string[] = [];
+    for (let i = 0; i < bulkChapters.length; i++) {
+      const { num, files } = bulkChapters[i];
+      setUploadProgress(`ตอน ${num} (${i + 1}/${bulkChapters.length}) — กำลังสร้าง`);
+      const createRes = await fetch(`/api/manga/${selectedSlug}/chapters`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chapterNum: num, isPremium: bulkPremium, coinCost: bulkPremium ? (parseInt(bulkCoinCost) || 0) : 0 }),
+      });
+      if (createRes.status === 409) { skipped++; continue; } // already exists → skip
+      if (!createRes.ok) { failed++; errors.push(`ตอน ${num}: สร้างไม่สำเร็จ`); continue; }
+      const chapter = await createRes.json();
+      const res = await uploadPagesToChapter(chapter.id, files, (m) =>
+        setUploadProgress(`ตอน ${num} (${i + 1}/${bulkChapters.length}) — ${m}`));
+      if (res.ok) ok++;
+      else { failed++; errors.push(`ตอน ${num}: ${res.error}`); }
+    }
+    setUploadProgress("");
+    setBulkResult({ ok, skipped, failed, errors });
+    setBulkChapters([]);
+    setMangasFetched(false); // refresh latest-chapter hints
+    setChapterLoading(false);
   };
 
   const onSubmitManga = async (data: MangaForm) => {
@@ -581,6 +707,67 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
               )}
             </div>
 
+            {/* Mode toggle: single chapter vs bulk-by-folder */}
+            <div className="flex gap-2">
+              {([["single", "ตอนเดียว"], ["bulk", "หลายตอน (เลือกโฟลเดอร์)"]] as const).map(([m, label]) => (
+                <button key={m} type="button" onClick={() => { setChapterMode(m); setChapterError(""); }}
+                  className={`px-4 py-2 rounded-lg text-sm border transition-colors ${chapterMode === m ? "bal-btn" : "bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]/40"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {chapterMode === "bulk" && (
+              <div className="space-y-4">
+                <p className="text-xs text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-3 leading-relaxed">
+                  เลือกโฟลเดอร์ที่ข้างในมีโฟลเดอร์ย่อยแต่ละตอน เช่น <span className="text-[var(--text-primary)]">ตอนที่ 1/</span> · <span className="text-[var(--text-primary)]">ตอนที่ 2/</span> … ระบบจะสร้างและอัปทุกตอนให้อัตโนมัติ (ตอนที่มีอยู่แล้วจะข้าม)
+                </p>
+                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-white/20 hover:border-[var(--text-primary)]/50 cursor-pointer transition-colors bg-[var(--bg-card)]">
+                  <Upload className="w-8 h-8 text-[var(--text-secondary)] mb-2" />
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {bulkChapters.length > 0
+                      ? `เลือกแล้ว ${bulkChapters.length} ตอน · ${bulkChapters.reduce((s, c) => s + c.files.length, 0)} รูป`
+                      : "คลิกเพื่อเลือกโฟลเดอร์มังงะ"}
+                  </span>
+                  {/* @ts-expect-error non-standard directory attributes */}
+                  <input type="file" className="hidden" webkitdirectory="" directory="" multiple onChange={handleBulkFolderChange} />
+                </label>
+
+                <div className="flex items-center gap-4 flex-wrap">
+                  <button type="button" onClick={() => setBulkPremium(p => !p)} className="flex items-center gap-3">
+                    <div className={`w-11 h-6 rounded-full transition-colors relative ${bulkPremium ? "bg-[var(--text-primary)]" : "bg-white/10"}`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${bulkPremium ? "translate-x-6" : "translate-x-1"}`} />
+                    </div>
+                    <span className="text-sm text-[var(--text-primary)]">{bulkPremium ? "ทุกตอนพรีเมียม" : "ทุกตอนฟรี"}</span>
+                  </button>
+                  {bulkPremium && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[var(--text-secondary)]">ราคา/ตอน</span>
+                      <input type="number" min="1" value={bulkCoinCost} onChange={e => setBulkCoinCost(e.target.value)}
+                        className="w-20 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-primary)] text-center focus:outline-none focus:border-[var(--text-primary)]/50" />
+                      <span className="text-xs text-[var(--text-primary)]">เหรียญ</span>
+                    </div>
+                  )}
+                </div>
+
+                {bulkResult && (
+                  <div className="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)]">
+                    เสร็จ · สำเร็จ {bulkResult.ok} ตอน · ข้าม {bulkResult.skipped} · ล้มเหลว {bulkResult.failed}
+                    {bulkResult.errors.length > 0 && (
+                      <div className="text-xs text-[var(--text-secondary)] mt-1">{bulkResult.errors.slice(0, 4).join(" · ")}</div>
+                    )}
+                  </div>
+                )}
+
+                <button type="button" onClick={onSubmitBulk} disabled={chapterLoading || !selectedSlug || bulkChapters.length === 0}
+                  className="w-full py-3 rounded-xl bal-btn font-semibold text-sm hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  {chapterLoading ? "กำลังอัปโหลด..." : `อัปโหลด${bulkChapters.length ? ` ${bulkChapters.length} ตอน` : "หลายตอน"}`}
+                </button>
+              </div>
+            )}
+
+            {chapterMode === "single" && (<>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">หมายเลขตอน *</label>
@@ -695,6 +882,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
                 </div>
               )}
             </div>
+            </>)}
 
             {chapterError && (
               <div className="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)]">
@@ -709,15 +897,17 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={onSubmitChapter}
-              disabled={chapterLoading}
-              className="w-full py-3 rounded-xl bal-btn font-semibold text-sm hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              {chapterLoading ? "กำลังอัปโหลด..." : "อัปโหลดตอน"}
-            </button>
+            {chapterMode === "single" && (
+              <button
+                type="button"
+                onClick={onSubmitChapter}
+                disabled={chapterLoading}
+                className="w-full py-3 rounded-xl bal-btn font-semibold text-sm hover:opacity-90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                {chapterLoading ? "กำลังอัปโหลด..." : "อัปโหลดตอน"}
+              </button>
+            )}
           </div>
         )
       )}
