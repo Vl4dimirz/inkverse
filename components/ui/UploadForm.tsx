@@ -20,7 +20,7 @@ const mangaSchema = z.object({
 type MangaForm = z.infer<typeof mangaSchema>;
 
 interface Genre { id: string; name: string; slug: string }
-interface MangaOption { id: string; title: string; slug: string }
+interface MangaOption { id: string; title: string; slug: string; latestChapter?: number | null }
 
 export default function UploadForm({ genres }: { genres: Genre[] }) {
   const [tab, setTab] = useState<"manga" | "chapter">("manga");
@@ -420,7 +420,17 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
             {/* Manga selector */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1.5">เลือกมังงะ *</label>
-              <select value={selectedSlug} onChange={e => setSelectedSlug(e.target.value)} className={inputCls}>
+              <select
+                value={selectedSlug}
+                onChange={e => {
+                  const slug = e.target.value;
+                  setSelectedSlug(slug);
+                  // Auto-suggest the next chapter number to avoid "already exists".
+                  const m = myMangas.find(x => x.slug === slug);
+                  if (m) setChapterNum(String((m.latestChapter ?? 0) + 1));
+                }}
+                className={inputCls}
+              >
                 <option value="">-- เลือกมังงะ --</option>
                 {myMangas.map(m => (
                   <option key={m.id} value={m.slug}>{m.title}</option>
@@ -448,6 +458,12 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
                   placeholder="1"
                   className={inputCls}
                 />
+                {(() => {
+                  const m = myMangas.find(x => x.slug === selectedSlug);
+                  return m && m.latestChapter != null ? (
+                    <p className="text-xs text-gray-500 mt-1">ตอนล่าสุดที่มี: {m.latestChapter} — เลขถัดไปถูกกรอกให้แล้ว</p>
+                  ) : null;
+                })()}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1.5">ชื่อตอน (ไม่บังคับ)</label>
