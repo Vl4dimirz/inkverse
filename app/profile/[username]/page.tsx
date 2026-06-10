@@ -27,7 +27,7 @@ const ROLES = {
   TRANSLATOR: {
     label: "นักแปล",
     icon: PenTool,
-    chip: "bg-[var(--accent)] text-white",
+    chip: "bg-[var(--text-primary)] text-[var(--bg-primary)]",
     ring: "ring-[var(--text-primary)]",
   },
   ADMIN: {

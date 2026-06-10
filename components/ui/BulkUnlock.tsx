@@ -155,14 +155,14 @@ export default function BulkUnlock({
 
       {/* Action */}
       {!isLoggedIn ? (
-        <a href="/auth/signin" className="block w-full py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm text-center hover:opacity-90 transition-opacity">
+        <a href="/auth/signin" className="block w-full py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm text-center hover:opacity-90 transition-opacity">
           เข้าสู่ระบบเพื่อปลดล็อก
         </a>
       ) : canAfford ? (
         <button
           onClick={unlock}
           disabled={loading || count < 1}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
           {loading ? "กำลังปลดล็อก..." : `ปลดล็อก ${count} ตอน · ${totalCost.toLocaleString()} เหรียญ`}

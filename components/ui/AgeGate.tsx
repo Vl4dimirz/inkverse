@@ -70,7 +70,7 @@ export default function AgeGate({ title, coverUrl }: AgeGateProps) {
         <div className="flex flex-col gap-3">
           <button
             onClick={confirm}
-            className="w-full py-3.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="w-full py-3.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
           >
             ฉันมีอายุ 18 ปีขึ้นไป — เข้าชมเนื้อหา
           </button>

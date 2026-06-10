@@ -357,7 +357,7 @@ export default function ApplyClient({ genres, prevApplication }: {
           <button
             onClick={() => setStep((s) => s + 1)}
             disabled={!canNext()}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ถัดไป
             <ChevronRight className="w-4 h-4" />
@@ -366,7 +366,7 @@ export default function ApplyClient({ genres, prevApplication }: {
           <button
             onClick={handleSubmit}
             disabled={loading || !form.motivation.trim() || !acceptedTerms}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? "กำลังส่ง..." : "ส่งใบสมัคร"}
             {!loading && <Check className="w-4 h-4" />}

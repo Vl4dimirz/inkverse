@@ -96,7 +96,7 @@ async function MangaGrid({ searchParams }: { searchParams: SearchParams }) {
                 href={`?page=${p}`}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all ${
                   p === page
-                    ? "bg-[var(--accent)] text-[var(--text-primary)]"
+                    ? "bg-[var(--text-primary)] text-[var(--bg-primary)]"
                     : "bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border)]"
                 }`}
               >

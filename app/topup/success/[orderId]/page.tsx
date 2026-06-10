@@ -79,7 +79,7 @@ export default async function TopupSuccessPage({
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
             href="/"
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
           >
             <Home className="w-4 h-4" />
             กลับสู่หน้าหลัก

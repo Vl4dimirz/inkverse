@@ -342,7 +342,7 @@ export default function CommentSection({
                 <button
                   type="submit"
                   disabled={!content.trim() || submitting}
-                  className="px-5 py-1.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
+                  className="px-5 py-1.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
                 >
                   {submitting ? "กำลังส่ง..." : "ส่ง"}
                 </button>

@@ -76,7 +76,7 @@ export default async function MangaChaptersPage({ params }: Props) {
           </div>
           <Link
             href={`/upload?manga=${slug}`}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
           >
             <Plus className="w-4 h-4" /> อัปโหลดตอนเพิ่ม
           </Link>

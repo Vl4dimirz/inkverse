@@ -91,7 +91,7 @@ export default function HeroBanner({
           <div className="flex items-center gap-3">
             <Link
               href={`/content/${slug}`}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-[var(--text-primary)]/25"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-[var(--text-primary)]/25"
             >
               <Play className="w-4 h-4 fill-white" />
               อ่านเลย

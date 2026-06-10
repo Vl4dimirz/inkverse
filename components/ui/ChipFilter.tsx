@@ -36,7 +36,7 @@ export default function ChipFilter({
             className={clsx(
               "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
               isActive
-                ? "bg-[var(--accent)] text-[var(--text-primary)] shadow-lg shadow-[var(--text-primary)]/25"
+                ? "bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-lg shadow-[var(--text-primary)]/25"
                 : "bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--text-primary)]/40 hover:text-[var(--text-primary)]"
             )}
           >

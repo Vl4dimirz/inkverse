@@ -59,7 +59,7 @@ export default function RankingPanel({
               className={clsx(
                 "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-medium transition-all",
                 activeTab === key
-                  ? "bg-[var(--accent)] text-[var(--text-primary)]"
+                  ? "bg-[var(--text-primary)] text-[var(--bg-primary)]"
                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5"
               )}
             >

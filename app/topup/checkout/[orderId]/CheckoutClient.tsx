@@ -499,7 +499,7 @@ export default function CheckoutClient({
                 <button
                   onClick={verifySlip}
                   disabled={verifying || !slipFile}
-                  className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {verifying
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> กำลังตรวจสอบสลิป...</>
@@ -510,7 +510,7 @@ export default function CheckoutClient({
               <button
                 onClick={handlePay}
                 disabled={loading}
-                className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {loading
                   ? <Loader2 className="w-4 h-4 animate-spin" />

@@ -121,7 +121,7 @@ export default function UnlockModal({
             <button
               onClick={handleUnlock}
               disabled={loading}
-              className="flex-1 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="flex-1 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {loading ? "กำลังปลดล็อก..." : `ปลดล็อก ${coinCost} เหรียญ`}
             </button>

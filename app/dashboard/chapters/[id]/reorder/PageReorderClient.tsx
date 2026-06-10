@@ -150,7 +150,7 @@ export default function PageReorderClient({
           <button
             onClick={save}
             disabled={saving || !hasChanges}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             {saving
               ? <Loader2 className="w-4 h-4 animate-spin" />

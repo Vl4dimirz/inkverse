@@ -112,7 +112,7 @@ export default async function EarningsPage() {
         {available >= 100 && (
           <Link
             href="/dashboard/withdraw"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             <Wallet className="w-4 h-4" />
             ถอนเงิน ฿{available.toFixed(0)}

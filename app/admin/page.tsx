@@ -70,7 +70,7 @@ export default async function AdminPage() {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-10">
         <Link
           href="/upload"
-          className="py-3 px-5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium text-center hover:opacity-90 transition-opacity"
+          className="py-3 px-5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium text-center hover:opacity-90 transition-opacity"
         >
           อัปโหลดมังงะใหม่
         </Link>

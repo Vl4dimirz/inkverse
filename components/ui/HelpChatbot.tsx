@@ -111,7 +111,7 @@ export default function HelpChatbot() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="ช่วยเหลือ"
-        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-[var(--accent)] text-[var(--text-primary)] shadow-lg flex items-center justify-center hover:opacity-90 transition-opacity"
+        className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] shadow-lg flex items-center justify-center hover:opacity-90 transition-opacity"
       >
         {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
       </button>
@@ -173,7 +173,7 @@ export default function HelpChatbot() {
             />
             <button
               type="submit"
-              className="w-9 h-9 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] flex items-center justify-center shrink-0 hover:opacity-90"
+              className="w-9 h-9 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] flex items-center justify-center shrink-0 hover:opacity-90"
             >
               <Send className="w-4 h-4" />
             </button>

@@ -300,7 +300,7 @@ export default function WithdrawClient({ availableBalance, history }: WithdrawCl
 
           <button
             type="submit" disabled={loading || !canSubmit}
-            className="w-full flex flex-col items-center gap-0.5 py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+            className="w-full flex flex-col items-center gap-0.5 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
           >
             <div className="flex items-center gap-2">
               {loading

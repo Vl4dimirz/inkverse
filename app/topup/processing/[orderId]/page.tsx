@@ -69,7 +69,7 @@ export default function ProcessingPage({
           </p>
           <button
             onClick={() => router.push(orderId ? `/topup/checkout/${orderId}` : "/topup")}
-            className="w-full py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
+            className="w-full py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity"
           >
             ลองใหม่
           </button>

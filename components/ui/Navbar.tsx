@@ -77,7 +77,7 @@ export default function Navbar({ user, userCoins = 0 }: NavbarProps) {
           ) : (
             <Link
               href="/auth/signin"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
             >
               <LogIn className="w-4 h-4" />
               เข้าสู่ระบบ

@@ -156,7 +156,7 @@ export default function ReaderViewer({
                     className={clsx(
                       "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
                       mode === m
-                        ? "bg-[var(--accent)] text-[var(--text-primary)]"
+                        ? "bg-[var(--text-primary)] text-[var(--bg-primary)]"
                         : "bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     )}
                   >

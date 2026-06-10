@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
-/* Balenciaga-style: flatten the global corner radius for a brutalist look. */
+/* Balenciaga-style: square everything (brutalist, sharp corners). */
 @theme {
-  --radius-sm: 2px;
-  --radius-md: 2px;
-  --radius-lg: 2px;
-  --radius-xl: 3px;
-  --radius-2xl: 4px;
-  --radius-3xl: 6px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
 }
 
 @layer base {
@@ -55,6 +55,19 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.2s ease, color 0.2s ease;
+    letter-spacing: 0.01em;
+  }
+
+  /* Balenciaga chrome: uppercase, airy tracking on nav + buttons. */
+  nav a {
+    letter-spacing: 0.1em;
+  }
+  button {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .font-bebas {
+    letter-spacing: 0.14em;
   }
 
   ::-webkit-scrollbar {

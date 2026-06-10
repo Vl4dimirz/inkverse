@@ -113,7 +113,7 @@ export default function TopupClient({ packages }: { packages: CoinPackage[] }) {
                 disabled={!!loading}
                 className={`w-full py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 ${
                   pkg.isPopular
-                    ? "bg-[var(--accent)] text-[var(--text-primary)] hover:opacity-90"
+                    ? "bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90"
                     : "bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-primary)] hover:border-white/30"
                 }`}
               >

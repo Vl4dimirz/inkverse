@@ -168,7 +168,7 @@ export default function DashboardClient({
           </Link>
           <Link
             href="/upload"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <BookOpen className="w-4 h-4" />
             อัปโหลดผลงานใหม่
@@ -583,7 +583,7 @@ function EmptyState({
       <p className="text-sm text-[var(--text-secondary)] mb-4">{sub}</p>
       <Link
         href={href}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
       >
         {cta}
         <ChevronRight className="w-4 h-4" />

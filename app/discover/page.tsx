@@ -118,7 +118,7 @@ export default async function DiscoverPage({
           </div>
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
           >
             ค้นหา
           </button>
@@ -202,7 +202,7 @@ export default async function DiscoverPage({
                   ← ก่อนหน้า
                 </a>
               )}
-              <span className="px-4 py-2 rounded-lg bg-[var(--accent)] text-[var(--text-primary)] text-sm">
+              <span className="px-4 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm">
                 {pageNum} / {totalPages}
               </span>
               {pageNum < totalPages && (

@@ -310,7 +310,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
             onClick={() => setTab(t)}
             className={`px-5 py-2 rounded-xl text-sm font-medium transition-all ${
               tab === t
-                ? "bg-[var(--accent)] text-[var(--text-primary)]"
+                ? "bg-[var(--text-primary)] text-[var(--bg-primary)]"
                 : "bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -344,7 +344,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
                   setMangaSuccess(null);
                   setTab("chapter");
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+                className="px-5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
               >
                 อัปโหลดตอนแรก →
               </button>
@@ -496,7 +496,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
             <button
               type="submit"
               disabled={mangaLoading}
-              className="w-full py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
               {mangaLoading ? "กำลังสร้าง..." : "สร้างมังงะ"}
@@ -525,7 +525,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
               </Link>
               <Link
                 href={`/content/${chapterSuccess.mangaSlug}/${chapterSuccess.chapterNum}`}
-                className="px-5 py-2.5 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
+                className="px-5 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-sm font-medium hover:opacity-90 transition-opacity"
               >
                 อ่านตอนนี้
               </Link>
@@ -700,7 +700,7 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
               type="button"
               onClick={onSubmitChapter}
               disabled={chapterLoading}
-              className="w-full py-3 rounded-xl bg-[var(--accent)] text-[var(--text-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Upload className="w-4 h-4" />
               {chapterLoading ? "กำลังอัปโหลด..." : "อัปโหลดตอน"}
