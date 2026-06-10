@@ -11,48 +11,30 @@ interface LogoProps {
 }
 
 const sizes = {
-  sm: { hex: 28, font: "text-lg" },
-  md: { hex: 36, font: "text-2xl" },
-  lg: { hex: 48, font: "text-4xl" },
+  sm: { tile: 28, font: "text-lg" },
+  md: { tile: 36, font: "text-2xl" },
+  lg: { tile: 48, font: "text-4xl" },
 };
 
-function HexInkMark({ size = 36 }: { size?: number }) {
+// "IV" monogram tile — matches the app icon / favicon for a unified brand mark.
+function MonogramMark({ size = 36 }: { size?: number }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <span
       aria-hidden
+      className="inline-flex items-center justify-center font-bebas text-white shrink-0 leading-none"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.28,
+        background: "linear-gradient(135deg,#ff2d55,#ff6b2b)",
+        fontSize: size * 0.54,
+        letterSpacing: -size * 0.03,
+        paddingTop: size * 0.04,
+        boxShadow: "0 2px 12px rgba(255,45,85,0.35)",
+      }}
     >
-      <defs>
-        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ff2d55" />
-          <stop offset="100%" stopColor="#ff6b2b" />
-        </linearGradient>
-      </defs>
-      {/* Hexagon */}
-      <polygon
-        points="24,2 43,13 43,35 24,46 5,35 5,13"
-        fill="url(#logoGrad)"
-        opacity="0.15"
-        stroke="url(#logoGrad)"
-        strokeWidth="2"
-      />
-      {/* Ink nib */}
-      <path
-        d="M24 10 L30 22 L24 38 L18 22 Z"
-        fill="url(#logoGrad)"
-      />
-      <path
-        d="M24 10 L24 38"
-        stroke="#080a10"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <circle cx="24" cy="38" r="2" fill="url(#logoGrad)" />
-    </svg>
+      IV
+    </span>
   );
 }
 
@@ -62,15 +44,15 @@ export default function Logo({
   className,
   href = "/",
 }: LogoProps) {
-  const { hex, font } = sizes[size];
+  const { tile, font } = sizes[size];
 
   const content = (
-    <span className={clsx("flex items-center gap-2 select-none", className)}>
-      {variant !== "text" && <HexInkMark size={hex} />}
+    <span className={clsx("flex items-center gap-2.5 select-none", className)}>
+      {variant !== "text" && <MonogramMark size={tile} />}
       {variant !== "icon" && (
         <span
           className={clsx(
-            "font-bebas tracking-widest bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] bg-clip-text text-transparent",
+            "font-bebas tracking-[0.18em] bg-gradient-to-r from-[#ff2d55] to-[#ff6b2b] bg-clip-text text-transparent",
             font
           )}
         >
@@ -82,7 +64,7 @@ export default function Logo({
 
   if (href) {
     return (
-      <Link href={href} className="flex items-center">
+      <Link href={href} className="flex items-center" aria-label="INKVERSE">
         {content}
       </Link>
     );
