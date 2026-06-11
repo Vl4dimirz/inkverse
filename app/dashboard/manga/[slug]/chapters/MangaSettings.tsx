@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Settings, Check, Loader2, Trash2, AlertTriangle, ChevronDown, Upload, ImageIcon } from "lucide-react";
 import clsx from "clsx";
+import TagInput from "@/components/ui/TagInput";
 
 interface MangaData {
   title: string;
@@ -12,6 +13,7 @@ interface MangaData {
   type: string;
   contentRating: string;
   coverUrl: string | null;
+  tags: string[];
 }
 
 const STATUS = [
@@ -193,6 +195,12 @@ export default function MangaSettings({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Custom tags */}
+          <div>
+            <label className="block text-xs text-[var(--text-secondary)] mb-1.5">แท็ก (พิมพ์เองได้ — คนอ่านค้นตามแท็ก)</label>
+            <TagInput value={form.tags} onChange={(t) => { setForm((f) => ({ ...f, tags: t })); setSaved(false); }} />
           </div>
 
           {error && <p className="text-sm text-[var(--text-primary)]">{error}</p>}

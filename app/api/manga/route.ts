@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { liveChapterWhere } from "@/lib/chapters";
+import { cleanTags } from "@/lib/tags";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { title, slug, description, originCountry, status, type, coverUrl, genreIds, contentRating } = body;
+  const { title, slug, description, originCountry, status, type, coverUrl, genreIds, contentRating, tags } = body;
 
   if (!title || !slug || !description) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -125,6 +126,7 @@ export async function POST(req: NextRequest) {
       type: type || "MANGA",
       coverUrl: coverUrl || null,
       contentRating: validRatings.includes(contentRating) ? contentRating : "EVERYONE",
+      tags: cleanTags(tags),
       translatorId,
       genres: genreIds
         ? { create: genreIds.map((id: string) => ({ genreId: id })) }

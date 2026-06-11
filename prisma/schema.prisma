@@ -194,6 +194,7 @@ model Manga {
   type          String      @default("MANGA")
   totalViews    Int         @default(0)
   contentRating String      @default("EVERYONE") // EVERYONE | TEEN | ADULT
+  tags          String[]    @default([]) // free-form creator tags (tropes etc.) for tag browsing
   // Attribution for openly-licensed (e.g. CC-BY) imported works
   author        String?
   sourceUrl     String?

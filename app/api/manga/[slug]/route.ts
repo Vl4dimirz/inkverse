@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { liveChapterWhere } from "@/lib/chapters";
+import { cleanTags } from "@/lib/tags";
 
 // Returns the manga only if the signed-in user owns it (translator) or is admin.
 async function getMangaOwnership(slug: string) {
@@ -76,6 +77,7 @@ export async function PATCH(
   if (TYPES.includes(body.type)) data.type = body.type;
   if (RATINGS.includes(body.contentRating)) data.contentRating = body.contentRating;
   if (["JP", "KR", "CN", "TH", "FR"].includes(body.originCountry)) data.originCountry = body.originCountry;
+  if (Array.isArray(body.tags)) data.tags = cleanTags(body.tags);
 
   // Optional: replace the genre set
   if (Array.isArray(body.genreIds)) {

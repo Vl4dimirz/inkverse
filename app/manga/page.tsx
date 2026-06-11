@@ -23,6 +23,7 @@ interface SearchParams {
   status?: string;
   type?: string;
   sort?: string;
+  tag?: string;
   page?: string;
 }
 
@@ -34,6 +35,7 @@ async function MangaGrid({ searchParams }: { searchParams: SearchParams }) {
   const where: Record<string, unknown> = {};
   if (searchParams.status) where.status = searchParams.status;
   if (searchParams.type) where.type = searchParams.type;
+  if (searchParams.tag) where.tags = { has: searchParams.tag };
 
   const orderBy: Record<string, string> =
     searchParams.sort === "rating"
@@ -61,6 +63,7 @@ async function MangaGrid({ searchParams }: { searchParams: SearchParams }) {
   return (
     <>
       <p className="text-sm text-[var(--text-secondary)] mb-4">
+        {searchParams.tag ? <>แท็ก <span className="text-[var(--text-primary)] font-semibold">#{searchParams.tag}</span> · </> : null}
         พบ {total} เรื่อง
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -96,6 +99,7 @@ async function MangaGrid({ searchParams }: { searchParams: SearchParams }) {
           status: searchParams.status,
           type: searchParams.type,
           sort: searchParams.sort,
+          tag: searchParams.tag,
         }}
       />
     </>

@@ -364,6 +364,21 @@ export default async function MangaProfilePage({ params }: Props) {
               ))}
             </div>
 
+            {/* Custom tags */}
+            {manga.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {manga.tags.map((t) => (
+                  <Link
+                    key={t}
+                    href={`/manga?tag=${encodeURIComponent(t)}`}
+                    className="text-xs px-2.5 py-1 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-[var(--text-primary)]/40 hover:text-[var(--text-primary)] transition-all"
+                  >
+                    #{t}
+                  </Link>
+                ))}
+              </div>
+            )}
+
             {/* Description */}
             <div className="bg-[var(--bg-surface)] rounded-xl p-4 border border-[var(--border)]">
               <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-2">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PenTool, Loader2, ArrowRight } from "lucide-react";
+import TagInput from "@/components/ui/TagInput";
 
 function slugify(s: string): string {
   const base = s
@@ -19,6 +20,7 @@ export default function NewNovelForm({ genres = [] }: { genres?: { id: string; n
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [genreIds, setGenreIds] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const toggleGenre = (id: string) =>
@@ -44,6 +46,7 @@ export default function NewNovelForm({ genres = [] }: { genres?: { id: string; n
           originCountry: "TH",
           contentRating: "TEEN",
           genreIds,
+          tags,
         }),
       });
       if (!res.ok) {
@@ -104,6 +107,11 @@ export default function NewNovelForm({ genres = [] }: { genres?: { id: string; n
             </div>
           </div>
         )}
+
+        <div>
+          <span className="block text-xs text-[var(--text-secondary)] uppercase tracking-wide mb-1">แท็ก (พิมพ์เองได้)</span>
+          <TagInput value={tags} onChange={setTags} />
+        </div>
 
         {error && <p className="text-sm text-[var(--text-primary)]">{error}</p>}
 
