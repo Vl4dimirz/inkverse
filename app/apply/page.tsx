@@ -5,7 +5,7 @@ import ApplyClient from "./ApplyClient";
 import ApplyStatus from "./ApplyStatus";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "สมัครเป็นนักแปล | INKVERSE" };
+export const metadata: Metadata = { title: "สมัครนักเขียน | INKVERSE" };
 
 export default async function ApplyPage() {
   const session = await auth();
@@ -14,9 +14,9 @@ export default async function ApplyPage() {
   const userId = (session.user as { id: string }).id;
   const role = (session.user as { role?: string }).role;
 
-  // Already a translator/admin
+  // Already a creator → straight to the dashboard
   if (role === "TRANSLATOR" || role === "ADMIN") {
-    redirect("/upload");
+    redirect("/dashboard");
   }
 
   const application = await prisma.translatorApplication.findUnique({

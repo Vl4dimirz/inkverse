@@ -50,14 +50,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.username = (user as { username?: string }).username ?? user.name ?? undefined;
       }
-      // Backfill username for sessions issued before it was added to the token
-      // (so existing logins get it without having to sign out/in).
-      if (token.id && !token.username) {
+      // Refresh role + username from the DB on every token use, so changes made
+      // server-side (e.g. a writer application being approved → role TRANSLATOR)
+      // take effect immediately without the user having to sign out and back in.
+      if (token.id) {
         const u = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { username: true },
+          select: { username: true, role: true },
         });
-        if (u) token.username = u.username;
+        if (u) {
+          token.username = u.username;
+          token.role = u.role;
+        }
       }
       return token;
     },
