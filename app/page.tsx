@@ -43,7 +43,7 @@ const getData = unstable_cache(async () => {
       prisma.chapter.findMany({
         take: 10,
         orderBy: { publishedAt: "desc" },
-        where: { manga: { contentRating: { not: "ADULT" }, type: { not: "NOVEL" } }, ...liveChapterWhere() },
+        where: { manga: { contentRating: { not: "ADULT" } }, ...liveChapterWhere() },
         include: {
           manga: { select: { title: true, slug: true, coverUrl: true, type: true } },
         },
