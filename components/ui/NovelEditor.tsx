@@ -51,6 +51,7 @@ export default function NovelEditor({
   const [focus, setFocus] = useState(false);
   const [goal, setGoal] = useState(0);
   const [showFind, setShowFind] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
   const [findText, setFindText] = useState("");
   const [replaceText, setReplaceText] = useState("");
   const [, force] = useState(0);
@@ -158,17 +159,30 @@ export default function NovelEditor({
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !editor) return;
+    // Phones sometimes report an empty or non-image type — fall back to jpeg.
+    const contentType = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
+    if (file.size > 8 * 1024 * 1024) { setError("รูปใหญ่เกินไป (สูงสุด 8MB)"); return; }
+    setUploadingImg(true);
+    setError("");
     try {
       const r = await fetch("/api/upload/novel-image", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mangaSlug, contentType: file.type }),
+        body: JSON.stringify({ mangaSlug, contentType }),
       });
-      if (!r.ok) { setError("อัปโหลดรูปไม่สำเร็จ"); return; }
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        setError(d.error || "อัปโหลดรูปไม่สำเร็จ");
+        return;
+      }
       const { uploadUrl, publicUrl } = await r.json();
-      const put = await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
-      if (!put.ok) { setError("อัปโหลดรูปไม่สำเร็จ"); return; }
+      const put = await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": contentType } });
+      if (!put.ok) { setError("อัปโหลดรูปไม่สำเร็จ (เซิร์ฟเวอร์รูปปฏิเสธ)"); return; }
       editor.chain().focus().setImage({ src: publicUrl }).run();
-    } catch { setError("อัปโหลดรูปไม่สำเร็จ"); }
+    } catch {
+      setError("อัปโหลดรูปไม่สำเร็จ — เครือข่ายขัดข้อง");
+    } finally {
+      setUploadingImg(false);
+    }
   }
 
   function addLink() {
@@ -203,7 +217,7 @@ export default function NovelEditor({
 
   return (
     <div className={focus ? "fixed inset-0 z-50 bg-[var(--bg-primary)] overflow-auto" : "max-w-3xl mx-auto px-4 sm:px-6 py-6"}>
-      <div className={focus ? "max-w-3xl mx-auto px-4 py-6" : ""}>
+      <div className={focus ? "max-w-3xl mx-auto px-4 pt-16 pb-6" : ""}>
         {!focus && <p className="eyebrow text-[var(--text-secondary)]">{existing ? "แก้ไขตอน" : "เขียนตอนใหม่"}</p>}
 
         {/* meta */}
@@ -235,7 +249,7 @@ export default function NovelEditor({
           <button onClick={() => e?.chain().focus().setHorizontalRule().run()} className={tb} title="เส้นคั่นฉาก"><Minus className="w-4 h-4" /></button>
           <span className="w-px bg-[var(--border)] mx-0.5" />
           <button onClick={addLink} className={`${tb} ${active(!!e?.isActive("link"))}`} title="ลิงก์"><Link2 className="w-4 h-4" /></button>
-          <button onClick={() => fileRef.current?.click()} className={tb} title="แทรกรูป"><ImagePlus className="w-4 h-4" /></button>
+          <button onClick={() => fileRef.current?.click()} disabled={uploadingImg} className={tb} title="แทรกรูป">{uploadingImg ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}</button>
           <button onClick={() => e?.chain().focus().setTextAlign("left").run()} className={`${tb} ${active(!!e?.isActive({ textAlign: "left" }))}`} title="ชิดซ้าย"><AlignLeft className="w-4 h-4" /></button>
           <button onClick={() => e?.chain().focus().setTextAlign("center").run()} className={`${tb} ${active(!!e?.isActive({ textAlign: "center" }))}`} title="กึ่งกลาง"><AlignCenter className="w-4 h-4" /></button>
           <button onClick={() => e?.chain().focus().setTextAlign("right").run()} className={`${tb} ${active(!!e?.isActive({ textAlign: "right" }))}`} title="ชิดขวา"><AlignRight className="w-4 h-4" /></button>

@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { mangaSlug, contentType } = await req.json().catch(() => ({}));
-  if (!mangaSlug || !EXT[contentType]) {
-    return NextResponse.json({ error: "mangaSlug and a valid image contentType required" }, { status: 400 });
+  if (!mangaSlug || typeof contentType !== "string" || !contentType.startsWith("image/")) {
+    return NextResponse.json({ error: "mangaSlug and an image contentType required" }, { status: 400 });
   }
 
   const manga = await prisma.manga.findUnique({
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const ext = EXT[contentType];
+  const ext = EXT[contentType] || "jpg";
   const key = `novel/${manga.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const uploadUrl = await getPresignedUploadUrl(key, contentType);
   return NextResponse.json({ uploadUrl, publicUrl: `${PUBLIC_URL}/${key}` });
