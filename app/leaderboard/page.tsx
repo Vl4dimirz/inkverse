@@ -45,7 +45,7 @@ export default async function LeaderboardPage() {
       if (!u) return null;
       const chaptersRead = g._count.userId;
       const rank = getReaderRank(chaptersRead, spentMap.get(g.userId) ?? 0);
-      return { ...u, chaptersRead, rankName: rank.current.name, rankLevel: rank.current.level };
+      return { ...u, chaptersRead, rankName: rank.current.nameEn, rankLevel: rank.current.level };
     })
     .filter((e): e is NonNullable<typeof e> => e !== null)
     .slice(0, 50);

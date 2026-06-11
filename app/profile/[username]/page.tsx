@@ -252,13 +252,13 @@ export default async function ProfilePage({ params }: Props) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)]">
-                LV.{tRank.current.level} · {tRank.current.nameEn}
+                TRANSLATOR · LV.{tRank.current.level}
               </p>
-              <p className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider">{tRank.current.name}</p>
+              <p className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider uppercase">{tRank.current.nameEn}</p>
               {tRank.next ? (
                 <div className="mt-2">
                   <div className="flex justify-between text-[11px] text-[var(--text-secondary)] mb-1">
-                    <span className="flex items-center gap-1">ยศถัดไป <ArrowRight className="w-3 h-3" /> {tRank.next.name}</span>
+                    <span className="flex items-center gap-1">ยศถัดไป <ArrowRight className="w-3 h-3" /> <span className="uppercase font-semibold text-[var(--text-primary)]">{tRank.next.nameEn}</span></span>
                     <span>{tRank.percentToNext}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
@@ -289,16 +289,16 @@ export default async function ProfilePage({ params }: Props) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)]">
-              LV.{rank.current.level} · {rank.current.nameEn}
+              READER · LV.{rank.current.level}
             </p>
-            <p className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider">
-              {rank.current.name}
+            <p className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider uppercase">
+              {rank.current.nameEn}
             </p>
             {rank.next ? (
               <div className="mt-2">
                 <div className="flex justify-between text-[11px] text-[var(--text-secondary)] mb-1">
                   <span className="flex items-center gap-1">
-                    ยศถัดไป <ArrowRight className="w-3 h-3" /> {rank.next.name}
+                    ยศถัดไป <ArrowRight className="w-3 h-3" /> <span className="uppercase font-semibold text-[var(--text-primary)]">{rank.next.nameEn}</span>
                   </span>
                   <span>{rank.percentToNext}%</span>
                 </div>

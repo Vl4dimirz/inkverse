@@ -103,10 +103,10 @@ export default async function AchievementsPage() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)]">
-              ยศปัจจุบัน · LV.{rank.current.level} · {rank.current.nameEn}
+              CURRENT RANK · LV.{rank.current.level}
             </p>
-            <p className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider">
-              {rank.current.name}
+            <p className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider uppercase">
+              {rank.current.nameEn}
             </p>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default async function AchievementsPage() {
             <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="text-[var(--text-secondary)] flex items-center gap-1">
                 ยศถัดไป <ArrowRight className="w-3 h-3" />{" "}
-                <span className="text-[var(--text-primary)] font-semibold">{rank.next.name}</span>
+                <span className="text-[var(--text-primary)] font-semibold uppercase">{rank.next.nameEn}</span>
               </span>
               <span className="text-[var(--text-primary)] font-semibold">{rank.percentToNext}%</span>
             </div>

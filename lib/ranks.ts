@@ -86,7 +86,7 @@ export const TRANSLATOR_RANKS: TranslatorRank[] = [
   { level: 2, name: "นักแปลมือใหม่",     nameEn: "Scribe",     icon: "Feather",    minChapters: 30,   minViews: 5000 },
   { level: 3, name: "นักแปลชำนาญ",       nameEn: "Artisan",    icon: "BookMarked", minChapters: 150,  minViews: 50000 },
   { level: 4, name: "นักแปลชั้นครู",      nameEn: "Maestro",    icon: "Award",      minChapters: 500,  minViews: 300000 },
-  { level: 5, name: "ปรมาจารย์นักแปล",   nameEn: "Grandmaster", icon: "Crown",     minChapters: 1200, minViews: 1000000 },
+  { level: 5, name: "ปรมาจารย์นักแปล",   nameEn: "Virtuoso",   icon: "Crown",     minChapters: 1200, minViews: 1000000 },
 ];
 
 export interface TranslatorRankInfo {
