@@ -24,8 +24,6 @@ interface Chapter {
   freeAt?: string | null;
 }
 
-const EARLY_DAYS = [1, 2, 3, 7];
-
 function fmtFree(iso: string): string {
   return new Date(iso).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
@@ -51,6 +49,7 @@ function ChapterRow({
   const [numInput, setNumInput] = useState(String(chapter.chapterNum));
   const [numError, setNumError] = useState("");
   const [editingEarly, setEditingEarly] = useState(false);
+  const [earlyInput, setEarlyInput] = useState("2");
   const [loading, setLoading] = useState(false);
 
   const earlyActive = !!chapter.freeAt && new Date(chapter.freeAt).getTime() > Date.now();
@@ -60,6 +59,11 @@ function ChapterRow({
     const freeAt = days === null ? null : new Date(Date.now() + days * 86400000).toISOString();
     await patchChapter({ isPremium: true, coinCost: parseInt(priceInput) || chapter.coinCost || 2, freeAt });
     setEditingEarly(false);
+  }
+  async function applyEarly() {
+    const d = parseInt(earlyInput);
+    if (!d || d < 1) return;
+    await setEarly(d);
   }
 
   async function patchChapter(data: Partial<Chapter>): Promise<{ ok: boolean; error?: string }> {
@@ -252,12 +256,20 @@ function ChapterRow({
         {chapter.isPremium && (
           editingEarly ? (
             <div className="flex items-center gap-1 flex-wrap">
-              {EARLY_DAYS.map((d) => (
-                <button key={d} onClick={() => setEarly(d)} disabled={loading}
-                  className="px-2 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-primary)] hover:border-[var(--text-primary)] transition-colors">
-                  {d} วัน
-                </button>
-              ))}
+              <input
+                autoFocus
+                type="number"
+                min="1"
+                value={earlyInput}
+                onChange={(e) => setEarlyInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") applyEarly(); if (e.key === "Escape") setEditingEarly(false); }}
+                placeholder="วัน"
+                className="w-14 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-2 py-1 text-xs text-[var(--text-primary)] text-center focus:outline-none"
+              />
+              <span className="text-xs text-[var(--text-secondary)]">วัน</span>
+              <button onClick={applyEarly} disabled={loading} title="ตั้งอ่านล่วงหน้า" className="p-1 text-[var(--text-primary)]">
+                {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              </button>
               <button onClick={() => setEarly(null)} disabled={loading}
                 title="ติดเหรียญถาวร (ไม่ปลดฟรี)"
                 className="px-2 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
