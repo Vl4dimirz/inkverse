@@ -1,0 +1,17 @@
+{
+  "name": "inkverse-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "INKVERSE Android shell (Capacitor) — loads the live site in a secure WebView with screenshot blocking.",
+  "scripts": {
+    "sync": "cap sync android",
+    "open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

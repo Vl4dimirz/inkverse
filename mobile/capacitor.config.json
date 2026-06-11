@@ -1,0 +1,10 @@
+{
+  "appId": "com.inkverse.app",
+  "appName": "INKVERSE",
+  "webDir": "www",
+  "server": {
+    "url": "https://inkverse-tau.vercel.app",
+    "androidScheme": "https",
+    "cleartext": false
+  }
+}
