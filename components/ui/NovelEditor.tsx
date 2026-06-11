@@ -221,7 +221,7 @@ export default function NovelEditor({
         )}
 
         {/* toolbar */}
-        <div className="flex flex-wrap gap-1 mb-2 sticky top-0 bg-[var(--bg-primary)] py-1 z-10">
+        <div className="flex flex-wrap gap-1 mb-2 sm:sticky sm:top-0 bg-[var(--bg-primary)] py-1 z-10">
           <button onClick={() => e?.chain().focus().toggleBold().run()} className={`${tb} ${active(!!e?.isActive("bold"))}`} title="หนา"><Bold className="w-4 h-4" /></button>
           <button onClick={() => e?.chain().focus().toggleItalic().run()} className={`${tb} ${active(!!e?.isActive("italic"))}`} title="เอียง"><Italic className="w-4 h-4" /></button>
           <button onClick={() => e?.chain().focus().toggleUnderline().run()} className={`${tb} ${active(!!e?.isActive("underline"))}`} title="ขีดเส้นใต้"><UnderlineIcon className="w-4 h-4" /></button>
