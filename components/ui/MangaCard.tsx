@@ -94,8 +94,8 @@ export default function MangaCard({
 
         {/* Type badge — novels clearly flagged so readers don't mistake them for comics */}
         {contentRating !== "ADULT" && type === "NOVEL" && (
-          <span className="absolute top-2 right-2 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider bg-[var(--text-primary)] text-[var(--bg-primary)] flex items-center gap-1">
-            📖 นิยาย
+          <span className="absolute top-2 right-2 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider bg-[var(--text-primary)] text-[var(--bg-primary)]">
+            นิยาย
           </span>
         )}
         {contentRating !== "ADULT" && type && type !== "NOVEL" && !isCompact && (

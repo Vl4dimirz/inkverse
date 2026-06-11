@@ -267,7 +267,7 @@ export default async function HomePage() {
         <section className="mt-14">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-[0.15em] uppercase flex items-center gap-2">
-              📖 นิยายน่าอ่าน
+              นิยายน่าอ่าน
             </h2>
             <Link
               href="/manga?type=NOVEL"

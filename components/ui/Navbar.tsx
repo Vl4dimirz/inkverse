@@ -29,7 +29,7 @@ const navLinks = [
   { href: "/manga?type=MANGA", label: "มังงะ" },
   { href: "/manga?type=MANHWA", label: "มังฮวา" },
   { href: "/manga?type=MANHUA", label: "มังฮัว" },
-  { href: "/manga?type=NOVEL", label: "📖 นิยาย" },
+  { href: "/manga?type=NOVEL", label: "นิยาย" },
   { href: "/apply?as=translator", label: "สมัครนักแปล" },
   { href: "/apply?as=writer", label: "สมัครนักเขียน" },
 ];
@@ -125,7 +125,7 @@ export default function Navbar({ user, userCoins = 0, rankBadge = null }: Navbar
                   onClick={() => setMenuOpen(false)}
                   className="px-3 py-2.5 rounded-lg text-sm bal-btn text-center font-semibold"
                 >
-                  ✍️ เขียนนิยาย
+                  เขียนนิยาย
                 </Link>
                 <Link
                   href="/dashboard"
