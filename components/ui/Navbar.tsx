@@ -121,6 +121,13 @@ export default function Navbar({ user, userCoins = 0, rankBadge = null }: Navbar
             {user && (user.role === "TRANSLATOR" || user.role === "ADMIN") && (
               <>
                 <Link
+                  href="/dashboard/new-novel"
+                  onClick={() => setMenuOpen(false)}
+                  className="px-3 py-2.5 rounded-lg text-sm bal-btn text-center font-semibold"
+                >
+                  ✍️ เขียนนิยาย
+                </Link>
+                <Link
                   href="/dashboard"
                   onClick={() => setMenuOpen(false)}
                   className="px-3 py-2.5 rounded-lg text-sm text-[var(--text-primary)] hover:bg-white/5 transition-colors font-medium"

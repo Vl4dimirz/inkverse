@@ -71,7 +71,7 @@ export default function ApplyClient({ genres, prevApplication, mode = "translato
       const res = await fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, acceptedTerms }),
+        body: JSON.stringify({ ...form, acceptedTerms, kind: isWriter ? "WRITER" : "TRANSLATOR" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "เกิดข้อผิดพลาด");

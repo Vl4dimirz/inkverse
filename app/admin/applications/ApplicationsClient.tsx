@@ -12,6 +12,7 @@ import clsx from "clsx";
 interface Application {
   id: string;
   status: string;
+  kind: string;
   penName: string;
   experience: string;
   sampleWork: string;
@@ -40,6 +41,8 @@ export default function ApplicationsClient({
   const [expanded, setExpanded] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<string | null>(null);
+  const [kindFilter, setKindFilter] = useState<"ALL" | "TRANSLATOR" | "WRITER">("ALL");
+  const shown = applications.filter((a) => kindFilter === "ALL" || a.kind === kindFilter);
 
   async function handleAction(id: string, action: "approve" | "reject") {
     setLoading(`${id}-${action}`);
@@ -94,15 +97,33 @@ export default function ApplicationsClient({
         ))}
       </div>
 
+      {/* Kind filter: translator vs writer */}
+      <div className="flex gap-2 mb-6">
+        {([["ALL", "ทั้งหมด"], ["TRANSLATOR", "นักแปล"], ["WRITER", "นักเขียน"]] as const).map(([k, l]) => (
+          <button
+            key={k}
+            onClick={() => setKindFilter(k)}
+            className={clsx(
+              "px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors",
+              kindFilter === k
+                ? "bg-[var(--text-primary)] text-[var(--bg-primary)] border-[var(--text-primary)]"
+                : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            )}
+          >
+            {l} ({k === "ALL" ? applications.length : applications.filter((a) => a.kind === k).length})
+          </button>
+        ))}
+      </div>
+
       {/* Applications list */}
-      {applications.length === 0 ? (
+      {shown.length === 0 ? (
         <div className="text-center py-16 text-[var(--text-secondary)]">
           <Clock className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p>ไม่มีใบสมัครในสถานะนี้</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {applications.map((app) => {
+          {shown.map((app) => {
             const isOpen = expanded === app.id;
             return (
               <div key={app.id} className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] overflow-hidden">
@@ -118,7 +139,12 @@ export default function ApplicationsClient({
                       </span>
                     </div>
                     <div>
-                      <p className="text-[var(--text-primary)] font-semibold">{app.penName}</p>
+                      <p className="text-[var(--text-primary)] font-semibold flex items-center gap-2">
+                        {app.penName}
+                        <span className="text-[9px] px-1.5 py-0.5 border border-[var(--border)] text-[var(--text-secondary)] uppercase tracking-wide">
+                          {app.kind === "WRITER" ? "นักเขียน" : "นักแปล"}
+                        </span>
+                      </p>
                       <p className="text-xs text-[var(--text-secondary)]">
                         @{app.user.username} · {app.experience}
                       </p>

@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => null);
-  const { penName, experience, sampleWork, socialLink, preferredGenres, motivation, acceptedTerms } = body ?? {};
+  const { penName, experience, sampleWork, socialLink, preferredGenres, motivation, acceptedTerms, kind } = body ?? {};
+  const appKind = kind === "WRITER" ? "WRITER" : "TRANSLATOR";
 
   if (!penName?.trim() || !experience?.trim() || !sampleWork?.trim() || !motivation?.trim()) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
         where: { userId },
         data: {
           status: "PENDING",
+          kind: appKind,
           penName: penName.trim(),
           experience: experience.trim(),
           sampleWork: sampleWork.trim(),
@@ -66,6 +68,7 @@ export async function POST(req: NextRequest) {
     : await prisma.translatorApplication.create({
         data: {
           userId,
+          kind: appKind,
           penName: penName.trim(),
           experience: experience.trim(),
           sampleWork: sampleWork.trim(),

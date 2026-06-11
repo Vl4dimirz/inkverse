@@ -384,6 +384,7 @@ model TranslatorApplication {
   id              String   @id @default(cuid())
   userId          String   @unique
   status          String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  kind            String   @default("TRANSLATOR") // TRANSLATOR | WRITER
   penName         String
   experience      String
   sampleWork      String

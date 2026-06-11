@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import {
-  User, LayoutDashboard, Settings, LogOut, Coins, Shield, Upload, ChevronDown, Gift, MessageSquare, Trophy, Medal,
+  User, LayoutDashboard, Settings, LogOut, Coins, Shield, Upload, ChevronDown, Gift, MessageSquare, Trophy, Medal, PenTool,
 } from "lucide-react";
 import RankChip from "./RankChip";
 import type { RankBadge } from "@/lib/ranks";
@@ -82,9 +82,14 @@ export default function UserMenu({ user, rankBadge }: { user: MenuUser; rankBadg
               <LayoutDashboard className="w-4 h-4" /> แดชบอร์ด
             </Link>
           )}
+          {isStaff && (
+            <Link href="/dashboard/new-novel" className={item}>
+              <PenTool className="w-4 h-4" /> เขียนนิยาย
+            </Link>
+          )}
           {user.role === "TRANSLATOR" && (
             <Link href="/upload" className={item}>
-              <Upload className="w-4 h-4" /> อัปโหลดผลงาน
+              <Upload className="w-4 h-4" /> อัปโหลดมังงะ
             </Link>
           )}
           {isAdmin && (
