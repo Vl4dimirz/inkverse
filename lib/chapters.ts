@@ -18,7 +18,9 @@ export function isChapterLive(ch: { status: string; publishAt: Date | null }): b
   return ch.status !== "DRAFT" && (!ch.publishAt || ch.publishAt.getTime() <= Date.now());
 }
 
-type LockableChapter = { isPremium: boolean; freeAt: Date | null };
+// freeAt may arrive as a Date (live query) or an ISO string (from a cached/
+// serialized payload) — normalise either way.
+type LockableChapter = { isPremium: boolean; freeAt: Date | string | null };
 
 /**
  * A premium chapter is locked unless the user already unlocked it, OR its
@@ -27,11 +29,11 @@ type LockableChapter = { isPremium: boolean; freeAt: Date | null };
  */
 export function isChapterLocked(ch: LockableChapter, unlocked: boolean): boolean {
   if (!ch.isPremium || unlocked) return false;
-  if (ch.freeAt && ch.freeAt.getTime() <= Date.now()) return false;
+  if (ch.freeAt && new Date(ch.freeAt).getTime() <= Date.now()) return false;
   return true;
 }
 
 /** True while a premium chapter is still in its early-access window (will turn free later). */
 export function isEarlyAccess(ch: LockableChapter): boolean {
-  return ch.isPremium && !!ch.freeAt && ch.freeAt.getTime() > Date.now();
+  return ch.isPremium && !!ch.freeAt && new Date(ch.freeAt).getTime() > Date.now();
 }

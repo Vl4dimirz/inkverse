@@ -98,8 +98,11 @@ export default async function MangaProfilePage({ params }: Props) {
     }
   }
 
-  // Get user's coin balance + which chapters they've unlocked + which they've read
-  const [userCoins, unlockedSet, readSet] = await Promise.all([
+  const isOwner = !!userId && manga.translator?.userId === userId;
+
+  // One parallel round-trip for everything that depends on the loaded manga:
+  // balance, unlocked/read sets, work-level comments, uploader rank, view bump.
+  const [userCoins, unlockedSet, readSet, workComments, translatorRank] = await Promise.all([
     userId ? getUserCoins(userId) : Promise.resolve(0),
     userId
       ? prisma.unlockedChapter
@@ -108,12 +111,32 @@ export default async function MangaProfilePage({ params }: Props) {
       : Promise.resolve(new Set<string>()),
     userId
       ? prisma.readHistory
-          .findMany({
-            where: { userId, chapter: { mangaId: manga.id } },
-            select: { chapterId: true },
-          })
+          .findMany({ where: { userId, chapter: { mangaId: manga.id } }, select: { chapterId: true } })
           .then((rows) => new Set(rows.map((r) => r.chapterId)))
       : Promise.resolve(new Set<string>()),
+    prisma.comment.findMany({
+      where: { mangaId: manga.id, parentId: null },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      include: {
+        user: { select: { id: true, username: true, avatarUrl: true } },
+        likedBy: userId ? { where: { userId }, select: { id: true } } : false,
+        replies: {
+          include: {
+            user: { select: { id: true, username: true, avatarUrl: true } },
+            likedBy: userId ? { where: { userId }, select: { id: true } } : false,
+          },
+          orderBy: { createdAt: "asc" },
+          take: 10,
+        },
+      },
+    }),
+    manga.translator
+      ? getUserRankBadge(manga.translator.userId, manga.translator.user.role)
+      : Promise.resolve(null),
+    isOwner
+      ? Promise.resolve(null)
+      : prisma.manga.update({ where: { id: manga.id }, data: { totalViews: { increment: 1 } } }),
   ]);
 
   // Reading progress (chapters opened / total)
@@ -122,15 +145,6 @@ export default async function MangaProfilePage({ params }: Props) {
     manga.chapters.length > 0
       ? Math.round((readCount / manga.chapters.length) * 100)
       : 0;
-
-  // Count views from readers only — never the creator viewing their own work.
-  const isOwner = !!userId && manga.translator?.userId === userId;
-  if (!isOwner) {
-    await prisma.manga.update({
-      where: { id: manga.id },
-      data: { totalViews: { increment: 1 } },
-    });
-  }
 
   const avgRating =
     manga.ratings.length > 0
@@ -141,11 +155,6 @@ export default async function MangaProfilePage({ params }: Props) {
     ? manga.bookmarks.length > 0
     : false;
 
-  // Uploader's rank badge.
-  const translatorRank = manga.translator
-    ? await getUserRankBadge(manga.translator.userId, manga.translator.user.role)
-    : null;
-
   const latestChapter = manga.chapters[manga.chapters.length - 1];
   const firstChapter = manga.chapters[0];
 
@@ -154,24 +163,7 @@ export default async function MangaProfilePage({ params }: Props) {
     .filter((ch) => isChapterLocked(ch, unlockedSet.has(ch.id)))
     .map((ch) => ({ id: ch.id, chapterNum: ch.chapterNum, coinCost: ch.coinCost }));
 
-  // Work-level (หน้ารวม) comments — readers discuss the whole story here.
-  const workComments = await prisma.comment.findMany({
-    where: { mangaId: manga.id, parentId: null },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-    include: {
-      user: { select: { id: true, username: true, avatarUrl: true } },
-      likedBy: userId ? { where: { userId }, select: { id: true } } : false,
-      replies: {
-        include: {
-          user: { select: { id: true, username: true, avatarUrl: true } },
-          likedBy: userId ? { where: { userId }, select: { id: true } } : false,
-        },
-        orderBy: { createdAt: "asc" },
-        take: 10,
-      },
-    },
-  });
+  // Rank badges for everyone in the work-level thread (+ current user).
   const commentRankMap = await getRankBadges([
     ...workComments.map((c) => c.user.id),
     ...workComments.flatMap((c) => c.replies.map((r) => r.user.id)),
