@@ -101,13 +101,22 @@ export async function unlockChapter(
   const earningAmount = parseFloat((cost * TRANSLATOR_SHARE).toFixed(2));
 
   const updatedUser = await prisma.$transaction(async (tx) => {
-    const u = await tx.user.update({
-      where: { id: userId },
+    // Conditional decrement guards against double-spend / negative balance when
+    // two unlocks (of different chapters) race — the pre-check above is outside
+    // the tx, so without this guard both could pass and drive coins negative.
+    // Mirrors unlockChaptersBulk.
+    const dec = await tx.user.updateMany({
+      where: { id: userId, coins: { gte: cost } },
       data: { coins: { decrement: cost } },
     });
-    await tx.unlockedChapter.create({
-      data: { userId, chapterId, coinSpent: cost },
+    if (dec.count === 0) return null;
+    // skipDuplicates makes a same-chapter race a no-op instead of a 500; if it
+    // didn't insert, another request already unlocked it — roll back the charge.
+    const ins = await tx.unlockedChapter.createMany({
+      data: [{ userId, chapterId, coinSpent: cost }],
+      skipDuplicates: true,
     });
+    if (ins.count === 0) throw new Error("ALREADY_UNLOCKED_RACE");
     await tx.coinTransaction.create({
       data: {
         userId,
@@ -132,9 +141,15 @@ export async function unlockChapter(
         },
       });
     }
-    return u;
+    return tx.user.findUnique({ where: { id: userId }, select: { coins: true } });
+  }).catch((err: unknown) => {
+    // A racing unlock of the same chapter already won → treat as already unlocked.
+    if (err instanceof Error && err.message === "ALREADY_UNLOCKED_RACE") return "RACE" as const;
+    throw err;
   });
 
+  if (updatedUser === "RACE") return { success: false, error: "ALREADY_UNLOCKED" };
+  if (!updatedUser) return { success: false, error: "INSUFFICIENT_COINS" };
   return { success: true, coinsLeft: updatedUser.coins };
 }
 

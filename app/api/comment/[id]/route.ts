@@ -26,7 +26,7 @@ export async function DELETE(
   return NextResponse.json({ ok: true });
 }
 
-// PATCH /api/comment/[id] — like (toggle)
+// PATCH /api/comment/[id] — toggle this user's like
 export async function PATCH(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -35,14 +35,35 @@ export async function PATCH(
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+  const userId = (session.user as { id: string }).id;
 
-  const comment = await prisma.comment.findUnique({ where: { id }, select: { id: true, likes: true } });
+  const comment = await prisma.comment.findUnique({ where: { id }, select: { id: true } });
   if (!comment) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const updated = await prisma.comment.update({
-    where: { id },
-    data: { likes: { increment: 1 } },
-    select: { likes: true },
+  // The CommentLike row is the source of truth; Comment.likes is the cached count.
+  // Both sides of the toggle run in one transaction so the count never drifts.
+  const result = await prisma.$transaction(async (tx) => {
+    const existing = await tx.commentLike.findUnique({
+      where: { userId_commentId: { userId, commentId: id } },
+      select: { id: true },
+    });
+    if (existing) {
+      await tx.commentLike.delete({ where: { id: existing.id } });
+      const c = await tx.comment.update({
+        where: { id },
+        data: { likes: { decrement: 1 } },
+        select: { likes: true },
+      });
+      return { likes: Math.max(0, c.likes), liked: false };
+    }
+    await tx.commentLike.create({ data: { userId, commentId: id } });
+    const c = await tx.comment.update({
+      where: { id },
+      data: { likes: { increment: 1 } },
+      select: { likes: true },
+    });
+    return { likes: c.likes, liked: true };
   });
-  return NextResponse.json({ likes: updated.likes });
+
+  return NextResponse.json(result);
 }
