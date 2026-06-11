@@ -47,10 +47,6 @@ export default async function AchievementsPage() {
   const rank = getReaderRank(stats.chaptersRead, coinsSpent);
   const RankIcon = RANK_ICONS[rank.current.icon] ?? BookOpen;
 
-  const coinsEarned = items
-    .filter((i) => i.unlocked)
-    .reduce((s, i) => s + i.coinReward, 0);
-
   const categories = ["reading", "completion", "social", "engagement"] as AchievementCategory[];
   const byCat = (c: AchievementCategory) => items.filter((i) => i.category === c);
 
@@ -63,25 +59,17 @@ export default async function AchievementsPage() {
           <Trophy className="w-8 h-8" /> ความสำเร็จ
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-2">
-          อ่าน อ่านจบ และมีส่วนร่วม เพื่อปลดล็อกความสำเร็จและรับเหรียญรางวัล
+          อ่าน อ่านจบ และมีส่วนร่วม เพื่อสะสมความสำเร็จและไต่ยศนักอ่าน
         </p>
 
         {/* Summary */}
-        <div className="grid grid-cols-3 gap-3 mt-5">
+        <div className="grid grid-cols-2 gap-3 mt-5">
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-4">
             <p className="text-2xl font-bold text-[var(--text-primary)]">
               {unlockedCount}/{items.length}
             </p>
             <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)] mt-0.5">
               ปลดล็อกแล้ว
-            </p>
-          </div>
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-4">
-            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-1">
-              <Coins className="w-5 h-5" /> {coinsEarned}
-            </p>
-            <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)] mt-0.5">
-              เหรียญที่ได้รับ
             </p>
           </div>
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-4">
@@ -188,14 +176,9 @@ function AchievementCard({ a }: { a: AchievementProgress }) {
           {a.unlocked ? <Icon className="w-5 h-5" /> : <Lock className="w-4 h-4" />}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] truncate">
-              {a.title}
-            </h3>
-            <span className="text-[11px] flex items-center gap-0.5 text-[var(--text-secondary)] shrink-0">
-              <Coins className="w-3 h-3" /> {a.coinReward}
-            </span>
-          </div>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] truncate">
+            {a.title}
+          </h3>
           <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
             {a.description}
           </p>

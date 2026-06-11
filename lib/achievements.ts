@@ -141,33 +141,17 @@ export async function evaluateAchievements(userId: string): Promise<AchievementD
     const unlocked: AchievementDef[] = [];
     for (const def of newlyMet) {
       try {
-        await prisma.$transaction(async (tx) => {
-          // Throws P2002 if another request already inserted it → skip reward.
-          await tx.userAchievement.create({
-            data: { userId, achievementKey: def.key },
-          });
-          if (def.coinReward > 0) {
-            await tx.coinTransaction.create({
-              data: {
-                userId,
-                amount: def.coinReward,
-                type: "BONUS",
-                description: `ความสำเร็จ: ${def.title}`,
-                refId: `ach:${def.key}`,
-              },
-            });
-            await tx.user.update({
-              where: { id: userId },
-              data: { coins: { increment: def.coinReward } },
-            });
-          }
+        // Throws P2002 if another request already inserted it (race) → skip.
+        // Achievements are status/challenges only — no coin reward (avoids coin inflation).
+        await prisma.userAchievement.create({
+          data: { userId, achievementKey: def.key },
         });
         unlocked.push(def);
         await createNotification({
           userId,
           type: "ACHIEVEMENT",
           title: "ปลดล็อกความสำเร็จ 🏆",
-          body: `${def.title} — รับ ${def.coinReward} เหรียญ`,
+          body: def.title,
           link: "/achievements",
         });
       } catch {
