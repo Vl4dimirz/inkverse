@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Crown, PenTool, BadgeCheck, Feather } from "lucide-react";
+import SnakeFrame from "./SnakeFrame";
 
 type FrameKind = "reader" | "translator" | "admin";
 type Seal = "crown" | "pen" | "check" | null;
@@ -13,11 +14,12 @@ interface FrameStyle {
   shimmer: boolean;
   seal: Seal;
   penAccent: boolean;
+  snake: boolean;
 }
 
 const DEFAULTS = {
   innerRing: false, outerRing: false, brackets: false, shimmer: false,
-  seal: null as Seal, penAccent: false,
+  seal: null as Seal, penAccent: false, snake: false,
 };
 
 function readerFrame(level: number): FrameStyle {
@@ -44,8 +46,7 @@ function translatorFrame(level: number): FrameStyle {
 }
 
 const ADMIN_FRAME: FrameStyle = {
-  ...DEFAULTS, border: "border-2 border-[var(--text-primary)]",
-  innerRing: true, brackets: true, shimmer: true, seal: "check",
+  ...DEFAULTS, border: "border border-[var(--text-primary)]/40", snake: true,
 };
 
 function getFrame(kind: FrameKind, level: number): FrameStyle {
@@ -87,6 +88,8 @@ export default function AvatarFrame({
   const f = getFrame(kind, level);
   const seal: Seal = f.seal ?? (verified ? "check" : null);
   const SealIcon = seal ? SEAL_ICON[seal] : null;
+  // Inset the avatar more when a snake coils around it, to clear the body.
+  const avInset = f.snake ? "inset-[9px]" : "inset-[5px]";
 
   return (
     <div className={`relative ${sizeClass} shrink-0`}>
@@ -100,7 +103,7 @@ export default function AvatarFrame({
       )}
 
       {/* avatar */}
-      <div className="absolute inset-[5px] overflow-hidden bg-[var(--bg-card)]">
+      <div className={`absolute ${avInset} overflow-hidden bg-[var(--bg-card)]`}>
         {avatarUrl ? (
           <Image src={avatarUrl} alt={username} fill unoptimized className="object-cover" />
         ) : (
@@ -110,29 +113,32 @@ export default function AvatarFrame({
         )}
       </div>
 
+      {/* serpent coil (admin) */}
+      {f.snake && <SnakeFrame />}
+
       {/* frame border(s) over the avatar edge */}
-      <div className={`absolute inset-[5px] pointer-events-none ${f.border}`} aria-hidden />
+      <div className={`absolute ${avInset} pointer-events-none ${f.border}`} aria-hidden />
       {f.innerRing && (
         <div className="absolute inset-[9px] border border-[var(--text-primary)]/20 pointer-events-none" aria-hidden />
       )}
       {f.brackets && <CornerBrackets />}
 
-      {/* translator pen accent (bottom-left) */}
+      {/* translator pen accent (top-left) */}
       {f.penAccent && (
-        <span className="absolute -bottom-1.5 -left-1.5 z-20 w-5 h-5 bg-[var(--bg-primary)] border border-[var(--text-primary)]/50 text-[var(--text-primary)] flex items-center justify-center">
+        <span className="absolute -top-1.5 -left-1.5 z-20 w-5 h-5 bg-[var(--bg-primary)] border border-[var(--text-primary)]/50 text-[var(--text-primary)] flex items-center justify-center">
           <Feather className="w-2.5 h-2.5" />
         </span>
       )}
 
-      {/* rank / verified seal (top-right) */}
+      {/* rank / verified seal (bottom-right) */}
       {SealIcon && (
-        <span className="absolute -top-1.5 -right-1.5 z-20 w-6 h-6 bg-[var(--text-primary)] text-[var(--bg-primary)] flex items-center justify-center">
+        <span className="absolute -bottom-1.5 -right-1.5 z-20 w-6 h-6 bg-[var(--text-primary)] text-[var(--bg-primary)] flex items-center justify-center">
           <SealIcon className="w-3.5 h-3.5" />
         </span>
       )}
 
-      {/* edit button (own profile) */}
-      {editSlot && <div className="absolute bottom-1 right-1 z-20">{editSlot}</div>}
+      {/* edit button (own profile) — bottom-left, clear of the seal */}
+      {editSlot && <div className="absolute bottom-1 left-1 z-20">{editSlot}</div>}
     </div>
   );
 }
