@@ -181,6 +181,26 @@ export async function evaluateAchievements(userId: string): Promise<AchievementD
   }
 }
 
+const BY_KEY = new Map(ACHIEVEMENTS.map((a) => [a.key, a]));
+
+/** A user's unlocked achievements (most recent first) — for profiles. */
+export async function getUnlockedAchievements(
+  userId: string,
+  limit = 8
+): Promise<(AchievementDef & { unlockedAt: Date })[]> {
+  const rows = await prisma.userAchievement.findMany({
+    where: { userId },
+    orderBy: { unlockedAt: "desc" },
+    take: limit,
+  });
+  return rows
+    .map((r) => {
+      const def = BY_KEY.get(r.achievementKey);
+      return def ? { ...def, unlockedAt: r.unlockedAt } : null;
+    })
+    .filter((x): x is AchievementDef & { unlockedAt: Date } => x !== null);
+}
+
 export interface AchievementProgress extends AchievementDef {
   current: number;
   unlocked: boolean;

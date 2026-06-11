@@ -7,12 +7,20 @@ import MangaCard from "@/components/ui/MangaCard";
 import ProfileImageButton from "@/components/ui/ProfileImageButton";
 import VerificationCard from "@/components/ui/VerificationCard";
 import { VERIFY_FEE_COINS } from "@/lib/coins";
+import { getReaderRank } from "@/lib/ranks";
+import { getUnlockedAchievements } from "@/lib/achievements";
 import {
   BookMarked, History, Star, Calendar, Eye, Layers,
   Shield, PenTool, User as UserIcon, BookOpen, Coins, Heart,
   LayoutDashboard, Wallet, Banknote, Settings, Plus, BadgeCheck,
+  Sprout, Footprints, Swords, Flame, Gem, Crown, Trophy, ArrowRight,
 } from "lucide-react";
 import type { Metadata } from "next";
+import type { ComponentType } from "react";
+
+const RANK_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Sprout, Footprints, BookOpen, Swords, Flame, Shield, Gem, Crown,
+};
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -97,6 +105,15 @@ export default async function ProfilePage({ params }: Props) {
   const displayName = user.translator?.penName || user.username;
   const bio = user.translator?.bio || user.bio;
   const joined = new Date(user.createdAt).toLocaleDateString("th-TH", { year: "numeric", month: "short" });
+
+  // Reader rank (derived from chapters read + coins spent unlocking) + achievements.
+  const [coinSpentAgg, unlockedAch] = await Promise.all([
+    prisma.unlockedChapter.aggregate({ where: { userId: user.id }, _sum: { coinSpent: true } }),
+    getUnlockedAchievements(user.id, 6),
+  ]);
+  const coinsSpent = coinSpentAgg._sum.coinSpent ?? 0;
+  const rank = getReaderRank(user._count.readHistory, coinsSpent);
+  const RankIcon = RANK_ICONS[rank.current.icon] ?? BookOpen;
 
   // Top Fans — readers who spent the most coins on this creator's work (incl. tips).
   let topFans: { id: string; username: string; avatarUrl: string | null; coins: number }[] = [];
@@ -224,6 +241,80 @@ export default async function ProfilePage({ params }: Props) {
           </div>
         ))}
       </div>
+
+      {/* ── Reader rank ────────────────────────────────────────────── */}
+      <section className="mb-10">
+        <SectionTitle><Trophy className="w-5 h-5" /> ยศนักอ่าน</SectionTitle>
+        <div className="flex items-center gap-4 border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+          <div className="w-16 h-16 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shrink-0">
+            <RankIcon className="w-8 h-8" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)]">
+              LV.{rank.current.level} · {rank.current.nameEn}
+            </p>
+            <p className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider">
+              {rank.current.name}
+            </p>
+            {rank.next ? (
+              <div className="mt-2">
+                <div className="flex justify-between text-[11px] text-[var(--text-secondary)] mb-1">
+                  <span className="flex items-center gap-1">
+                    ยศถัดไป <ArrowRight className="w-3 h-3" /> {rank.next.name}
+                  </span>
+                  <span>{rank.percentToNext}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
+                  <div className="h-full bg-[var(--text-primary)]" style={{ width: `${rank.percentToNext}%` }} />
+                </div>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                  {rank.readsToNext > 0 && (
+                    <span className="flex items-center gap-1">
+                      <BookOpen className="w-3 h-3" /> อ่านอีก {rank.readsToNext} ตอน
+                    </span>
+                  )}
+                  {rank.coinsToNext > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Coins className="w-3 h-3" /> ใช้เหรียญปลดล็อกอีก {rank.coinsToNext}
+                    </span>
+                  )}
+                  {rank.readsToNext === 0 && rank.coinsToNext === 0 && <span>พร้อมเลื่อนยศ!</span>}
+                </p>
+              </div>
+            ) : (
+              <p className="text-[11px] text-[var(--text-primary)] mt-2 flex items-center gap-1">
+                <Crown className="w-3.5 h-3.5" /> ยศสูงสุดแล้ว
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Recent achievements ────────────────────────────────────── */}
+      {unlockedAch.length > 0 && (
+        <section className="mb-10">
+          <SectionTitle><Trophy className="w-5 h-5" /> ความสำเร็จล่าสุด</SectionTitle>
+          <div className="flex flex-wrap gap-2">
+            {unlockedAch.map((a) => (
+              <span
+                key={a.key}
+                title={a.description}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--text-primary)]/30 bg-[var(--bg-surface)] text-xs text-[var(--text-primary)]"
+              >
+                <Trophy className="w-3.5 h-3.5" /> {a.title}
+              </span>
+            ))}
+            {isOwner && (
+              <Link
+                href="/achievements"
+                className="inline-flex items-center gap-1 px-3 py-1.5 border border-[var(--border)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/50 transition-colors"
+              >
+                ดูทั้งหมด <ArrowRight className="w-3 h-3" />
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── Get verified (own translator, not yet verified) ────────── */}
       {isOwner && !!user.translator && !isVerified && (

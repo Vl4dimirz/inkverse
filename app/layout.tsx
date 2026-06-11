@@ -8,6 +8,7 @@ import { getUserCoins } from "@/lib/coins";
 import { WebsiteJsonLd } from "@/components/seo/JsonLd";
 import HelpChatbot from "@/components/ui/HelpChatbot";
 import ReadingProgressProvider from "@/components/ui/ReadingProgressProvider";
+import AchievementToaster from "@/components/ui/AchievementToaster";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
 
@@ -108,6 +109,7 @@ export default async function RootLayout({
         </main>
         <Footer />
         <HelpChatbot />
+        {userId && <AchievementToaster />}
       </body>
     </html>
   );

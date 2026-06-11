@@ -28,6 +28,7 @@ const navLinks = [
   { href: "/manga?type=MANHWA", label: "มังฮวา" },
   { href: "/manga?type=MANHUA", label: "มังฮัว" },
   { href: "/manga?type=NOVEL", label: "Novel" },
+  { href: "/leaderboard", label: "อันดับนักอ่าน" },
   { href: "/apply", label: "สมัครเป็นนักแปล" },
 ];
 

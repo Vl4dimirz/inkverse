@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import {
   evaluateAchievements,
   getAchievementProgress,
@@ -7,9 +8,11 @@ import {
   type AchievementCategory,
   type AchievementProgress,
 } from "@/lib/achievements";
+import { getReaderRank } from "@/lib/ranks";
 import {
   BookOpen, BookText, Library, Flame, Crown, CheckCircle2, Trophy,
   Compass, Bookmark, Star, Unlock, Coins, CalendarCheck, Lock, Check,
+  Sprout, Footprints, Swords, Shield, Gem, ArrowRight,
 } from "lucide-react";
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
@@ -24,6 +27,10 @@ const ICONS: Record<string, ComponentType<{ className?: string }>> = {
   Compass, Bookmark, Star, Unlock, Coins, CalendarCheck,
 };
 
+const RANK_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  Sprout, Footprints, BookOpen, Swords, Flame, Shield, Gem, Crown,
+};
+
 export default async function AchievementsPage() {
   const session = await auth();
   if (!session?.user) redirect("/auth/signin?callbackUrl=/achievements");
@@ -31,7 +38,14 @@ export default async function AchievementsPage() {
 
   // Catch achievements unlocked by non-reading actions (topup, rating, …).
   await evaluateAchievements(userId);
-  const { items, unlockedCount } = await getAchievementProgress(userId);
+  const [{ items, unlockedCount, stats }, coinSpentAgg] = await Promise.all([
+    getAchievementProgress(userId),
+    prisma.unlockedChapter.aggregate({ where: { userId }, _sum: { coinSpent: true } }),
+  ]);
+
+  const coinsSpent = coinSpentAgg._sum.coinSpent ?? 0;
+  const rank = getReaderRank(stats.chaptersRead, coinsSpent);
+  const RankIcon = RANK_ICONS[rank.current.icon] ?? BookOpen;
 
   const coinsEarned = items
     .filter((i) => i.unlocked)
@@ -79,6 +93,56 @@ export default async function AchievementsPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Reader rank — progress + what's missing to rank up */}
+      <div className="mb-10 border border-[var(--text-primary)]/30 bg-[var(--bg-surface)] p-5">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)] shrink-0">
+            <RankIcon className="w-8 h-8" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)]">
+              ยศปัจจุบัน · LV.{rank.current.level} · {rank.current.nameEn}
+            </p>
+            <p className="font-bebas text-2xl text-[var(--text-primary)] tracking-wider">
+              {rank.current.name}
+            </p>
+          </div>
+        </div>
+
+        {rank.next ? (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="text-[var(--text-secondary)] flex items-center gap-1">
+                ยศถัดไป <ArrowRight className="w-3 h-3" />{" "}
+                <span className="text-[var(--text-primary)] font-semibold">{rank.next.name}</span>
+              </span>
+              <span className="text-[var(--text-primary)] font-semibold">{rank.percentToNext}%</span>
+            </div>
+            <div className="h-2 w-full bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
+              <div className="h-full bg-[var(--text-primary)] transition-all" style={{ width: `${rank.percentToNext}%` }} />
+            </div>
+            {/* What's still missing */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              <span className={`text-[11px] px-2 py-1 border flex items-center gap-1 ${rank.readsToNext > 0 ? "border-[var(--border)] text-[var(--text-secondary)]" : "border-[var(--text-primary)]/40 text-[var(--text-primary)]"}`}>
+                {rank.readsToNext > 0 ? <BookOpen className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                {rank.readsToNext > 0 ? `อ่านอีก ${rank.readsToNext} ตอน` : "เงื่อนไขการอ่านครบแล้ว"}
+              </span>
+              <span className={`text-[11px] px-2 py-1 border flex items-center gap-1 ${rank.coinsToNext > 0 ? "border-[var(--border)] text-[var(--text-secondary)]" : "border-[var(--text-primary)]/40 text-[var(--text-primary)]"}`}>
+                {rank.coinsToNext > 0 ? <Coins className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                {rank.coinsToNext > 0 ? `ใช้เหรียญปลดล็อกอีก ${rank.coinsToNext}` : "เงื่อนไขเหรียญครบแล้ว"}
+              </span>
+            </div>
+            {rank.readsToNext === 0 && rank.coinsToNext === 0 && (
+              <p className="text-[11px] text-[var(--text-primary)] mt-2">🎉 ครบทุกเงื่อนไข — อ่านอีกตอนเพื่อเลื่อนยศ!</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-[var(--text-primary)] mt-4 flex items-center gap-1">
+            <Crown className="w-4 h-4" /> คุณคือยศสูงสุดแล้ว — ตำนานนักอ่าน!
+          </p>
+        )}
       </div>
 
       {/* Categories */}
