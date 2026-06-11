@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { renderNovel } from "@/lib/markdown";
+import { isChapterLive } from "@/lib/chapters";
+import { notifyNewChapter } from "@/lib/notifications";
 
 async function getOwnership(chapterId: string) {
   const session = await auth();
@@ -10,7 +13,7 @@ async function getOwnership(chapterId: string) {
 
   const chapter = await prisma.chapter.findUnique({
     where: { id: chapterId },
-    include: { manga: { select: { translatorId: true } } },
+    include: { manga: { select: { id: true, title: true, slug: true, translatorId: true } } },
   });
   if (!chapter) return null;
 
@@ -46,11 +49,21 @@ export async function PATCH(
     coinCost?: number;
     chapterNum?: number;
     content?: string;
+    status?: string;
+    publishAt?: string | null;
+    authorNote?: string;
   };
 
   const data: Record<string, unknown> = {};
   if (typeof body.title === "string") data.title = body.title || null;
-  if (typeof body.content === "string") data.content = body.content.slice(0, 200000);
+  if (typeof body.content === "string") data.content = renderNovel(body.content.slice(0, 500000));
+  if (body.status === "DRAFT" || body.status === "PUBLISHED") data.status = body.status;
+  if (body.publishAt === null) data.publishAt = null;
+  else if (typeof body.publishAt === "string") {
+    const d = new Date(body.publishAt);
+    if (!isNaN(d.getTime())) data.publishAt = d;
+  }
+  if (typeof body.authorNote === "string") data.authorNote = body.authorNote.slice(0, 5000) || null;
   if (typeof body.isPremium === "boolean") {
     data.isPremium = body.isPremium;
     data.coinCost = body.isPremium ? (typeof body.coinCost === "number" ? Math.max(1, body.coinCost) : chapter.coinCost || 2) : 0;
@@ -63,7 +76,17 @@ export async function PATCH(
   }
 
   try {
+    const wasLive = isChapterLive(chapter);
     const updated = await prisma.chapter.update({ where: { id }, data });
+    // Notify bookmarkers only when a chapter first becomes live (not on draft saves).
+    if (!wasLive && isChapterLive(updated)) {
+      await notifyNewChapter({
+        mangaId: chapter.manga.id,
+        mangaTitle: chapter.manga.title,
+        mangaSlug: chapter.manga.slug,
+        chapterNum: updated.chapterNum,
+      });
+    }
     return NextResponse.json(updated);
   } catch (e: unknown) {
     // Unique (mangaId, chapterNum) violation → another chapter already has this number.

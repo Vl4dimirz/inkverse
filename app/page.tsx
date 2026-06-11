@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getRanking } from "@/lib/ranking";
 import { getRankBadges } from "@/lib/ranks";
+import { liveChapterWhere } from "@/lib/chapters";
 import MangaCard from "@/components/ui/MangaCard";
 import FeaturedSpotlight from "@/components/ui/FeaturedSpotlight";
 import UpdateRow from "@/components/ui/UpdateRow";
@@ -25,6 +26,7 @@ async function getData() {
         include: {
           genres: { include: { genre: true } },
           chapters: {
+            where: liveChapterWhere(),
             orderBy: { chapterNum: "desc" },
             take: 1,
           },
@@ -35,7 +37,7 @@ async function getData() {
       prisma.chapter.findMany({
         take: 10,
         orderBy: { publishedAt: "desc" },
-        where: { manga: { contentRating: { not: "ADULT" } } },
+        where: { manga: { contentRating: { not: "ADULT" } }, ...liveChapterWhere() },
         include: {
           manga: { select: { title: true, slug: true, coverUrl: true, type: true } },
         },

@@ -10,6 +10,7 @@ import PremiumGate from "@/components/ui/PremiumGate";
 import { getUserCoins, hasUnlockedChapter } from "@/lib/coins";
 import { evaluateAchievements } from "@/lib/achievements";
 import { getRankBadges } from "@/lib/ranks";
+import { isChapterLive, liveChapterWhere } from "@/lib/chapters";
 import type { Metadata } from "next";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
@@ -64,6 +65,12 @@ export default async function ReaderPage({ params }: Props) {
   // ── Premium gate ──────────────────────────────────────────────
   const userId = session?.user ? (session.user as { id: string }).id : null;
 
+  // Drafts / not-yet-released chapters are visible only to the owner (preview).
+  if (!isChapterLive(chapterData)) {
+    const isOwnerPreview = !!userId && manga.translator?.userId === userId;
+    if (!isOwnerPreview) notFound();
+  }
+
   if (chapterData.isPremium) {
     if (!userId) {
       redirect(`/auth/signin?callbackUrl=/content/${slug}/${chapter}`);
@@ -88,12 +95,12 @@ export default async function ReaderPage({ params }: Props) {
   // Adjacent chapters
   const [prevChapter, nextChapter] = await Promise.all([
     prisma.chapter.findFirst({
-      where: { mangaId: manga.id, chapterNum: { lt: chapterNum } },
+      where: { mangaId: manga.id, chapterNum: { lt: chapterNum }, ...liveChapterWhere() },
       orderBy: { chapterNum: "desc" },
       select: { chapterNum: true },
     }),
     prisma.chapter.findFirst({
-      where: { mangaId: manga.id, chapterNum: { gt: chapterNum } },
+      where: { mangaId: manga.id, chapterNum: { gt: chapterNum }, ...liveChapterWhere() },
       orderBy: { chapterNum: "asc" },
       select: { chapterNum: true },
     }),
@@ -161,6 +168,7 @@ export default async function ReaderPage({ params }: Props) {
           prevChapter={prevChapter?.chapterNum ?? null}
           nextChapter={nextChapter?.chapterNum ?? null}
           minutes={novelStats(chapterData.content).minutes}
+          authorNote={chapterData.authorNote}
         />
       ) : (
         <ReaderViewer

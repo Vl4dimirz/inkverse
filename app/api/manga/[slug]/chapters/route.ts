@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notifyNewChapter } from "@/lib/notifications";
+import { renderNovel } from "@/lib/markdown";
+import { isChapterLive } from "@/lib/chapters";
 
 export async function POST(
   req: NextRequest,
@@ -32,7 +34,7 @@ export async function POST(
   }
 
   const body = await req.json();
-  const { chapterNum, title, isPremium = false, coinCost = 0, content } = body;
+  const { chapterNum, title, isPremium = false, coinCost = 0, content, status, publishAt, authorNote } = body;
 
   if (typeof chapterNum !== "number" || isNaN(chapterNum)) {
     return NextResponse.json({ error: "Valid chapterNum required" }, { status: 400 });
@@ -45,6 +47,9 @@ export async function POST(
     return NextResponse.json({ error: "Chapter number already exists" }, { status: 409 });
   }
 
+  const publishDate =
+    typeof publishAt === "string" && !isNaN(new Date(publishAt).getTime()) ? new Date(publishAt) : null;
+
   const chapter = await prisma.chapter.create({
     data: {
       mangaId: manga.id,
@@ -52,7 +57,10 @@ export async function POST(
       title: title || null,
       isPremium,
       coinCost: isPremium ? coinCost : 0,
-      content: typeof content === "string" ? content.slice(0, 200000) : null,
+      content: typeof content === "string" ? renderNovel(content.slice(0, 500000)) : null,
+      status: status === "DRAFT" ? "DRAFT" : "PUBLISHED",
+      publishAt: publishDate,
+      authorNote: typeof authorNote === "string" ? authorNote.slice(0, 5000) || null : null,
     },
   });
 
@@ -61,13 +69,15 @@ export async function POST(
     data: { updatedAt: new Date() },
   });
 
-  // Re-engagement: tell everyone who bookmarked this manga (best-effort).
-  await notifyNewChapter({
-    mangaId: manga.id,
-    mangaTitle: manga.title,
-    mangaSlug: manga.slug,
-    chapterNum,
-  });
+  // Notify bookmarkers only if the chapter is live now (skip drafts/scheduled).
+  if (isChapterLive(chapter)) {
+    await notifyNewChapter({
+      mangaId: manga.id,
+      mangaTitle: manga.title,
+      mangaSlug: manga.slug,
+      chapterNum,
+    });
+  }
 
   return NextResponse.json(chapter, { status: 201 });
 }

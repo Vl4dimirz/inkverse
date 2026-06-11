@@ -33,11 +33,17 @@ export default async function WriteNovelPage({ params, searchParams }: Props) {
   if (!manga) notFound();
   if (role !== "ADMIN" && manga.translator?.userId !== userId) redirect("/dashboard");
 
-  const existing = ch
+  const existingRow = ch
     ? await prisma.chapter.findFirst({
         where: { id: ch, mangaId: manga.id },
-        select: { id: true, chapterNum: true, title: true, content: true, isPremium: true, coinCost: true },
+        select: {
+          id: true, chapterNum: true, title: true, content: true, isPremium: true,
+          coinCost: true, status: true, publishAt: true, authorNote: true,
+        },
       })
+    : null;
+  const existing = existingRow
+    ? { ...existingRow, publishAt: existingRow.publishAt ? existingRow.publishAt.toISOString() : null }
     : null;
 
   const suggestedNum = Math.floor((manga.chapters[0]?.chapterNum ?? 0) + 1);

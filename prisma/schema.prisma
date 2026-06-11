@@ -256,7 +256,10 @@ model Chapter {
   coinCost         Int               @default(0)
   publishedAt      DateTime          @default(now())
   viewCount        Int               @default(0)
-  content          String?           @db.Text // novel chapter body (markdown); null for image manga
+  content          String?           @db.Text // novel chapter body (HTML from the WYSIWYG editor); null for image manga
+  authorNote       String?           @db.Text // optional note shown at the end of a novel chapter
+  status           String            @default("PUBLISHED") // DRAFT | PUBLISHED
+  publishAt        DateTime?         // future timestamp for scheduled release; null = live now
   manga            Manga             @relation(fields: [mangaId], references: [id], onDelete: Cascade)
   pages            Page[]
   readHistory      ReadHistory[]

@@ -18,6 +18,8 @@ interface Chapter {
   viewCount: number;
   pageCount: number;
   wordCount?: number;
+  status?: string;
+  scheduledAt?: string | null;
   publishedAt: string;
 }
 
@@ -176,6 +178,12 @@ function ChapterRow({
             >
               <Edit3 className="w-3 h-3" />
             </button>
+            {chapter.status === "DRAFT" && (
+              <span className="text-[9px] px-1.5 py-0.5 border border-[var(--border)] text-[var(--text-secondary)] uppercase tracking-wide shrink-0">ร่าง</span>
+            )}
+            {chapter.status !== "DRAFT" && chapter.scheduledAt && new Date(chapter.scheduledAt).getTime() > Date.now() && (
+              <span className="text-[9px] px-1.5 py-0.5 border border-[var(--border)] text-[var(--text-secondary)] uppercase tracking-wide shrink-0">ตั้งเวลา</span>
+            )}
           </div>
         )}
         <div className="flex items-center gap-3 text-xs text-[var(--text-muted)] mt-0.5">

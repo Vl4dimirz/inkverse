@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { liveChapterWhere } from "@/lib/chapters";
 
 // Returns the manga only if the signed-in user owns it (translator) or is admin.
 async function getMangaOwnership(slug: string) {
@@ -29,7 +30,7 @@ export async function GET(
     where: { slug },
     include: {
       genres: { include: { genre: { select: { id: true, name: true, slug: true } } } },
-      chapters: { orderBy: { chapterNum: "asc" } },
+      chapters: { where: liveChapterWhere(), orderBy: { chapterNum: "asc" } },
       ratings: { select: { score: true } },
       translator: {
         select: { penName: true, bio: true },

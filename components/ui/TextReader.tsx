@@ -13,6 +13,7 @@ interface Props {
   prevChapter?: number | null;
   nextChapter?: number | null;
   minutes?: number;
+  authorNote?: string | null;
 }
 
 type Settings = {
@@ -35,7 +36,7 @@ const THEMES: Record<Settings["theme"], { bg: string; fg: string; label: string 
 const WIDTHS = { narrow: "max-w-xl", normal: "max-w-2xl", wide: "max-w-3xl" };
 
 export default function TextReader({
-  html, chapterTitle, chapterNum, mangaTitle, mangaSlug, prevChapter, nextChapter, minutes,
+  html, chapterTitle, chapterNum, mangaTitle, mangaSlug, prevChapter, nextChapter, minutes, authorNote,
 }: Props) {
   const [s, setS] = useState<Settings>(DEFAULT);
   const [open, setOpen] = useState(false);
@@ -128,9 +129,16 @@ export default function TextReader({
         {chapterTitle && <h1 className="font-bebas text-3xl sm:text-4xl tracking-wide mb-8">{chapterTitle}</h1>}
         <div
           style={{ fontSize: `${s.size}px`, lineHeight: s.leading, fontFamily: s.serif ? "Georgia, 'Times New Roman', serif" : "var(--font-noto), sans-serif" }}
-          className="novel-body [&_p]:mb-5 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2 [&_blockquote]:border-l-2 [&_blockquote]:border-current/40 [&_blockquote]:pl-4 [&_blockquote]:opacity-80 [&_blockquote]:italic [&_hr]:my-8 [&_hr]:border-current/20 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-5 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-5 [&_a]:underline [&_a]:opacity-90"
+          className="novel-body [&_p]:mb-5 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2 [&_blockquote]:border-l-2 [&_blockquote]:border-current/40 [&_blockquote]:pl-4 [&_blockquote]:opacity-80 [&_blockquote]:italic [&_hr]:my-8 [&_hr]:border-current/20 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-5 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-5 [&_a]:underline [&_a]:opacity-90 [&_img]:max-w-full [&_img]:h-auto [&_img]:my-4 [&_img]:mx-auto"
           dangerouslySetInnerHTML={{ __html: html }}
         />
+
+        {authorNote && (
+          <div className="mt-10 border-t border-current/15 pt-5">
+            <p className="text-[11px] uppercase tracking-[0.25em] opacity-50 mb-2">โน้ตผู้เขียน</p>
+            <p className="text-sm opacity-80 whitespace-pre-line leading-relaxed">{authorNote}</p>
+          </div>
+        )}
       </article>
 
       {/* prev / next */}

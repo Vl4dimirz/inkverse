@@ -170,6 +170,25 @@
   }
   @keyframes snake-eye { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
+  /* ── Tiptap novel editor content ── */
+  .tiptap { outline: none; min-height: 360px; }
+  .tiptap p { margin-bottom: 0.75rem; }
+  .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+  .tiptap h2 { font-size: 1.5rem; font-weight: 600; margin: 0.9em 0 0.4em; }
+  .tiptap h3 { font-size: 1.25rem; font-weight: 600; margin: 0.7em 0 0.3em; }
+  .tiptap blockquote { border-left: 2px solid var(--border); padding-left: 1rem; font-style: italic; opacity: 0.85; margin: 0.5rem 0; }
+  .tiptap ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+  .tiptap ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+  .tiptap hr { border: 0; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+  .tiptap img { max-width: 100%; height: auto; margin: 0.5rem 0; }
+  .tiptap a { text-decoration: underline; }
+
   .snake-glint { animation: snake-slither 3.2s linear infinite; }
   .snake-tongue { transform-origin: 50% 100%; animation: snake-tongue 2.6s ease-in-out infinite; }
   .snake-eye { animation: snake-eye 2s ease-in-out infinite; }

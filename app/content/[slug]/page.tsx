@@ -10,6 +10,7 @@ import ChapterRow from "@/components/ui/ChapterRow";
 import AgeGate from "@/components/ui/AgeGate";
 import { getUserCoins } from "@/lib/coins";
 import { getUserRankBadge } from "@/lib/ranks";
+import { liveChapterWhere } from "@/lib/chapters";
 import RankChip from "@/components/ui/RankChip";
 import {
   BookOpen,
@@ -76,7 +77,7 @@ export default async function MangaProfilePage({ params }: Props) {
     where: { slug },
     include: {
       genres: { include: { genre: true } },
-      chapters: { orderBy: { chapterNum: "asc" } },
+      chapters: { where: liveChapterWhere(), orderBy: { chapterNum: "asc" } },
       ratings: { select: { score: true } },
       bookmarks: userId
         ? { where: { userId }, take: 1 }

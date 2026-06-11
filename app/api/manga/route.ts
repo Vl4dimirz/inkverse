@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { liveChapterWhere } from "@/lib/chapters";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
       skip: mine === "1" ? 0 : skip,
       include: {
         genres: { include: { genre: { select: { name: true, slug: true } } } },
-        chapters: { orderBy: { chapterNum: "desc" }, take: 1 },
+        chapters: { where: liveChapterWhere(), orderBy: { chapterNum: "desc" }, take: 1 },
         ratings: { select: { score: true } },
       },
     }),

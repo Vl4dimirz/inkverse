@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isChapterLive, liveChapterWhere } from "@/lib/chapters";
 
 export async function GET(
   _req: NextRequest,
@@ -22,18 +23,18 @@ export async function GET(
     include: { pages: { orderBy: { pageNum: "asc" } } },
   });
 
-  if (!chapterData) {
+  if (!chapterData || !isChapterLive(chapterData)) {
     return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
   }
 
   const [prev, next] = await Promise.all([
     prisma.chapter.findFirst({
-      where: { mangaId: manga.id, chapterNum: { lt: chapterNum } },
+      where: { mangaId: manga.id, chapterNum: { lt: chapterNum }, ...liveChapterWhere() },
       orderBy: { chapterNum: "desc" },
       select: { chapterNum: true },
     }),
     prisma.chapter.findFirst({
-      where: { mangaId: manga.id, chapterNum: { gt: chapterNum } },
+      where: { mangaId: manga.id, chapterNum: { gt: chapterNum }, ...liveChapterWhere() },
       orderBy: { chapterNum: "asc" },
       select: { chapterNum: true },
     }),

@@ -56,6 +56,8 @@ export default async function MangaChaptersPage({ params }: Props) {
     viewCount: ch.viewCount,
     pageCount: ch._count.pages,
     wordCount: isNovel ? novelStats(ch.content).words : 0,
+    status: ch.status,
+    scheduledAt: ch.publishAt ? ch.publishAt.toISOString() : null,
     publishedAt: ch.publishedAt.toISOString(),
   }));
 
