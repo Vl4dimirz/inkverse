@@ -11,6 +11,7 @@ import { getReaderRank, getTranslatorRank, getRankBadges } from "@/lib/ranks";
 import { getUnlockedAchievements } from "@/lib/achievements";
 import AvatarFrame from "@/components/ui/AvatarFrame";
 import RankChip from "@/components/ui/RankChip";
+import FollowButton from "@/components/ui/FollowButton";
 import {
   BookMarked, History, Star, Calendar, Eye, Layers,
   Shield, PenTool, User as UserIcon, BookOpen, Coins, Heart,
@@ -18,6 +19,15 @@ import {
   Sprout, Footprints, Swords, Flame, Gem, Crown, Trophy, ArrowRight,
   Feather, Award,
 } from "lucide-react";
+
+const SOCIAL_DISPLAY: { key: string; label: string }[] = [
+  { key: "facebook", label: "Facebook" },
+  { key: "youtube", label: "YouTube" },
+  { key: "x", label: "X" },
+  { key: "tiktok", label: "TikTok" },
+  { key: "discord", label: "Discord" },
+  { key: "website", label: "เว็บไซต์" },
+];
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
 
@@ -77,7 +87,7 @@ export default async function ProfilePage({ params }: Props) {
           chapter: { include: { manga: { select: { title: true, slug: true, coverUrl: true } } } },
         },
       },
-      _count: { select: { bookmarks: true, ratings: true, readHistory: true } },
+      _count: { select: { bookmarks: true, ratings: true, readHistory: true, followers: true } },
       verificationRequest: { select: { status: true } },
       translator: {
         include: {
@@ -97,6 +107,14 @@ export default async function ProfilePage({ params }: Props) {
   if (!user) notFound();
 
   const isOwner = !!session?.user && (session.user as { id?: string }).id === user.id;
+  const viewerId = session?.user ? (session.user as { id?: string }).id : null;
+  const isFollowing =
+    viewerId && viewerId !== user.id
+      ? !!(await prisma.follow.findUnique({
+          where: { followerId_followingId: { followerId: viewerId, followingId: user.id } },
+        }))
+      : false;
+  const socials = (user.translator?.socialLinks as Record<string, string> | null) ?? {};
   const role = ROLES[user.role as keyof typeof ROLES] ?? ROLES.READER;
   const RoleIcon = role.icon;
   // Paid identity verification (admins are inherently official).
@@ -228,6 +246,41 @@ export default async function ProfilePage({ params }: Props) {
           <p className="text-xs text-[var(--text-secondary)] mt-2 uppercase tracking-[0.2em]">@{user.username}</p>
           {bio && (
             <p className="text-sm text-[var(--text-secondary)] mt-3 max-w-2xl leading-relaxed">{bio}</p>
+          )}
+
+          {/* Social links (creators) */}
+          {isCreator && SOCIAL_DISPLAY.some((s) => socials[s.key]) && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {SOCIAL_DISPLAY.filter((s) => socials[s.key]).map(({ key, label }) => (
+                <a
+                  key={key}
+                  href={socials[key]}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="px-3 h-8 flex items-center border border-[var(--border)] text-[11px] uppercase tracking-wide text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/50 transition-colors"
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Follow (creators) */}
+          {isCreator && (
+            <div className="mt-4">
+              {isOwner ? (
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {user._count.followers.toLocaleString()} ผู้ติดตาม
+                </p>
+              ) : (
+                <FollowButton
+                  targetUserId={user.id}
+                  initialFollowing={isFollowing}
+                  initialFollowers={user._count.followers}
+                  isLoggedIn={!!session?.user}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>

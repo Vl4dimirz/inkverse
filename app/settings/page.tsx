@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Settings, User, Mail, Shield, Calendar } from "lucide-react";
 import SignOutButton from "@/components/ui/SignOutButton";
+import CreatorProfileForm from "@/components/ui/CreatorProfileForm";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "ตั้งค่าบัญชี" };
@@ -24,6 +25,14 @@ export default async function SettingsPage() {
     select: { username: true, email: true, role: true, createdAt: true },
   });
   if (!user) redirect("/auth/signin");
+
+  const translator =
+    user.role === "TRANSLATOR" || user.role === "ADMIN"
+      ? await prisma.translator.findUnique({
+          where: { userId },
+          select: { bio: true, socialLinks: true },
+        })
+      : null;
 
   const rows = [
     { icon: User, label: "ชื่อผู้ใช้", value: user.username },
@@ -53,6 +62,14 @@ export default async function SettingsPage() {
           </div>
         ))}
       </div>
+
+      {/* Creator profile (translators/admins) */}
+      {translator && (
+        <CreatorProfileForm
+          initialBio={translator.bio ?? ""}
+          initialSocials={(translator.socialLinks as Record<string, string>) ?? {}}
+        />
+      )}
 
       {/* Theme hint */}
       <p className="text-xs text-[var(--text-secondary)]">

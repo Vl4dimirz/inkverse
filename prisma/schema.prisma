@@ -43,6 +43,20 @@ model User {
   verificationRequest     VerificationRequest?
   passwordResetTokens     PasswordResetToken[]
   achievements            UserAchievement[]
+  following               Follow[]          @relation("Following")
+  followers               Follow[]          @relation("Followers")
+}
+
+// A reader following a creator. followingId = the creator's user id.
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId])
 }
 
 // Unlocked achievements. Definitions live in code (lib/achievements.ts); this
@@ -212,11 +226,12 @@ model MangaGenre {
 }
 
 model Translator {
-  id         String  @id @default(cuid())
-  userId     String  @unique
-  penName    String
-  bio        String?
-  totalWorks Int     @default(0)
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  penName     String
+  bio         String?
+  socialLinks Json?   // { facebook?, x?, youtube?, tiktok?, discord?, website? }
+  totalWorks  Int     @default(0)
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   mangas     Manga[]
   earnings           TranslatorEarning[]
