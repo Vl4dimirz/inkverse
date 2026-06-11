@@ -38,15 +38,24 @@ export async function notifyNewChapter(opts: {
     if (bookmarks.length === 0) return;
 
     const link = `/content/${opts.mangaSlug}/${opts.chapterNum}`;
+    const body = `${opts.mangaTitle} ตอนที่ ${opts.chapterNum} ออกแล้ว`;
     await prisma.notification.createMany({
       data: bookmarks.map((b) => ({
         userId: b.userId,
         type: "NEW_CHAPTER",
         title: "มีตอนใหม่!",
-        body: `${opts.mangaTitle} ตอนที่ ${opts.chapterNum} ออกแล้ว`,
+        body,
         link,
       })),
     });
+
+    // Push to the Android app too (lazy import; no-op if Firebase isn't set up).
+    try {
+      const { sendPushToUsers } = await import("./push");
+      await sendPushToUsers(bookmarks.map((b) => b.userId), "มีตอนใหม่!", body, link);
+    } catch {
+      /* push is optional */
+    }
   } catch {
     // non-critical
   }

@@ -40,6 +40,20 @@ jobs:
           npm ci
           npx cap sync android
 
+      # If you've set up Firebase, add its config so push notifications work.
+      # Secret GOOGLE_SERVICES_JSON = base64 of google-services.json. Optional —
+      # without it the app still builds (push just stays off).
+      - name: Add Firebase config (optional)
+        env:
+          GS: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GS" ]; then
+            echo "$GS" | base64 -d > mobile/android/app/google-services.json
+            echo "google-services.json added — push enabled"
+          else
+            echo "No GOOGLE_SERVICES_JSON secret — building without push"
+          fi
+
       - name: Build debug APK
         working-directory: mobile/android
         run: |

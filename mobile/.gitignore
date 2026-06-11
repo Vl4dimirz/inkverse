@@ -11,3 +11,4 @@ android/captures/
 *.aab
 *.keystore
 *.jks
+android/app/google-services.json

@@ -46,6 +46,7 @@ model User {
   achievements            UserAchievement[]
   following               Follow[]          @relation("Following")
   followers               Follow[]          @relation("Followers")
+  pushTokens              PushToken[]
 }
 
 // A reader following a creator. followingId = the creator's user id.
@@ -69,6 +70,18 @@ model UserAchievement {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, achievementKey])
+  @@index([userId])
+}
+
+// FCM device tokens for push notifications (from the Android app).
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String   @default("android")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
