@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { notifyAdmins } from "@/lib/notifications";
 
 export async function GET() {
   const session = await auth();
@@ -79,6 +80,14 @@ export async function POST(req: NextRequest) {
           termsAcceptedAt: new Date(),
         },
       });
+
+  const roleWord = appKind === "WRITER" ? "นักเขียน" : "นักแปล";
+  await notifyAdmins({
+    type: "NEW_APPLICATION",
+    title: `ใบสมัคร${roleWord}ใหม่`,
+    body: `${penName.trim()} สมัครเป็น${roleWord} — รอพิจารณา`,
+    link: "/admin/applications",
+  });
 
   return NextResponse.json({ application });
 }
