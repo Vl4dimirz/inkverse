@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/ui/Logo";
+import Turnstile from "@/components/ui/Turnstile";
 import { Mail, Lock, User, Eye, EyeOff, Gift } from "lucide-react";
 import Link from "next/link";
+
+const CAPTCHA_ON = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -16,6 +19,7 @@ export default function SignUpPage() {
   const [sent, setSent] = useState(false);
   const [ref, setRef] = useState("");
   const [inApp, setInApp] = useState(false);
+  const [captcha, setCaptcha] = useState("");
   const [noGms, setNoGms] = useState(false);
   const showGoogle = !inApp || !noGms; // web always; in-app only on GMS devices
 
@@ -30,13 +34,17 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (CAPTCHA_ON && !captcha) {
+      setError("กรุณายืนยันว่าคุณไม่ใช่บอท");
+      return;
+    }
     setLoading(true);
     setError("");
 
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(ref ? { ...form, ref } : form),
+      body: JSON.stringify({ ...form, ...(ref ? { ref } : {}), turnstileToken: captcha }),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -210,13 +218,16 @@ export default function SignUpPage() {
               </button>
             </div>
 
+            {/* "I am human" — renders only when a Turnstile site key is set */}
+            <Turnstile onToken={setCaptcha} />
+
             {error && (
               <p className="text-sm text-[var(--text-primary)] text-center">{error}</p>
             )}
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (CAPTCHA_ON && !captcha)}
               className="w-full py-3 rounded-xl bal-btn font-semibold text-sm hover:opacity-90 transition-colors disabled:opacity-50"
             >
               {loading ? "กำลังสมัคร..." : "สมัครสมาชิก"}

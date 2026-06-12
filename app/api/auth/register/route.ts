@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { grantSignupBonus, recordReferral } from "@/lib/coins";
 import { sendEmail, verificationEmail } from "@/lib/email";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
 
@@ -18,6 +19,7 @@ const schema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   ref: z.string().max(30).optional(),
+  turnstileToken: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -35,7 +37,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { username, email, password, ref } = parsed.data;
+  const { username, email, password, ref, turnstileToken } = parsed.data;
+
+  // Bot check ("I am human"). No-op until TURNSTILE_SECRET_KEY is configured.
+  if (!(await verifyTurnstile(turnstileToken, clientIp(req)))) {
+    return NextResponse.json({ error: "กรุณายืนยันว่าคุณไม่ใช่บอท" }, { status: 400 });
+  }
 
   const existing = await prisma.user.findFirst({
     where: { OR: [{ email }, { username }] },
