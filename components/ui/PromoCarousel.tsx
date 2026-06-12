@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Coins, PenLine, Smartphone, Users } from "lucide-react";
 
 type Slide = {
   tag: string;
@@ -10,6 +10,7 @@ type Slide = {
   sub: string;
   cta: string;
   href: string;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
 };
 
 const SLIDES: Slide[] = [
@@ -19,6 +20,7 @@ const SLIDES: Slide[] = [
     sub: "เติมครั้งแรกรับโบนัสเหรียญทันที — ปลดล็อกตอนพรีเมียม + สนับสนุนนักเขียน/นักแปลที่คุณรักโดยตรง",
     cta: "เติมเหรียญ",
     href: "/topup",
+    icon: Coins,
   },
   {
     tag: "ครีเอเตอร์",
@@ -26,6 +28,7 @@ const SLIDES: Slide[] = [
     sub: "อนุมัติไว ลงผลงานได้เลย รับส่วนแบ่งรายได้ 80% — รู้ผลเร็ว เริ่มสร้างรายได้จากงานเขียนของคุณ",
     cta: "สมัครเลย",
     href: "/creator-101",
+    icon: PenLine,
   },
   {
     tag: "แอป ANDROID",
@@ -33,6 +36,7 @@ const SLIDES: Slide[] = [
     sub: "อ่านลื่นกว่าเว็บ กันแคปหน้าจอ + แจ้งเตือนตอนใหม่ทันที — ติดตั้งแล้วรับเหรียญฟรีเลย",
     cta: "โหลดแอป",
     href: "/download",
+    icon: Smartphone,
   },
   {
     tag: "ชวนเพื่อน",
@@ -40,6 +44,7 @@ const SLIDES: Slide[] = [
     sub: "แชร์ลิงก์ชวนเพื่อนของคุณ เพื่อนสมัครแล้วเติมครั้งแรก = ได้เหรียญกันทั้งคู่ ยิ่งชวนยิ่งได้",
     cta: "ชวนเพื่อน",
     href: "/earn",
+    icon: Users,
   },
 ];
 
@@ -74,15 +79,31 @@ export default function PromoCarousel() {
           key={idx}
           className={`absolute inset-0 transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         >
-          <div className="relative h-full flex flex-col justify-center px-8 sm:px-12 lg:px-16 max-w-3xl">
-            <p className="eyebrow mb-4">{s.tag}</p>
-            <h2 className="font-bebas text-4xl sm:text-5xl lg:text-6xl text-[var(--text-primary)] tracking-[0.04em] leading-[0.95] mb-4 uppercase">
-              {s.title}
-            </h2>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] mb-6 max-w-lg leading-relaxed">
-              {s.sub}
-            </p>
-            <div>
+          <div className="relative h-full flex items-center px-8 sm:px-12 lg:px-16">
+            {/* big faded illustration — bleeds in from the right (mobile too) */}
+            <s.icon
+              className="absolute right-[-2.5rem] sm:right-2 top-1/2 -translate-y-1/2 w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 text-[var(--text-primary)] opacity-[0.07] pointer-events-none"
+              strokeWidth={1}
+            />
+
+            {/* framed focal icon on the right (desktop) */}
+            <div className="hidden md:flex absolute right-10 lg:right-20 top-1/2 -translate-y-1/2">
+              <div className="relative w-40 h-40 lg:w-52 lg:h-52 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border border-[var(--text-primary)]/20" />
+                <div className="absolute inset-5 rounded-full border border-[var(--text-primary)]/10" />
+                <s.icon className="w-20 h-20 lg:w-28 lg:h-28 text-[var(--text-primary)]" strokeWidth={1} />
+              </div>
+            </div>
+
+            {/* text */}
+            <div className="relative z-10 max-w-md lg:max-w-lg">
+              <p className="eyebrow mb-4">{s.tag}</p>
+              <h2 className="font-bebas text-4xl sm:text-5xl lg:text-6xl text-[var(--text-primary)] tracking-[0.04em] leading-[0.95] mb-4 uppercase">
+                {s.title}
+              </h2>
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] mb-6 leading-relaxed">
+                {s.sub}
+              </p>
               <Link
                 href={s.href}
                 className="inline-flex items-center gap-2 px-7 py-3 bal-btn font-semibold text-xs uppercase tracking-[0.2em] hover:opacity-90"
