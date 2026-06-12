@@ -43,6 +43,24 @@ function shell(title: string, body: string): string {
 </div>`;
 }
 
+// Escape user/admin-supplied text before embedding it in email HTML.
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Admin's reply to a contact/support message, emailed back to the sender.
+export function contactReplyEmail(opts: { name: string; original: string; reply: string }) {
+  return shell(
+    "ตอบกลับจากทีมงาน",
+    `<p>สวัสดีคุณ ${esc(opts.name)}</p>
+     <p>ทีมงาน INKVERSE ได้ตอบกลับข้อความที่คุณส่งมาแล้ว:</p>
+     <div style="border-left:3px solid #fff;padding:6px 16px;margin:18px 0;color:#fff;white-space:pre-wrap">${esc(opts.reply)}</div>
+     <p style="color:#777;font-size:12px;margin-top:24px">— ข้อความเดิมของคุณ —</p>
+     <p style="color:#777;font-size:12px;white-space:pre-wrap">${esc(opts.original)}</p>
+     <p style="color:#777;font-size:12px;margin-top:20px">หากต้องการสอบถามเพิ่มเติม ส่งข้อความผ่านหน้า "ติดต่อเรา" บนเว็บไซต์ได้เลย</p>`
+  );
+}
+
 export function passwordResetEmail(resetUrl: string) {
   return shell(
     "รีเซ็ตรหัสผ่าน",

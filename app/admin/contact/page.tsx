@@ -49,6 +49,8 @@ export default async function AdminContactPage() {
                 status: m.status,
                 createdAt: m.createdAt.toISOString(),
                 username: m.user?.username ?? null,
+                reply: m.reply,
+                repliedAt: m.repliedAt ? m.repliedAt.toISOString() : null,
               }}
             />
           ))}

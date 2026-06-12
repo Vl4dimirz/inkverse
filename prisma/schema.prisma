@@ -137,6 +137,8 @@ model ContactMessage {
   subject   String?
   message   String
   status    String   @default("OPEN") // OPEN | RESOLVED
+  reply     String?  @db.Text // admin's reply, emailed to the sender
+  repliedAt DateTime?
   createdAt DateTime @default(now())
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
