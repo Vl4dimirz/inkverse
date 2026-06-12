@@ -160,24 +160,21 @@ export default function NovelEditor({
     e.target.value = "";
     if (!file || !editor) return;
     // Phones sometimes report an empty or non-image type — fall back to jpeg.
-    const contentType = file.type && file.type.startsWith("image/") ? file.type : "image/jpeg";
     if (file.size > 8 * 1024 * 1024) { setError("รูปใหญ่เกินไป (สูงสุด 8MB)"); return; }
     setUploadingImg(true);
     setError("");
     try {
-      const r = await fetch("/api/upload/novel-image", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mangaSlug, contentType }),
-      });
-      if (!r.ok) {
-        const d = await r.json().catch(() => ({}));
+      // Upload through our API (server → R2) so it never depends on R2 CORS.
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("mangaSlug", mangaSlug);
+      const r = await fetch("/api/upload/novel-image", { method: "POST", body: fd });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.url) {
         setError(d.error || "อัปโหลดรูปไม่สำเร็จ");
         return;
       }
-      const { uploadUrl, publicUrl } = await r.json();
-      const put = await fetch(uploadUrl, { method: "PUT", body: file, headers: { "Content-Type": contentType } });
-      if (!put.ok) { setError("อัปโหลดรูปไม่สำเร็จ (เซิร์ฟเวอร์รูปปฏิเสธ)"); return; }
-      editor.chain().focus().setImage({ src: publicUrl }).run();
+      editor.chain().focus().setImage({ src: d.url }).run();
     } catch {
       setError("อัปโหลดรูปไม่สำเร็จ — เครือข่ายขัดข้อง");
     } finally {
