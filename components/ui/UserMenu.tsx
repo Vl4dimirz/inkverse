@@ -100,6 +100,9 @@ export default function UserMenu({ user, rankBadge }: { user: MenuUser; rankBadg
           <Link href="/topup" className={item}>
             <Coins className="w-4 h-4" /> เติมเหรียญ
           </Link>
+          <Link href="/earn" className={item}>
+            <Gift className="w-4 h-4" /> หาเหรียญฟรี
+          </Link>
           <Link href="/achievements" className={item}>
             <Trophy className="w-4 h-4" /> ความสำเร็จ
           </Link>

@@ -157,6 +157,29 @@ export default function PremiumGate({
                 กลับไปหน้าเรื่อง
               </Link>
             </div>
+
+            {/* Earn free coins instead of paying */}
+            <div className="border-t border-[var(--border)] pt-4">
+              <p className="text-xs text-[var(--text-secondary)] text-center mb-2.5">ไม่อยากจ่าย? เก็บเหรียญฟรีได้:</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {[
+                  { href: "/", label: "เช็คอิน +2/วัน" },
+                  { href: "/download", label: "โหลดแอป +20" },
+                  { href: "/referral", label: "ชวนเพื่อน +50" },
+                ].map((o) => (
+                  <Link
+                    key={o.href}
+                    href={o.href}
+                    className="px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/40 transition-colors"
+                  >
+                    {o.label}
+                  </Link>
+                ))}
+              </div>
+              <Link href="/earn" className="block text-center text-xs text-[var(--text-primary)] underline mt-2.5">
+                ดูวิธีหาเหรียญฟรีทั้งหมด
+              </Link>
+            </div>
           </div>
         </div>
       </div>
