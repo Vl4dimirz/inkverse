@@ -74,7 +74,12 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION || "uOOtdTLcXgK374na6xYQ2hVlYKP9JbdLtvaKx7gPzs4",
+    // Both the env-configured code and the current one render, so verifying with
+    // either Search Console property works.
+    google: [
+      "uOOtdTLcXgK374na6xYQ2hVlYKP9JbdLtvaKx7gPzs4",
+      process.env.GOOGLE_SITE_VERIFICATION,
+    ].filter((v): v is string => !!v),
   },
 };
 
