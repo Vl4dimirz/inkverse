@@ -75,6 +75,12 @@ export default function ApplyClient({ genres, prevApplication, mode = "translato
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "เกิดข้อผิดพลาด");
+      if (data.autoApproved) {
+        // Instant approval → straight to the creator dashboard.
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
       setDone(true);
       router.refresh();
     } catch (e) {

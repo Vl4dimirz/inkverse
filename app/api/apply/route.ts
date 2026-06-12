@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { notifyAdmins } from "@/lib/notifications";
+import { notifyAdmins, createNotification } from "@/lib/notifications";
+
+// TEMP growth mode: auto-approve creators to recruit fast. Flip off later by
+// setting AUTO_APPROVE_CREATORS="false" in the env (no redeploy needed).
+const AUTO_APPROVE = process.env.AUTO_APPROVE_CREATORS !== "false";
 
 export async function GET() {
   const session = await auth();
@@ -82,6 +86,34 @@ export async function POST(req: NextRequest) {
       });
 
   const roleWord = appKind === "WRITER" ? "นักเขียน" : "นักแปล";
+
+  if (AUTO_APPROVE) {
+    // Instant approval: promote to creator + create the Translator profile.
+    await prisma.$transaction([
+      prisma.translatorApplication.update({ where: { userId }, data: { status: "APPROVED" } }),
+      prisma.user.update({ where: { id: userId }, data: { role: "TRANSLATOR" } }),
+      prisma.translator.upsert({
+        where: { userId },
+        create: { userId, penName: penName.trim(), bio: "", kind: appKind },
+        update: { penName: penName.trim(), kind: appKind },
+      }),
+    ]);
+    await createNotification({
+      userId,
+      type: "APPLICATION_APPROVED",
+      title: "อนุมัติแล้ว! 🎉",
+      body: `ยินดีต้อนรับ${roleWord}! เข้าแดชบอร์ดเริ่มลงผลงานได้เลย`,
+      link: "/dashboard",
+    });
+    await notifyAdmins({
+      type: "NEW_CREATOR",
+      title: `${roleWord}ใหม่เข้าร่วม`,
+      body: `${penName.trim()} (อนุมัติอัตโนมัติ)`,
+      link: "/admin/applications",
+    });
+    return NextResponse.json({ application, autoApproved: true });
+  }
+
   await notifyAdmins({
     type: "NEW_APPLICATION",
     title: `ใบสมัคร${roleWord}ใหม่`,

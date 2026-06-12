@@ -13,6 +13,7 @@ import AchievementToaster from "@/components/ui/AchievementToaster";
 import TrafficBeacon from "@/components/ui/TrafficBeacon";
 import AppBonus from "@/components/ui/AppBonus";
 import PushRegister from "@/components/ui/PushRegister";
+import WelcomePopup from "@/components/ui/WelcomePopup";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
 
@@ -125,6 +126,7 @@ export default async function RootLayout({
         {userId && <AchievementToaster />}
         {userId && <AppBonus />}
         {userId && <PushRegister />}
+        <WelcomePopup isCreator={userRole === "TRANSLATOR" || userRole === "ADMIN"} />
       </body>
     </html>
   );
