@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { grantSignupBonus } from "@/lib/coins";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse-tau.vercel.app";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
 
 // Email verification link target. Verifies → grants the welcome bonus → signs in prompt.
 export async function GET(req: NextRequest) {

@@ -7,7 +7,7 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { grantSignupBonus, recordReferral } from "@/lib/coins";
 import { sendEmail, verificationEmail } from "@/lib/email";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse-tau.vercel.app";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
 
 const schema = z.object({
   username: z
