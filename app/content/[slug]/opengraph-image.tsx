@@ -11,10 +11,10 @@ export const contentType = "image/png";
 // Loaded lazily (at request time, not build time) and cached per instance.
 let fontCache: ArrayBuffer | null = null;
 async function getFont(): Promise<ArrayBuffer> {
-  if (!fontCache) {
-    fontCache = await fetch(new URL("./noto-thai.ttf", import.meta.url)).then((r) => r.arrayBuffer());
-  }
-  return fontCache;
+  if (fontCache) return fontCache;
+  const data = await fetch(new URL("./noto-thai.ttf", import.meta.url)).then((r) => r.arrayBuffer());
+  fontCache = data;
+  return data;
 }
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
