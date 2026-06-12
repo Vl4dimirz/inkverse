@@ -7,12 +7,12 @@ import FeaturedSpotlight from "@/components/ui/FeaturedSpotlight";
 import UpdateRow from "@/components/ui/UpdateRow";
 import RankingPanel from "@/components/ui/RankingPanel";
 import GenreFilterBar from "@/components/ui/GenreFilterBar";
-import HeroBanner from "@/components/ui/HeroBanner";
+import PromoCarousel from "@/components/ui/PromoCarousel";
 import ContinueReading from "@/components/ui/ContinueReading";
 import DailyCheckIn from "@/components/ui/DailyCheckIn";
 import TranslatorRanking from "@/components/ui/TranslatorRanking";
 import Link from "next/link";
-import { ChevronRight, Smartphone } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { unstable_cache } from "next/cache";
 
 export const revalidate = 300; // 5 minutes
@@ -125,37 +125,8 @@ export default async function HomePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      {/* Hero */}
-      {featured && (
-        <HeroBanner
-          title={featured.title}
-          description={featured.description}
-          coverUrl={featured.coverUrl}
-          slug={featured.slug}
-          genres={featured.genreNames}
-          rating={featured.avgRating}
-          latestChapter={featured.latestChapter}
-        />
-      )}
-
-      {/* App download banner */}
-      <Link
-        href="/download"
-        className="flex items-center justify-between gap-3 border border-[var(--text-primary)]/30 bg-[var(--bg-surface)] px-4 sm:px-5 py-3 my-6 hover:border-[var(--text-primary)] transition-colors"
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-[var(--text-primary)] text-[var(--bg-primary)]">
-            <Smartphone className="w-5 h-5" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-[var(--text-primary)] truncate">โหลดแอป Android — ติดตั้งรับ 20 เหรียญฟรี</p>
-            <p className="text-xs text-[var(--text-secondary)]">กันแคปหน้าจอ · ลื่นกว่า · ฟรี ไม่มีโฆษณา</p>
-          </div>
-        </div>
-        <span className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-[var(--text-primary)]">
-          โหลด <ChevronRight className="w-4 h-4" />
-        </span>
-      </Link>
+      {/* Hero — auto-rotating promo carousel */}
+      <PromoCarousel />
 
       {/* Daily check-in (per-user, client-fetched so the page stays cached) */}
       <DailyCheckIn />
