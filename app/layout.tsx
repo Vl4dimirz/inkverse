@@ -15,6 +15,7 @@ import AppBonus from "@/components/ui/AppBonus";
 import PushRegister from "@/components/ui/PushRegister";
 import WelcomePopup from "@/components/ui/WelcomePopup";
 import NativeShell from "@/components/ui/NativeShell";
+import UpdateChecker from "@/components/ui/UpdateChecker";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
 
@@ -131,6 +132,7 @@ export default async function RootLayout({
         <Footer />
         <HelpChatbot />
         <NativeShell />
+        <UpdateChecker />
         <TrafficBeacon />
         {userId && <AchievementToaster />}
         {userId && <AppBonus />}

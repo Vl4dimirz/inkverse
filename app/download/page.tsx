@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ShieldCheck, Smartphone, RefreshCw, Download, Lock, ArrowRight, Gift } from "lucide-react";
 import type { Metadata } from "next";
+import { LATEST_APK } from "@/lib/appVersion";
 
 export const metadata: Metadata = {
   title: "ดาวน์โหลดแอป Android — อ่านแบบกันแคปหน้าจอ | INKVERSE",
@@ -8,10 +9,10 @@ export const metadata: Metadata = {
     "แอป INKVERSE สำหรับ Android — อ่านมังงะ/นิยายแบบกันแคปหน้าจอ (FLAG_SECURE) ลื่นกว่า อัปเดตอัตโนมัติ",
 };
 
-// Published automatically by the Android build workflow into public/downloads.
+// Single source of truth (lib/appVersion) — same version the in-app updater checks.
 // Versioned filename so a new build is never masked by a cached old .apk.
-const APK_URL = process.env.NEXT_PUBLIC_ANDROID_APK_URL || "/downloads/inkverse-1.0.3.apk";
-const APK_VERSION = process.env.NEXT_PUBLIC_ANDROID_APK_VERSION || "1.0.3";
+const APK_URL = process.env.NEXT_PUBLIC_ANDROID_APK_URL || LATEST_APK.url;
+const APK_VERSION = process.env.NEXT_PUBLIC_ANDROID_APK_VERSION || LATEST_APK.version;
 
 const FEATURES = [
   { icon: ShieldCheck, title: "กันแคปหน้าจอ", body: "บล็อกการแคป/อัดจอระดับระบบ (เหมือนแอปอ่านอีบุ๊กชั้นนำ) — ปกป้องผลงานนักเขียน" },
