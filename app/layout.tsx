@@ -41,9 +41,6 @@ export const metadata: Metadata = {
   authors: [{ name: "INKVERSE" }],
   creator: "INKVERSE",
   publisher: "INKVERSE",
-  verification: {
-    google: "uOOtdTLcXgK374na6xYQ2hVlYKP9JbdLtvaKx7gPzs4",
-  },
   robots: {
     index: true,
     follow: true,
@@ -77,7 +74,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    google: process.env.GOOGLE_SITE_VERIFICATION || "uOOtdTLcXgK374na6xYQ2hVlYKP9JbdLtvaKx7gPzs4",
   },
 };
 
