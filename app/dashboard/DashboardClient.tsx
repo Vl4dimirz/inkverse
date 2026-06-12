@@ -59,6 +59,7 @@ interface Props {
     totalBookmarks: number;
     totalUnlocks: number;
     totalCoins: number;
+    totalEarnedBaht: number;
     recentReaders: number;
     mangaCount: number;
   };
@@ -175,6 +176,22 @@ export default function DashboardClient({
           </Link>
         </div>
       </div>
+
+      {/* Earnings hero — the number creators care about most */}
+      <Link
+        href="/dashboard/earnings"
+        className="flex items-center justify-between gap-3 border border-[var(--text-primary)]/30 bg-[var(--bg-surface)] px-5 py-4 mb-4 hover:border-[var(--text-primary)] transition-colors"
+      >
+        <div>
+          <p className="text-[11px] text-[var(--text-secondary)] uppercase tracking-widest">รายได้รวม (ส่วนแบ่ง 80% ของคุณ)</p>
+          <p className="font-bebas text-4xl text-[var(--text-primary)] tracking-wide leading-none mt-1">
+            ฿{stats.totalEarnedBaht.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </p>
+        </div>
+        <span className="shrink-0 text-xs font-semibold uppercase tracking-widest text-[var(--text-primary)] inline-flex items-center gap-1">
+          ถอนเงิน <ChevronRight className="w-4 h-4" />
+        </span>
+      </Link>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

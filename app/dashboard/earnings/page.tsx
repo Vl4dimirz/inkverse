@@ -111,7 +111,7 @@ export default async function EarningsPage() {
             <ArrowLeft className="w-3.5 h-3.5" /> Dashboard
           </Link>
           <h1 className="font-bebas text-4xl text-[var(--text-primary)] tracking-wider">รายได้ของฉัน</h1>
-          <p className="text-xs text-[var(--text-secondary)] mt-0.5">อัตราแบ่งรายได้: นักแปล 70% / แพลตฟอร์ม 30%</p>
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">อัตราแบ่งรายได้: นักแปล 80% / แพลตฟอร์ม 20%</p>
         </div>
         {available >= 100 && (
           <Link

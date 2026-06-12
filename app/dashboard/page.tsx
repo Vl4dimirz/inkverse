@@ -38,6 +38,13 @@ export default async function DashboardPage() {
 
   if (!translator) redirect("/apply");
 
+  // Real baht earnings (the number creators care about most).
+  const earningsAgg = await prisma.translatorEarning.aggregate({
+    where: { translatorId: translator.id },
+    _sum: { amount: true },
+  });
+  const totalEarnedBaht = earningsAgg._sum.amount ?? 0;
+
   // Summary aggregates
   const totalViews = translator.mangas.reduce((s, m) => s + m.totalViews, 0);
   const totalChapters = translator.mangas.reduce(
@@ -150,6 +157,7 @@ export default async function DashboardPage() {
         totalBookmarks,
         totalUnlocks,
         totalCoins,
+        totalEarnedBaht,
         recentReaders,
         mangaCount: translator.mangas.length,
       }}
