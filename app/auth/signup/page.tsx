@@ -137,6 +137,8 @@ export default function SignUpPage() {
             </div>
           )}
 
+          {/* Google — web only for now; native in-app sign-in temporarily off. */}
+          {!inApp && (
           <button
             onClick={handleGoogle}
             disabled={loading}
@@ -150,12 +152,15 @@ export default function SignUpPage() {
             </svg>
             สมัครด้วย Google
           </button>
+          )}
 
+          {!inApp && (
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-white/10" />
             <span className="text-xs text-[var(--text-secondary)]">หรือ</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">

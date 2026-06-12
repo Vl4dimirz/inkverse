@@ -93,7 +93,9 @@ export default function SignInPage() {
             เข้าสู่ระบบ
           </h1>
 
-          {/* Google — native picker in the app, OAuth redirect on the web */}
+          {/* Google — web only for now. Native in-app sign-in is temporarily
+              disabled (it can crash until the Android OAuth client is live). */}
+          {!inApp && (
           <button
             onClick={handleGoogle}
             disabled={loading}
@@ -119,12 +121,22 @@ export default function SignInPage() {
             </svg>
             เข้าสู่ระบบด้วย Google
           </button>
+          )}
 
+          {!inApp && (
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-white/10" />
             <span className="text-xs text-[var(--text-secondary)]">หรือ</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
+          )}
+
+          {inApp && (
+            <p className="text-xs text-[var(--text-secondary)] text-center mb-6 leading-relaxed">
+              ในแอป กรุณาเข้าสู่ระบบด้วยอีเมล + รหัสผ่าน<br />
+              (เคยสมัครด้วย Google? กด &ldquo;ลืมรหัสผ่าน?&rdquo; เพื่อตั้งรหัสผ่านครั้งแรก)
+            </p>
+          )}
 
           <form onSubmit={handleCredentials} className="space-y-4">
             <div className="relative">
