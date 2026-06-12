@@ -11,4 +11,7 @@ android/captures/
 *.aab
 *.keystore
 *.jks
+# Exception: the fixed debug keystore MUST be committed for stable signatures.
+# (Debug keystores are not secret — password is the public "android".)
+!android/app/debug.keystore
 android/app/google-services.json
