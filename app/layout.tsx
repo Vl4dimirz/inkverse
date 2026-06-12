@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/Navbar";
@@ -14,6 +14,7 @@ import TrafficBeacon from "@/components/ui/TrafficBeacon";
 import AppBonus from "@/components/ui/AppBonus";
 import PushRegister from "@/components/ui/PushRegister";
 import WelcomePopup from "@/components/ui/WelcomePopup";
+import NativeShell from "@/components/ui/NativeShell";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
 
@@ -29,6 +30,13 @@ const notoSansThai = Noto_Sans_Thai({
   variable: "--font-noto",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  // Dark browser theme-color so the mobile address bar matches the black UI.
+  // (Status-bar inset inside the app is handled natively via overlay:false,
+  // so we deliberately avoid viewport-fit:cover to not shift any web layout.)
+  themeColor: "#000000",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -122,6 +130,7 @@ export default async function RootLayout({
         </main>
         <Footer />
         <HelpChatbot />
+        <NativeShell />
         <TrafficBeacon />
         {userId && <AchievementToaster />}
         {userId && <AppBonus />}

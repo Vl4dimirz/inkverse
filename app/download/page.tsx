@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 // Published automatically by the Android build workflow into public/downloads.
 // Versioned filename so a new build is never masked by a cached old .apk.
-const APK_URL = process.env.NEXT_PUBLIC_ANDROID_APK_URL || "/downloads/inkverse-1.0.2.apk";
-const APK_VERSION = process.env.NEXT_PUBLIC_ANDROID_APK_VERSION || "1.0.2";
+const APK_URL = process.env.NEXT_PUBLIC_ANDROID_APK_URL || "/downloads/inkverse-1.0.3.apk";
+const APK_VERSION = process.env.NEXT_PUBLIC_ANDROID_APK_VERSION || "1.0.3";
 
 const FEATURES = [
   { icon: ShieldCheck, title: "กันแคปหน้าจอ", body: "บล็อกการแคป/อัดจอระดับระบบ (เหมือนแอปอ่านอีบุ๊กชั้นนำ) — ปกป้องผลงานนักเขียน" },

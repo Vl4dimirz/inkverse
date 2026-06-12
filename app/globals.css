@@ -256,3 +256,24 @@
     color: var(--bg-primary) !important;
   }
 }
+
+/* ===== Native app feel (Capacitor only — `.native-app` set by NativeShell) =====
+   All scoped to html.native-app so the web browser is completely unaffected. */
+html.native-app,
+html.native-app body {
+  overscroll-behavior: none;            /* kill rubber-band bounce + pull-to-refresh */
+  -webkit-tap-highlight-color: transparent;
+}
+html.native-app * {
+  -webkit-touch-callout: none;          /* no long-press popup on links/images */
+}
+/* Keep reading text selectable; disable selection on UI chrome only. */
+html.native-app nav,
+html.native-app button,
+html.native-app a,
+html.native-app [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Cleaner app surface — hide scrollbars. */
+html.native-app ::-webkit-scrollbar { width: 0; height: 0; }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Match the app's black UI so the system bars blend in. -->
+    <color name="ink_black">#000000</color>
+</resources>
