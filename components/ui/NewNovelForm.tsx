@@ -9,9 +9,11 @@ function slugify(s: string): string {
   const base = s
     .toLowerCase()
     .normalize("NFKD")
-    .replace(/[^a-z0-9]+/g, "-")
+    // Keep Latin letters, digits, AND Thai characters (U+0E00–U+0E7F) so Thai
+    // titles get a readable, SEO-friendly slug instead of collapsing to "novel".
+    .replace(/[^a-z0-9฀-๿]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
+    .slice(0, 60);
   return base || "novel";
 }
 
