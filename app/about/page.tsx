@@ -5,7 +5,7 @@ import {
   ArrowRight, Mail, MessageSquare,
 } from "lucide-react";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
 export const metadata: Metadata = {
   title: "เกี่ยวกับเรา — ทำไมครีเอเตอร์เชื่อใจ INKVERSE | INKVERSE",
@@ -130,7 +130,7 @@ export default function AboutPage() {
         </p>
         <p className="flex items-center gap-2.5">
           <Mail className="w-4 h-4 text-[var(--text-primary)] shrink-0" />
-          อีเมล: <span className="text-[var(--text-primary)]">support@inkverse.com</span>
+          อีเมล: <span className="text-[var(--text-primary)]">support@inksverse.com</span>
         </p>
         <p className="text-xs text-[var(--text-muted)] pt-1">
           อ่านเงื่อนไขเต็มได้ที่{" "}

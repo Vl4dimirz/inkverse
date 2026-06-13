@@ -8,7 +8,7 @@ import { grantSignupBonus, recordReferral } from "@/lib/coins";
 import { sendEmail, verificationEmail } from "@/lib/email";
 import { verifyTurnstile } from "@/lib/turnstile";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
 const schema = z.object({
   username: z

@@ -4,7 +4,7 @@ import Pagination from "@/components/ui/Pagination";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
 export const metadata: Metadata = {
   title: "ค้นหามังงะ",

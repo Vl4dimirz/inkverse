@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Creator101 from "@/components/ui/Creator101";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
 export const metadata: Metadata = {
   title: "Creator 101 — สอนสร้างเนื้อหาบน INKVERSE (นักเขียน & นักแปล)",

@@ -36,7 +36,7 @@ export async function GET() {
           อ่านมังงะ · มังฮวา · นิยาย แปลไทย
         </div>
         <div style={{ fontSize: 26, color: "#9a9a9a", marginTop: 12, display: "flex" }}>
-          สนับสนุนนักเขียน รับ 80% · inkverse.com
+          สนับสนุนนักเขียน รับ 80% · inksverse.com
         </div>
       </div>
     ),

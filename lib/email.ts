@@ -2,7 +2,7 @@
 // Fully graceful: if RESEND_API_KEY is unset, it logs and no-ops so flows that
 // "send an email" never break in dev / before email is configured.
 
-const FROM = process.env.EMAIL_FROM || "INKVERSE <noreply@inkverse.com>";
+const FROM = process.env.EMAIL_FROM || "INKVERSE <noreply@inksverse.com>";
 
 export async function sendEmail(opts: {
   to: string;

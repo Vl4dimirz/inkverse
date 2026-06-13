@@ -30,7 +30,7 @@ import { MangaJsonLd, BreadcrumbJsonLd } from "@/components/seo/JsonLd";
 import BulkUnlock from "@/components/ui/BulkUnlock";
 import TipButton from "@/components/ui/TipButton";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
 interface Props {
   params: Promise<{ slug: string }>;

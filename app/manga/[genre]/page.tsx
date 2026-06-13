@@ -4,7 +4,7 @@ import Pagination from "@/components/ui/Pagination";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inkverse.com";
+const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
 interface Props {
   params: Promise<{ genre: string }>;
