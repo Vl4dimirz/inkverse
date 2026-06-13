@@ -16,33 +16,26 @@ export async function GET() {
           color: "#ffffff",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          padding: "0 120px",
-          position: "relative",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          textAlign: "center",
+          paddingTop: 76,
           fontFamily: font ? "Noto Sans Thai" : "sans-serif",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: 44,
-            left: 44,
-            right: 44,
-            bottom: 44,
-            border: "2px solid rgba(255,255,255,0.16)",
-            display: "flex",
-          }}
-        />
-        <div style={{ fontSize: 30, letterSpacing: "0.42em", color: "#8a8a8a", display: "flex" }}>
+        {/* Content kept centered in the top ~half so neither the desktop
+            (bottom-left) nor mobile (bottom-center) profile picture covers it,
+            and it survives Facebook's mobile center-crop. */}
+        <div style={{ fontSize: 26, letterSpacing: "0.42em", color: "#8a8a8a", display: "flex" }}>
           READ · CREATE · EARN
         </div>
-        <div style={{ fontSize: 172, fontWeight: 700, letterSpacing: "-0.01em", lineHeight: 1, marginTop: 10, display: "flex" }}>
+        <div style={{ fontSize: 132, fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1, marginTop: 16, display: "flex" }}>
           INKVERSE
         </div>
-        <div style={{ fontSize: 42, color: "#cccccc", marginTop: 30, display: "flex" }}>
+        <div style={{ fontSize: 34, color: "#dddddd", marginTop: 26, display: "flex" }}>
           อ่านมังงะ · มังฮวา · นิยาย แปลไทย
         </div>
-        <div style={{ fontSize: 30, color: "#9a9a9a", marginTop: 16, display: "flex" }}>
+        <div style={{ fontSize: 26, color: "#9a9a9a", marginTop: 12, display: "flex" }}>
           สนับสนุนนักเขียน รับ 80% · inkverse.com
         </div>
       </div>
