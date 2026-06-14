@@ -179,7 +179,7 @@ export default async function ReaderPage({ params }: Props) {
         <ReaderViewer
           pages={chapterData.pages.map((p) => ({
             pageNum: p.pageNum,
-            src: signedImagePath(p.id),
+            src: signedImagePath(p.id, userId),
             width: p.width,
             height: p.height,
           }))}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, Settings, AlignJustify, BookOpen } from "lucide-react";
 import clsx from "clsx";
 import Link from "next/link";
+import { isLikelyAutomated } from "@/lib/botCheck";
 
 interface Page {
   pageNum: number;
@@ -53,6 +54,9 @@ function MangaCanvas({
 
     const draw = () => {
       if (drawn.current || cancelled) return;
+      // Don't paint pages for headless/automation — a canvas never drawn can't be
+      // screenshotted by a bot. Real readers are unaffected (see lib/botCheck).
+      if (isLikelyAutomated()) return;
       drawn.current = true;
       (async () => {
         let url: string | null = null;

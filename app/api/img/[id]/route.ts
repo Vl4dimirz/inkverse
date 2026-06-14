@@ -16,11 +16,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   const e = req.nextUrl.searchParams.get("e");
+  const u = req.nextUrl.searchParams.get("u");
   const s = req.nextUrl.searchParams.get("s");
 
   // Signed + unexpired token is the access grant (minted post-authorization).
-  if (!verifyImageToken(id, e, s)) {
+  if (!verifyImageToken(id, e, u, s)) {
     return new NextResponse("Forbidden", { status: 403 });
+  }
+
+  // Behavioral throttle: the token binds the reader's id, so we can cap sustained
+  // per-user volume. A human reading never pulls this many pages over 10 minutes;
+  // a ripper grabbing whole series does. (Per-IP burst limit above still applies.)
+  if (u && u !== "anon" && !rateLimit(`img:u:${u}`, 1200, 600_000).ok) {
+    return new NextResponse("Too Many Requests", { status: 429 });
   }
 
   const page = await prisma.page.findUnique({ where: { id }, select: { imageUrl: true } });
