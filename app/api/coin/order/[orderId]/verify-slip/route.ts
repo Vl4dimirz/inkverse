@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
-import { uploadToR2 } from "@/lib/r2";
+import { uploadToR2Private } from "@/lib/r2";
 import { rateLimit } from "@/lib/rate-limit";
 import { isFirstTopup, extendVipDays, rewardReferralOnFirstTopup } from "@/lib/coins";
 
@@ -171,7 +171,7 @@ export async function POST(
   if (r2Ready) {
     try {
       const ext = (file.type?.split("/")[1] || "jpg").replace("jpeg", "jpg");
-      slipUrl = await uploadToR2(`slips/${orderId}.${ext}`, buffer, file.type || "image/jpeg");
+      slipUrl = await uploadToR2Private(`slips/${orderId}.${ext}`, buffer, file.type || "image/jpeg");
     } catch {
       /* non-critical */
     }

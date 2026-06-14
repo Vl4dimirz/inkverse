@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { uploadToR2 } from "@/lib/r2";
+import { uploadToR2Private } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import sharp from "sharp";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB per page
-const PUBLIC_URL = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -46,7 +45,7 @@ export async function POST(req: NextRequest) {
     for (const p of pages) {
       const pageNum = Number(p.pageNum);
       if (!p.key || !p.key.startsWith(prefix) || !Number.isFinite(pageNum)) continue;
-      const imageUrl = `${PUBLIC_URL}/${p.key}`;
+      const imageUrl = p.key; // private bucket → store bare key, serve via /api/img
       const width = Number.isFinite(p.width) ? Number(p.width) : null;
       const height = Number.isFinite(p.height) ? Number(p.height) : null;
       await prisma.page.upsert({
@@ -130,7 +129,7 @@ export async function POST(req: NextRequest) {
       const webpBuffer = await image.webp({ quality: 92 }).toBuffer();
 
       const key = `pages/${chapterId}/${pageNum}.webp`;
-      const url = await uploadToR2(key, webpBuffer, "image/webp");
+      const url = await uploadToR2Private(key, webpBuffer, "image/webp");
 
       await prisma.page.upsert({
         where: { chapterId_pageNum: { chapterId, pageNum } },

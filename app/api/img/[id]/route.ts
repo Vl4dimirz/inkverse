@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyImageToken } from "@/lib/imageToken";
+import { getPresignedDownloadUrl } from "@/lib/r2";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 // Authenticated, signed image proxy. Manga page images are served through here
@@ -34,7 +35,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const page = await prisma.page.findUnique({ where: { id }, select: { imageUrl: true } });
   if (!page) return new NextResponse("Not found", { status: 404 });
 
-  const upstream = await fetch(page.imageUrl);
+  // Fetch from R2 via a short-lived presigned GET — works for both the private
+  // bucket (new objects: bare key) and legacy public objects (full URL), so the
+  // public bucket can be locked down without breaking already-uploaded pages.
+  const upstream = await fetch(await getPresignedDownloadUrl(page.imageUrl));
   if (!upstream.ok || !upstream.body) return new NextResponse("Bad gateway", { status: 502 });
 
   return new NextResponse(upstream.body, {

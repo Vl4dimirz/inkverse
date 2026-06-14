@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPresignedUploadUrl } from "@/lib/r2";
+import { getPresignedUploadUrlPrivate } from "@/lib/r2";
 
-const PUBLIC_URL = process.env.CLOUDFLARE_R2_PUBLIC_URL!;
 const EXT: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/jpg": "jpg",
@@ -49,8 +48,8 @@ export async function POST(req: NextRequest) {
       const ct = EXT[f.contentType] ? f.contentType : "image/jpeg";
       const ext = EXT[ct] ?? "jpg";
       const key = `pages/${chapterId}/${f.pageNum}.${ext}`;
-      const uploadUrl = await getPresignedUploadUrl(key, ct);
-      return { pageNum: f.pageNum, key, contentType: ct, uploadUrl, publicUrl: `${PUBLIC_URL}/${key}` };
+      const uploadUrl = await getPresignedUploadUrlPrivate(key, ct);
+      return { pageNum: f.pageNum, key, contentType: ct, uploadUrl };
     })
   );
 
