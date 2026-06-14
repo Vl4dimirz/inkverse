@@ -73,6 +73,18 @@ function floodGuard(req: NextRequest): NextResponse | null {
 }
 
 export const proxy = auth((req) => {
+  // 0) Canonical host: force www → apex. NEXTAUTH_URL is the apex domain, so the
+  // OAuth flow must stay on apex — if /api/auth/signin runs on www, NextAuth's
+  // PKCE/state cookies get scoped to www and are unreadable when Google sends the
+  // user back to the apex callback → error=Configuration. Redirecting early keeps
+  // the whole flow (and the rest of the site) on one host.
+  const host = req.headers.get("host");
+  if (host && host.startsWith("www.")) {
+    const url = req.nextUrl.clone();
+    url.host = host.slice(4); // drop "www."
+    return NextResponse.redirect(url, 308);
+  }
+
   // 1) Rate limit first — cheapest rejection, protects everything incl. /api.
   const blocked = floodGuard(req);
   if (blocked) return blocked;
