@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { uploadToR2 } from "@/lib/r2";
 import sharp from "sharp";
 
@@ -12,6 +13,7 @@ export async function POST(req: NextRequest) {
   }
 
   const role = (session.user as { role?: string }).role;
+  const userId = (session.user as { id: string }).id;
   if (role !== "TRANSLATOR" && role !== "ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -26,6 +28,18 @@ export async function POST(req: NextRequest) {
 
   if (file.size > MAX_SIZE) {
     return NextResponse.json({ error: "File too large (max 5MB)" }, { status: 413 });
+  }
+
+  // The cover key is derived from the slug, so guard against a creator overwriting
+  // another creator's existing cover. New uploads (slug not yet a manga) pass through.
+  if (role !== "ADMIN") {
+    const existing = await prisma.manga.findUnique({ where: { slug }, select: { translatorId: true } });
+    if (existing) {
+      const t = await prisma.translator.findUnique({ where: { userId } });
+      if (!t || existing.translatorId !== t.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
   }
 
   const isR2Ready = !!(

@@ -73,9 +73,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const chapter = await prisma.chapter.findUnique({ where: { id: chapterId } });
+  const chapter = await prisma.chapter.findUnique({
+    where: { id: chapterId },
+    include: { manga: { select: { translatorId: true } } },
+  });
   if (!chapter) {
     return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
+  }
+  // Ownership: a translator may only upload pages to their OWN manga's chapters.
+  // The presign/JSON branch already enforces this; the multipart fallback must too,
+  // otherwise any creator could overwrite another creator's pages.
+  if (role !== "ADMIN") {
+    const t = await prisma.translator.findUnique({ where: { userId } });
+    if (!t || chapter.manga.translatorId !== t.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
 
   const isR2Ready = !!(
