@@ -58,6 +58,7 @@ const getData = unstable_cache(async () => {
         include: {
           chapters: { where: liveChapterWhere(), orderBy: { chapterNum: "desc" }, take: 1 },
           ratings: { select: { score: true } },
+          genres: { include: { genre: true } },
         },
       }),
     ]);
@@ -97,11 +98,13 @@ const getData = unstable_cache(async () => {
     slug: m.slug,
     title: m.title,
     coverUrl: m.coverUrl,
+    description: m.description,
     type: m.type,
     status: m.status,
     totalViews: m.totalViews,
     latestChapter: m.chapters[0]?.chapterNum,
     avgRating: m.ratings.length > 0 ? m.ratings.reduce((a, b) => a + b.score, 0) / m.ratings.length : 0,
+    genreNames: m.genres.map((g) => g.genre.name),
   }));
 
   return { mangas, genres, latestChapters, weeklyRank, monthlyRank, allRank, translatorRanking, novels };
@@ -121,10 +124,11 @@ export default async function HomePage() {
     genreNames: m.genres.map((g) => g.genre.name),
   }));
 
-  // Editorial "เรื่องเด่น" set — top titles with cover art for the showcase carousel.
-  const featuredTitles: FeaturedItem[] = withRating
+  // Editorial "เรื่องเด่น" set — interleave top manga + top novels (both with
+  // cover art) so the showcase promotes creators across content types.
+  const featManga: FeaturedItem[] = withRating
     .filter((m) => m.coverUrl)
-    .slice(0, 6)
+    .slice(0, 5)
     .map((m) => ({
       slug: m.slug,
       title: m.title,
@@ -136,6 +140,25 @@ export default async function HomePage() {
       views: m.totalViews,
       latestChapter: m.latestChapter,
     }));
+  const featNovels: FeaturedItem[] = novels
+    .filter((n) => n.coverUrl)
+    .slice(0, 3)
+    .map((n) => ({
+      slug: n.slug,
+      title: n.title,
+      coverUrl: n.coverUrl,
+      description: n.description,
+      genres: n.genreNames,
+      type: n.type,
+      rating: n.avgRating,
+      views: n.totalViews,
+      latestChapter: n.latestChapter,
+    }));
+  const featuredTitles: FeaturedItem[] = [];
+  for (let k = 0; k < Math.max(featManga.length, featNovels.length); k++) {
+    if (featManga[k]) featuredTitles.push(featManga[k]);
+    if (featNovels[k]) featuredTitles.push(featNovels[k]);
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
