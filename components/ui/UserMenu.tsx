@@ -77,8 +77,14 @@ export default function UserMenu({ user, rankBadge }: { user: MenuUser; rankBadg
           <Link href={`/profile/${user.username ?? user.name}`} className={item}>
             <User className="w-4 h-4" /> โปรไฟล์ของฉัน
           </Link>
-          {/* App/PWA only (.app-only) — plain <a> so it works offline (SW-cached) */}
-          <a href="/downloads" className={`${item} app-only`}>
+          {/* App/PWA only (.app-only) — plain <a> so it works offline (SW-cached).
+              stopPropagation so the dropdown's close handler doesn't unmount the
+              link before navigation (iOS cancels nav if the <a> is removed). */}
+          <a
+            href="/downloads"
+            onClick={(e) => e.stopPropagation()}
+            className={`${item} app-only`}
+          >
             <WifiOff className="w-4 h-4" /> คลังออฟไลน์
           </a>
           {isStaff && (
