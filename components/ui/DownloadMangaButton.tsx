@@ -115,12 +115,12 @@ export default function DownloadMangaButton({ chapters }: Props) {
             {available.length > 0 && !busy && (
               <button
                 onClick={toggleAll}
-                className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-[var(--text-primary)] border-b border-[var(--border)] hover:bg-white/5"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] border-b border-[var(--border)] hover:bg-white/5"
               >
-                <span className="min-w-0 truncate">เลือกทั้งหมด ({available.length} ตอน)</span>
                 <span className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ${allSelected ? "bg-[var(--text-primary)] border-[var(--text-primary)]" : "border-[var(--border)]"}`}>
                   {allSelected && <Check className="w-3.5 h-3.5 text-[var(--bg-primary)]" />}
                 </span>
+                <span className="min-w-0 truncate">เลือกทั้งหมด ({available.length} ตอน)</span>
               </button>
             )}
 
