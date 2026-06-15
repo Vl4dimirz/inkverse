@@ -5,6 +5,7 @@ import { createNotification } from "@/lib/notifications";
 import { uploadToR2Private } from "@/lib/r2";
 import { rateLimit } from "@/lib/rate-limit";
 import { isFirstTopup, extendVipDays, rewardReferralOnFirstTopup } from "@/lib/coins";
+import { apiError } from "@/lib/apiError";
 
 // EasySlip API v1 — the image-upload endpoint EasySlip's own clients use.
 // (v2 /verify/bank multipart is not parsed by standard HTTP clients; v1 works
@@ -53,15 +54,11 @@ export async function POST(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   const session = await auth();
-  if (!session?.user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user) return apiError("AUTH-007", 401);
 
   const token = process.env.EASYSLIP_TOKEN;
   if (!token)
-    return NextResponse.json(
-      { error: "ระบบตรวจสลิปยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ" },
-      { status: 503 }
-    );
+    return apiError("COIN-002", 503, { message: "ระบบตรวจสลิปยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ" });
 
   const { orderId } = await params;
   const userId = (session.user as { id: string }).id;
@@ -69,25 +66,25 @@ export async function POST(
   // Each verify call hits the paid EasySlip API — throttle to stop quota/cost abuse.
   const rl = rateLimit(`verify-slip:${userId}`, 6, 5 * 60_000);
   if (!rl.ok)
-    return NextResponse.json(
-      { error: "ตรวจสลิปบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่" },
-      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } }
-    );
+    return apiError("RATE-001", 429, {
+      message: "ตรวจสลิปบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่",
+      headers: { "Retry-After": String(rl.retryAfter) },
+    });
 
   const order = await prisma.coinOrder.findUnique({ where: { id: orderId } });
   if (!order || order.userId !== userId)
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    return apiError("COIN-005", 404, { message: "ไม่พบคำสั่งซื้อนี้" });
   if (order.status === "PAID")
-    return NextResponse.json({ error: "คำสั่งซื้อนี้ชำระเงินแล้ว" }, { status: 409 });
+    return apiError("COIN-005", 409, { message: "คำสั่งซื้อนี้ชำระเงินแล้ว" });
   if (order.status !== "PENDING")
-    return NextResponse.json({ error: "คำสั่งซื้อนี้ถูกยกเลิกแล้ว" }, { status: 409 });
+    return apiError("COIN-005", 409, { message: "คำสั่งซื้อนี้ถูกยกเลิกแล้ว" });
 
   const form = await req.formData();
   const file = form.get("file");
   if (!(file instanceof File))
-    return NextResponse.json({ error: "กรุณาแนบรูปสลิป" }, { status: 400 });
+    return apiError("VAL-001", 400, { message: "กรุณาแนบรูปสลิป" });
   if (file.size > MAX_SLIP_SIZE)
-    return NextResponse.json({ error: "ไฟล์สลิปใหญ่เกินไป (สูงสุด 4MB)" }, { status: 413 });
+    return apiError("UP-003", 413, { message: "ไฟล์สลิปใหญ่เกินไป (สูงสุด 4MB)" });
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -105,38 +102,30 @@ export async function POST(
     });
     result = await res.json();
   } catch {
-    return NextResponse.json(
-      { error: "ตรวจสอบสลิปไม่สำเร็จ กรุณาลองใหม่" },
-      { status: 502 }
-    );
+    return apiError("COIN-002", 502, { message: "ตรวจสอบสลิปไม่สำเร็จ กรุณาลองใหม่" });
   }
 
   // v1: success has `data`; errors return `{ status, message: "<code>" }`.
   if (!result.data) {
     const code = result.message ?? "";
     const friendly = SLIP_ERRORS[code] ?? "ตรวจสอบสลิปไม่สำเร็จ กรุณาตรวจสอบรูปสลิป";
-    const httpStatus = code === "duplicate_slip" ? 409 : 422;
-    return NextResponse.json({ error: friendly }, { status: httpStatus });
+    return code === "duplicate_slip"
+      ? apiError("COIN-003", 409, { message: friendly })
+      : apiError("COIN-002", 422, { message: friendly });
   }
 
   const data = result.data;
 
   const transRef = data.transRef;
   if (!transRef)
-    return NextResponse.json(
-      { error: "อ่านเลขอ้างอิงสลิปไม่ได้ กรุณาอัปโหลดสลิปที่ชัดเจน" },
-      { status: 422 }
-    );
+    return apiError("COIN-002", 422, { message: "อ่านเลขอ้างอิงสลิปไม่ได้ กรุณาอัปโหลดสลิปที่ชัดเจน" });
 
   // ── Validate amount (must match exactly) ─────────────────────────────────
   const slipAmount = data.amount?.amount ?? 0;
   if (Math.abs(slipAmount - order.price) > 0.01)
-    return NextResponse.json(
-      {
-        error: `ยอดในสลิป (฿${slipAmount.toFixed(2)}) ไม่ตรงกับยอดที่ต้องชำระ (฿${order.price.toFixed(0)}) กรุณาโอนให้ตรงตามจำนวน`,
-      },
-      { status: 422 }
-    );
+    return apiError("COIN-004", 422, {
+      message: `ยอดในสลิป (฿${slipAmount.toFixed(2)}) ไม่ตรงกับยอดที่ต้องชำระ (฿${order.price.toFixed(0)}) กรุณาโอนให้ตรงตามจำนวน`,
+    });
 
   // ── Validate receiver is the shop's account ──────────────────────────────
   // v1 returns the (masked) receiver account number, e.g. "xxx-x-x3788-x".
@@ -150,10 +139,7 @@ export async function POST(
       (!!last4 && acctDigits.some((d) => d.includes(last4))) ||
       (!!expectName && receiverName.includes(expectName));
     if (!matched)
-      return NextResponse.json(
-        { error: "บัญชีปลายทางในสลิปไม่ตรงกับบัญชีร้าน กรุณาตรวจสอบ" },
-        { status: 422 }
-      );
+      return apiError("COIN-004", 422, { message: "บัญชีปลายทางในสลิปไม่ตรงกับบัญชีร้าน กรุณาตรวจสอบ" });
   }
 
   // ── Mark paid + credit coins (guard against duplicate slip & double-credit) ─

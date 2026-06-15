@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPresignedUploadUrlPrivate } from "@/lib/r2";
+import { apiError } from "@/lib/apiError";
 
 const EXT: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -37,10 +38,10 @@ export async function POST(req: NextRequest) {
   const files: { pageNum: number; contentType: string }[] = Array.isArray(body.files) ? body.files : [];
 
   if (!chapterId || files.length === 0) {
-    return NextResponse.json({ error: "chapterId and files required" }, { status: 400 });
+    return apiError("VAL-001", 400);
   }
   if (!(await ownsChapter(chapterId))) {
-    return NextResponse.json({ error: "Not found or forbidden" }, { status: 403 });
+    return apiError("UP-004", 403);
   }
 
   const uploads = await Promise.all(

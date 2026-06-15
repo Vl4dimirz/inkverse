@@ -3,19 +3,20 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadToR2 } from "@/lib/r2";
 import sharp from "sharp";
+import { apiError } from "@/lib/apiError";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiError("AUTH-007", 401);
   }
 
   const role = (session.user as { role?: string }).role;
   const userId = (session.user as { id: string }).id;
   if (role !== "TRANSLATOR" && role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return apiError("UP-004", 403);
   }
 
   const formData = await req.formData();
@@ -23,11 +24,11 @@ export async function POST(req: NextRequest) {
   const slug = formData.get("slug") as string | null;
 
   if (!file || !slug) {
-    return NextResponse.json({ error: "file and slug required" }, { status: 400 });
+    return apiError("VAL-001", 400);
   }
 
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: "File too large (max 5MB)" }, { status: 413 });
+    return apiError("UP-003", 413, { message: "ไฟล์ปกใหญ่เกินไป (สูงสุด 5MB)" });
   }
 
   // The cover key is derived from the slug, so guard against a creator overwriting
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (existing) {
       const t = await prisma.translator.findUnique({ where: { userId } });
       if (!t || existing.translatorId !== t.id) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        return apiError("UP-004", 403);
       }
     }
   }

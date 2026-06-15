@@ -3,18 +3,19 @@ import { auth } from "@/lib/auth";
 import { uploadToR2Private } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import sharp from "sharp";
+import { apiError } from "@/lib/apiError";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB per page
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiError("AUTH-007", 401);
   }
 
   const role = (session.user as { role?: string }).role;
   if (role !== "TRANSLATOR" && role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return apiError("UP-004", 403);
   }
   const userId = (session.user as { id: string }).id;
 
@@ -32,11 +33,11 @@ export async function POST(req: NextRequest) {
       where: { id: chapterId },
       include: { manga: { select: { translatorId: true } } },
     });
-    if (!chapter) return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
+    if (!chapter) return apiError("READ-001", 404);
     if (role !== "ADMIN") {
       const t = await prisma.translator.findUnique({ where: { userId } });
       if (!t || chapter.manga.translatorId !== t.id) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        return apiError("UP-004", 403);
       }
     }
 
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
     include: { manga: { select: { translatorId: true } } },
   });
   if (!chapter) {
-    return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
+    return apiError("READ-001", 404);
   }
   // Ownership: a translator may only upload pages to their OWN manga's chapters.
   // The presign/JSON branch already enforces this; the multipart fallback must too,
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
   if (role !== "ADMIN") {
     const t = await prisma.translator.findUnique({ where: { userId } });
     if (!t || chapter.manga.translatorId !== t.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return apiError("UP-004", 403);
     }
   }
 
@@ -100,10 +101,9 @@ export async function POST(req: NextRequest) {
   if (!isR2Ready) {
     // Fail loudly instead of silently storing random placeholder images — a
     // misconfigured R2 must never masquerade as a successful upload.
-    return NextResponse.json(
-      { error: "ระบบจัดเก็บรูป (R2) ยังไม่พร้อม — ตรวจสอบ env CLOUDFLARE_R2_* แล้ว redeploy" },
-      { status: 503 }
-    );
+    return apiError("UP-001", 503, {
+      message: "ระบบจัดเก็บรูป (R2) ยังไม่พร้อม — ตรวจสอบ env CLOUDFLARE_R2_* แล้ว redeploy",
+    });
   }
 
   const results: { pageNum: number; imageUrl: string; width: number; height: number }[] = [];
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     const file = files[i];
     const pageNum = startPage + i;
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: `หน้า ${pageNum} ใหญ่เกิน 10MB` }, { status: 413 });
+      return apiError("UP-003", 413, { message: `หน้า ${pageNum} ใหญ่เกิน 10MB` });
     }
 
     try {
@@ -144,10 +144,9 @@ export async function POST(req: NextRequest) {
         height: meta.height ?? 0,
       });
     } catch {
-      return NextResponse.json(
-        { error: `ประมวลผลหน้า ${pageNum} ไม่สำเร็จ (ไฟล์อาจเสียหรือไม่ใช่รูปภาพ)` },
-        { status: 422 }
-      );
+      return apiError("UP-005", 422, {
+        message: `ประมวลผลหน้า ${pageNum} ไม่สำเร็จ (ไฟล์อาจเสียหรือไม่ใช่รูปภาพ)`,
+      });
     }
   }
 
