@@ -13,6 +13,8 @@ import { evaluateAchievements } from "@/lib/achievements";
 import { getRankBadges } from "@/lib/ranks";
 import { isChapterLive, liveChapterWhere } from "@/lib/chapters";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { after } from "next/server";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
@@ -112,53 +114,28 @@ export default async function ReaderPage({ params }: Props) {
     }),
   ]);
 
-  // Comments
-  const comments = await prisma.comment.findMany({
-    where: { chapterId: chapterData.id, parentId: null },
-    orderBy: { createdAt: "desc" },
-    take: 30,
-    include: {
-      user: { select: { id: true, username: true, avatarUrl: true } },
-      likedBy: userId ? { where: { userId }, select: { id: true } } : false,
-      replies: {
-        include: {
-          user: { select: { id: true, username: true, avatarUrl: true } },
-          likedBy: userId ? { where: { userId }, select: { id: true } } : false,
-        },
-        orderBy: { createdAt: "asc" },
-        take: 10,
-      },
-    },
-  });
-
-  // Rank badges for everyone in the thread (+ current user, for new comments).
-  const rankMap = await getRankBadges([
-    ...comments.map((c) => c.user.id),
-    ...comments.flatMap((c) => c.replies.map((r) => r.user.id)),
-    ...(userId ? [userId] : []),
-  ]);
-  const currentUserRank = userId ? rankMap.get(userId) ?? null : null;
-
   // Count views from readers only — never the creator viewing their own work.
   const isOwner = !!userId && manga.translator?.userId === userId;
 
-  // Increment chapter views + save history
-  if (!isOwner) {
-    await prisma.chapter.update({
-      where: { id: chapterData.id },
-      data: { viewCount: { increment: 1 } },
-    });
-  }
-
-  if (userId) {
-    await prisma.readHistory.upsert({
-      where: { userId_chapterId: { userId, chapterId: chapterData.id } },
-      create: { userId, chapterId: chapterData.id, lastPage: 1 },
-      update: { readAt: new Date() },
-    });
-    // Unlock any reading achievements this opened up (grants coins + notifies).
-    await evaluateAchievements(userId);
-  }
+  // Side effects (view count, reading history, achievements) must NOT block the
+  // reader from painting — run them after the response is sent.
+  after(async () => {
+    if (!isOwner) {
+      await prisma.chapter.update({
+        where: { id: chapterData.id },
+        data: { viewCount: { increment: 1 } },
+      });
+    }
+    if (userId) {
+      await prisma.readHistory.upsert({
+        where: { userId_chapterId: { userId, chapterId: chapterData.id } },
+        create: { userId, chapterId: chapterData.id, lastPage: 1 },
+        update: { readAt: new Date() },
+      });
+      // Unlock any reading achievements this opened up (grants coins + notifies).
+      await evaluateAchievements(userId);
+    }
+  });
 
   const isNovel = manga.type === "NOVEL";
 
@@ -191,34 +168,99 @@ export default async function ReaderPage({ params }: Props) {
       <ScrollToTop />
 
       <div className="max-w-4xl mx-auto px-4 pb-16">
-        <CommentSection
-          chapterId={chapterData.id}
-          comments={comments.map((c) => ({
-            ...c,
-            createdAt: c.createdAt.toISOString(),
-            likedByMe: Array.isArray(c.likedBy) && c.likedBy.length > 0,
-            user: {
-              username: c.user.username,
-              avatarUrl: c.user.avatarUrl,
-              rank: rankMap.get(c.user.id) ?? null,
-            },
-            replies: c.replies.map((r) => ({
-              ...r,
-              createdAt: r.createdAt.toISOString(),
-              likedByMe: Array.isArray(r.likedBy) && r.likedBy.length > 0,
-              user: {
-                username: r.user.username,
-                avatarUrl: r.user.avatarUrl,
-                rank: rankMap.get(r.user.id) ?? null,
-              },
-              replies: [],
-            })),
-          }))}
-          currentUserId={userId ?? undefined}
-          currentUsername={session?.user?.name ?? undefined}
-          currentUserRank={currentUserRank}
-        />
+        {/* Comments stream in separately so they never delay the reader. */}
+        <Suspense fallback={<CommentsSkeleton />}>
+          <ChapterComments
+            chapterId={chapterData.id}
+            userId={userId}
+            username={session?.user?.name ?? undefined}
+          />
+        </Suspense>
       </div>
+    </div>
+  );
+}
+
+// Heavy comment query (nested replies + rank badges) split into its own streamed
+// boundary so the manga/novel reader paints without waiting on it.
+async function ChapterComments({
+  chapterId,
+  userId,
+  username,
+}: {
+  chapterId: string;
+  userId: string | null;
+  username?: string;
+}) {
+  const comments = await prisma.comment.findMany({
+    where: { chapterId, parentId: null },
+    orderBy: { createdAt: "desc" },
+    take: 30,
+    include: {
+      user: { select: { id: true, username: true, avatarUrl: true } },
+      likedBy: userId ? { where: { userId }, select: { id: true } } : false,
+      replies: {
+        include: {
+          user: { select: { id: true, username: true, avatarUrl: true } },
+          likedBy: userId ? { where: { userId }, select: { id: true } } : false,
+        },
+        orderBy: { createdAt: "asc" },
+        take: 10,
+      },
+    },
+  });
+
+  const rankMap = await getRankBadges([
+    ...comments.map((c) => c.user.id),
+    ...comments.flatMap((c) => c.replies.map((r) => r.user.id)),
+    ...(userId ? [userId] : []),
+  ]);
+  const currentUserRank = userId ? rankMap.get(userId) ?? null : null;
+
+  return (
+    <CommentSection
+      chapterId={chapterId}
+      comments={comments.map((c) => ({
+        ...c,
+        createdAt: c.createdAt.toISOString(),
+        likedByMe: Array.isArray(c.likedBy) && c.likedBy.length > 0,
+        user: {
+          username: c.user.username,
+          avatarUrl: c.user.avatarUrl,
+          rank: rankMap.get(c.user.id) ?? null,
+        },
+        replies: c.replies.map((r) => ({
+          ...r,
+          createdAt: r.createdAt.toISOString(),
+          likedByMe: Array.isArray(r.likedBy) && r.likedBy.length > 0,
+          user: {
+            username: r.user.username,
+            avatarUrl: r.user.avatarUrl,
+            rank: rankMap.get(r.user.id) ?? null,
+          },
+          replies: [],
+        })),
+      }))}
+      currentUserId={userId ?? undefined}
+      currentUsername={username}
+      currentUserRank={currentUserRank}
+    />
+  );
+}
+
+function CommentsSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="h-5 w-32 bg-[var(--bg-surface)] rounded animate-pulse" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="flex gap-3">
+          <div className="w-9 h-9 rounded-full bg-[var(--bg-surface)] animate-pulse shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-24 bg-[var(--bg-surface)] rounded animate-pulse" />
+            <div className="h-3 w-full bg-[var(--bg-surface)] rounded animate-pulse" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
