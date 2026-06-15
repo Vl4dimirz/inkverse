@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Download, X, Check, Lock, Loader2 } from "lucide-react";
 import { downloadById, getDownloads, OFFLINE_ENABLED } from "@/lib/offline";
 
@@ -90,8 +91,10 @@ export default function DownloadMangaButton({ chapters }: Props) {
         ดาวน์โหลดตอน
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70" onClick={() => !busy && setOpen(false)}>
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70" onClick={() => !busy && setOpen(false)}>
           <div
             className="w-full sm:max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-t-2xl sm:rounded-2xl max-h-[85vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
@@ -175,8 +178,9 @@ export default function DownloadMangaButton({ chapters }: Props) {
               )}
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+        )}
     </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Download, Check, Loader2, X, Smartphone } from "lucide-react";
 import { downloadChapter, downloadNovel, removeDownload, isDownloaded, OFFLINE_ENABLED } from "@/lib/offline";
@@ -107,12 +108,14 @@ export default function DownloadChapterButton({
         )}
       </button>
 
-      {/* Web-only soft upsell */}
-      {invite && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4"
-          onClick={() => setInvite(false)}
-        >
+      {/* Web-only soft upsell — portalled to <body> so it floats above the navbar */}
+      {invite &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-4"
+            onClick={() => setInvite(false)}
+          >
           <div
             className="w-full max-w-sm bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-center relative text-[var(--text-primary)]"
             onClick={(e) => e.stopPropagation()}
@@ -140,8 +143,9 @@ export default function DownloadChapterButton({
               โหลดแอป
             </Link>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }
