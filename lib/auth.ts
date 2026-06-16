@@ -65,7 +65,8 @@ const adapter: Adapter = {
         name: data.name ?? null,
         image: data.image ?? null,
         avatarUrl: data.image ?? null,
-        emailVerified: data.emailVerified ?? null,
+        // OAuth (Google) sign-up: the provider already verified inbox ownership.
+        emailVerified: new Date(),
         role: "READER",
       },
     });
@@ -196,6 +197,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.passwordHash
         );
         if (!valid) return null;
+        // Require a verified email for password logins. This closes the
+        // pre-account-hijacking vector: a password account pre-registered for
+        // someone else's email is useless (can't log in) even after a Google
+        // sign-in links to it. Existing users were grandfathered to verified.
+        if (!user.emailVerified) return null;
         return {
           id: user.id,
           email: user.email,

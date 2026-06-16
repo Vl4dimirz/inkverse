@@ -41,7 +41,7 @@ export default function SignInPage() {
     });
     setLoading(false);
     if (res?.error) {
-      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง — หรือยังไม่ได้ยืนยันอีเมล (เช็คกล่องจดหมาย/สแปม)");
     } else {
       window.location.href = callbackUrl;
     }
