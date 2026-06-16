@@ -4,18 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PenTool, Loader2, ArrowRight } from "lucide-react";
 import TagInput from "@/components/ui/TagInput";
-
-function slugify(s: string): string {
-  const base = s
-    .toLowerCase()
-    .normalize("NFKD")
-    // Keep Latin letters, digits, AND Thai characters (U+0E00–U+0E7F) so Thai
-    // titles get a readable, SEO-friendly slug instead of collapsing to "novel".
-    .replace(/[^a-z0-9฀-๿]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
-  return base || "novel";
-}
+import { slugify } from "@/lib/slug";
 
 export default function NewNovelForm({ genres = [] }: { genres?: { id: string; name: string }[] }) {
   const router = useRouter();

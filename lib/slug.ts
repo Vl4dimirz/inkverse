@@ -10,3 +10,16 @@ export function decodeSlug(s: string): string {
     return s; // malformed % sequence — use as-is
   }
 }
+
+// Build a URL slug from a title, KEEPING Thai (U+0E00–U+0E7F) so Thai titles get
+// a readable slug instead of collapsing to empty. ASCII-lowercased; spaces and
+// other characters become hyphens. Used by both the novel and manga create forms.
+export function slugify(s: string): string {
+  const base = s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9฀-๿]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return base || "untitled";
+}

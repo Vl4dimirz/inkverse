@@ -6,10 +6,11 @@ import { Upload, Plus, X, ImageIcon, Loader2, CheckCircle2, Lock, Unlock } from 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { slugify } from "@/lib/slug";
 
 const mangaSchema = z.object({
   title: z.string().min(1, "กรุณากรอกชื่อเรื่อง"),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "ใช้ตัวอักษรพิมพ์เล็ก ตัวเลข และขีดกลางเท่านั้น"),
+  slug: z.string().min(1).regex(/^[a-z0-9฀-๿-]+$/, "ใช้ตัวอักษร a-z 0-9 ไทย และ - เท่านั้น"),
   description: z.string().min(10, "กรุณากรอกคำอธิบายอย่างน้อย 10 ตัวอักษร"),
   originCountry: z.enum(["JP", "KR", "CN", "TH"]),
   status: z.enum(["ONGOING", "COMPLETED", "HIATUS"]),
@@ -533,7 +534,8 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
                 <input
                   {...register("title", {
                     onChange: (e) => {
-                      setValue("slug", e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
+                      // Keep Thai so a Thai title gets a Thai slug (still editable below).
+                      setValue("slug", slugify(e.target.value));
                     },
                   })}
                   placeholder="ชื่อเรื่อง..."
