@@ -171,7 +171,8 @@ export type BulkUnlockResult =
  */
 export async function unlockChaptersBulk(
   userId: string,
-  chapterIds: string[]
+  chapterIds: string[],
+  _retry = false
 ): Promise<BulkUnlockResult> {
   const ids = [...new Set(chapterIds)].slice(0, 500);
   if (ids.length === 0) return { success: false, error: "NOTHING_TO_UNLOCK" };
@@ -216,7 +217,7 @@ export async function unlockChaptersBulk(
     });
     if (dec.count === 0) return null;
 
-    await tx.unlockedChapter.createMany({
+    const ins = await tx.unlockedChapter.createMany({
       data: toUnlock.map((c) => ({
         userId,
         chapterId: c.id,
@@ -224,6 +225,11 @@ export async function unlockChaptersBulk(
       })),
       skipDuplicates: true,
     });
+    // If a concurrent unlock (or a double-click) already owns some of these, the
+    // skipped rows would be charged for nothing → roll the whole charge back and
+    // retry with a fresh ownership filter, so the user can never overpay and the
+    // translator never gets a duplicate earning.
+    if (ins.count < toUnlock.length) throw new Error("UNLOCK_RACE");
     await tx.coinTransaction.create({
       data: {
         userId,
@@ -253,8 +259,18 @@ export async function unlockChaptersBulk(
 
     const u = await tx.user.findUnique({ where: { id: userId }, select: { coins: true } });
     return u;
+  }).catch((err: unknown) => {
+    if (err instanceof Error && err.message === "UNLOCK_RACE") return "RACE" as const;
+    throw err;
   });
 
+  // A concurrent unlock won the race for some chapters → recompute ownership and
+  // retry once so we only ever charge for what we actually unlock.
+  if (result === "RACE") {
+    return _retry
+      ? { success: false, error: "NOTHING_TO_UNLOCK" }
+      : unlockChaptersBulk(userId, chapterIds, true);
+  }
   if (!result) return { success: false, error: "INSUFFICIENT_COINS" };
   return {
     success: true,
