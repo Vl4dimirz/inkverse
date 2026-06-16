@@ -37,13 +37,22 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
   return { ok: true, remaining: limit - b.count, retryAfter };
 }
 
-// Best-effort client IP from common proxy headers (Vercel/Cloudflare/nginx).
+// Client IP for rate-limit keys, from trusted proxy headers.
+// SECURITY: never key on the LEFTMOST x-forwarded-for value — it is client-
+// controlled (Cloudflare/proxies APPEND the real IP, so a forged header lands
+// first), which would let an attacker rotate the key to bypass every per-IP
+// limit (login brute-force, scraping, register…). cf-connecting-ip is set by
+// Cloudflare to the real client IP and can't be spoofed; x-real-ip is the
+// platform-trusted value. Use x-forwarded-for's RIGHTMOST hop only as a fallback.
 export function clientIp(req: NextRequest): string {
+  const cf = req.headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
   const xff = req.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return (
-    req.headers.get("x-real-ip") ??
-    req.headers.get("cf-connecting-ip") ??
-    "unknown"
-  );
+  if (xff) {
+    const hops = xff.split(",").map((s) => s.trim()).filter(Boolean);
+    return hops[hops.length - 1] || "unknown";
+  }
+  return "unknown";
 }

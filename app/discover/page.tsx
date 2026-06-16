@@ -26,7 +26,7 @@ export default async function DiscoverPage({
 }) {
   const params = await searchParams;
   const { q, genre, status, type, country, sort = "views", page = "1", adult } = params;
-  const pageNum = Number(page);
+  const pageNum = Math.max(1, Math.floor(Number(page) || 1));
   const take = 24;
   const skip = (pageNum - 1) * take;
 

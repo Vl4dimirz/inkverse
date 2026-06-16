@@ -28,7 +28,7 @@ interface SearchParams {
 }
 
 async function MangaGrid({ searchParams }: { searchParams: SearchParams }) {
-  const page = Number(searchParams.page) || 1;
+  const page = Math.max(1, Math.floor(Number(searchParams.page) || 1));
   const take = 24;
   const skip = (page - 1) * take;
 

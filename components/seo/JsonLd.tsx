@@ -1,5 +1,14 @@
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
 
+// `JSON.stringify` is NOT safe to drop straight into a <script>: it leaves `<`,
+// `>`, `&` raw, so a creator-controlled value containing `</script>...` could
+// break out of the tag and inject markup (stored XSS). Escape those to \uXXXX —
+// still valid JSON. (This is ld+json data, never executed as JS, so the
+// U+2028/9 JS-string pitfall doesn't apply.)
+function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/[<>&]/g, (c) => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"));
+}
+
 interface MangaJsonLdProps {
   manga: {
     title: string;
@@ -56,7 +65,7 @@ export function MangaJsonLd({ manga }: MangaJsonLdProps) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
     />
   );
 }
@@ -83,7 +92,7 @@ export function WebsiteJsonLd() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
     />
   );
 }
@@ -107,7 +116,7 @@ export function BreadcrumbJsonLd({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
     />
   );
 }

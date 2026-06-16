@@ -34,13 +34,19 @@ function allow(key: string, max: number, now: number): boolean {
 }
 
 function clientIp(req: NextRequest): string {
+  // SECURITY: don't trust the leftmost x-forwarded-for (client-controlled — a
+  // forged header would let an attacker rotate the flood-guard key). Prefer the
+  // untamperable cf-connecting-ip / x-real-ip; fall back to XFF's rightmost hop.
+  const cf = req.headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
   const xff = req.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0].trim();
-  return (
-    req.headers.get("x-real-ip") ??
-    req.headers.get("cf-connecting-ip") ??
-    "unknown"
-  );
+  if (xff) {
+    const hops = xff.split(",").map((s) => s.trim()).filter(Boolean);
+    return hops[hops.length - 1] || "unknown";
+  }
+  return "unknown";
 }
 
 function tooMany(): NextResponse {

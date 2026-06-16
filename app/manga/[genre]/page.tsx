@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function GenrePage({ params, searchParams }: Props) {
   const { genre } = await params;
-  const page = Number((await searchParams).page) || 1;
+  const page = Math.max(1, Math.floor(Number((await searchParams).page) || 1));
   const take = 24;
 
   const genreRecord = await prisma.genre.findUnique({ where: { slug: genre } });

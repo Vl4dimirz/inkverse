@@ -11,8 +11,10 @@ export async function GET(req: NextRequest) {
   const type = searchParams.get("type");
   const sort = searchParams.get("sort") || "views";
   const mine = searchParams.get("mine");
-  const page = Number(searchParams.get("page")) || 1;
-  const take = Number(searchParams.get("limit")) || 24;
+  // Clamp pagination: a negative page → negative skip (Prisma 500), and an
+  // unbounded limit lets a caller request the whole table at once (DoS).
+  const page = Math.max(1, Math.floor(Number(searchParams.get("page")) || 1));
+  const take = Math.min(100, Math.max(1, Math.floor(Number(searchParams.get("limit")) || 24)));
   const skip = (page - 1) * take;
 
   const where: Record<string, unknown> = {};
