@@ -72,12 +72,7 @@ export default async function ProfilePage({ params }: Props) {
         take: 12,
         orderBy: { createdAt: "desc" },
         include: {
-          manga: {
-            include: {
-              chapters: { orderBy: { chapterNum: "desc" }, take: 1 },
-              ratings: { select: { score: true } },
-            },
-          },
+          manga: true,
         },
       },
       readHistory: {
@@ -94,8 +89,6 @@ export default async function ProfilePage({ params }: Props) {
           mangas: {
             orderBy: { updatedAt: "desc" },
             include: {
-              chapters: { orderBy: { chapterNum: "desc" }, take: 1 },
-              ratings: { select: { score: true } },
               _count: { select: { chapters: true } },
             },
           },
@@ -504,18 +497,14 @@ export default async function ProfilePage({ params }: Props) {
           <SectionTitle>ผลงานที่ลง ({works.length})</SectionTitle>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {works.map((manga) => {
-              const avgRating =
-                manga.ratings.length > 0
-                  ? manga.ratings.reduce((a, b) => a + b.score, 0) / manga.ratings.length
-                  : 0;
               return (
                 <div key={manga.id} className="space-y-1.5">
                   <MangaCard
                     slug={manga.slug}
                     title={manga.title}
                     coverUrl={manga.coverUrl}
-                    latestChapter={manga.chapters[0]?.chapterNum}
-                    rating={avgRating}
+                    latestChapter={manga.latestChapterNum ?? undefined}
+                    rating={manga.avgRating}
                     status={manga.status}
                     type={manga.type}
                   />
@@ -540,18 +529,14 @@ export default async function ProfilePage({ params }: Props) {
           <SectionTitle>บุ๊กมาร์ก</SectionTitle>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {user.bookmarks.map(({ manga }) => {
-              const avgRating =
-                manga.ratings.length > 0
-                  ? manga.ratings.reduce((a, b) => a + b.score, 0) / manga.ratings.length
-                  : 0;
               return (
                 <MangaCard
                   key={manga.id}
                   slug={manga.slug}
                   title={manga.title}
                   coverUrl={manga.coverUrl}
-                  latestChapter={manga.chapters[0]?.chapterNum}
-                  rating={avgRating}
+                  latestChapter={manga.latestChapterNum ?? undefined}
+                  rating={manga.avgRating}
                   status={manga.status}
                   type={manga.type}
                 />

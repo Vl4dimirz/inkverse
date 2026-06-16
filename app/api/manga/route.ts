@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { liveChapterWhere } from "@/lib/chapters";
 import { cleanTags } from "@/lib/tags";
 import { apiError } from "@/lib/apiError";
 
@@ -49,7 +48,7 @@ export async function GET(req: NextRequest) {
       : sort === "latest"
       ? { updatedAt: "desc" as const }
       : sort === "bookmarks"
-      ? { bookmarks: { _count: "desc" as const } }
+      ? { bookmarkCount: "desc" as const }
       : { totalViews: "desc" as const };
 
   const [mangas, total] = await Promise.all([
@@ -60,20 +59,16 @@ export async function GET(req: NextRequest) {
       skip: mine === "1" ? 0 : skip,
       include: {
         genres: { include: { genre: { select: { name: true, slug: true } } } },
-        chapters: { where: liveChapterWhere(), orderBy: { chapterNum: "desc" }, take: 1 },
-        ratings: { select: { score: true } },
       },
     }),
     prisma.manga.count({ where }),
   ]);
 
+  // avgRating / latestChapter come straight from the denormalized columns (synced
+  // in lib/mangaStats) — no per-title ratings load or latest-chapter subquery.
   const data = mangas.map((m) => ({
     ...m,
-    avgRating:
-      m.ratings.length > 0
-        ? m.ratings.reduce((a, b) => a + b.score, 0) / m.ratings.length
-        : 0,
-    latestChapter: m.chapters[0]?.chapterNum ?? null,
+    latestChapter: m.latestChapterNum,
     genres: m.genres.map((g) => g.genre),
   }));
 

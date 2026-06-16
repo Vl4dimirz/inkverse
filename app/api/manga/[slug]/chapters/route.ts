@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { notifyNewChapter } from "@/lib/notifications";
 import { renderNovel } from "@/lib/markdown";
 import { isChapterLive } from "@/lib/chapters";
+import { syncMangaLatestChapter } from "@/lib/mangaStats";
 import { revalidateMangaCache } from "@/lib/revalidate";
 import { decodeSlug } from "@/lib/slug";
 import { apiError } from "@/lib/apiError";
@@ -73,6 +74,7 @@ export async function POST(
     where: { id: manga.id },
     data: { updatedAt: new Date() },
   });
+  await syncMangaLatestChapter(manga.id);
 
   // Show the new chapter right away (bust the cached story page + home feed).
   revalidateMangaCache(manga.slug);

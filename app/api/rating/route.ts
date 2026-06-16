@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { apiError } from "@/lib/apiError";
+import { syncMangaRating } from "@/lib/mangaStats";
 
 const ratingSchema = z.object({
   mangaId: z.string().min(1),
@@ -30,6 +31,7 @@ export async function POST(req: NextRequest) {
     update: { score },
   });
 
+  await syncMangaRating(mangaId);
   return NextResponse.json(rating);
 }
 

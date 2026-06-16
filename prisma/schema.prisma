@@ -203,6 +203,13 @@ model Manga {
   status        String      @default("ONGOING")
   type          String      @default("MANGA")
   totalViews    Int         @default(0)
+  // Denormalized aggregates — kept in sync on rating/bookmark/chapter changes
+  // (lib/mangaStats) so list/grid queries don't load every rating + run a
+  // latest-chapter subquery per title. Backfill with scripts/zz-backfill-stats.
+  avgRating        Float    @default(0)
+  ratingCount      Int      @default(0)
+  bookmarkCount    Int      @default(0)
+  latestChapterNum Float?
   contentRating String      @default("EVERYONE") // EVERYONE | TEEN | ADULT
   tags          String[]    @default([]) // free-form creator tags (tropes etc.) for tag browsing
   // Attribution for openly-licensed (e.g. CC-BY) imported works
@@ -220,6 +227,10 @@ model Manga {
   storyBible    StoryBibleEntry[]
   translatorId  String?
   translator    Translator? @relation(fields: [translatorId], references: [id])
+
+  @@index([totalViews])
+  @@index([avgRating])
+  @@index([bookmarkCount])
 }
 
 // Private worldbuilding notes for the writer — characters, places, timeline.

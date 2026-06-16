@@ -30,12 +30,6 @@ const getData = unstable_cache(async () => {
         orderBy: { totalViews: "desc" },
         include: {
           genres: { include: { genre: true } },
-          chapters: {
-            where: liveChapterWhere(),
-            orderBy: { chapterNum: "desc" },
-            take: 1,
-          },
-          ratings: { select: { score: true } },
         },
       }),
       prisma.genre.findMany({ orderBy: { name: "asc" } }),
@@ -55,8 +49,6 @@ const getData = unstable_cache(async () => {
         where: { contentRating: { not: "ADULT" }, type: "NOVEL" },
         orderBy: { totalViews: "desc" },
         include: {
-          chapters: { where: liveChapterWhere(), orderBy: { chapterNum: "desc" }, take: 1 },
-          ratings: { select: { score: true } },
           genres: { include: { genre: true } },
         },
       }),
@@ -101,8 +93,8 @@ const getData = unstable_cache(async () => {
     type: m.type,
     status: m.status,
     totalViews: m.totalViews,
-    latestChapter: m.chapters[0]?.chapterNum,
-    avgRating: m.ratings.length > 0 ? m.ratings.reduce((a, b) => a + b.score, 0) / m.ratings.length : 0,
+    latestChapter: m.latestChapterNum ?? undefined,
+    avgRating: m.avgRating,
     genreNames: m.genres.map((g) => g.genre.name),
   }));
 
@@ -115,11 +107,8 @@ export default async function HomePage() {
 
   const withRating = mangas.map((m) => ({
     ...m,
-    avgRating:
-      m.ratings.length > 0
-        ? m.ratings.reduce((a, b) => a + b.score, 0) / m.ratings.length
-        : 0,
-    latestChapter: m.chapters[0]?.chapterNum,
+    avgRating: m.avgRating,
+    latestChapter: m.latestChapterNum ?? undefined,
     genreNames: m.genres.map((g) => g.genre.name),
   }));
 

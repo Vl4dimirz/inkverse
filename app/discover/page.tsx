@@ -52,39 +52,27 @@ export default async function DiscoverPage({
     if (g) where.genres = { some: { genreId: g.id } };
   }
 
-  const isRatingSort = sort === "rating";
-  const orderBy = isRatingSort
-    ? { totalViews: "desc" as const }
+  const orderBy =
+    sort === "rating"
+    ? { avgRating: "desc" as const }
     : sort === "latest"
     ? { updatedAt: "desc" as const }
     : sort === "bookmarks"
-    ? { bookmarks: { _count: "desc" as const } }
+    ? { bookmarkCount: "desc" as const }
     : { totalViews: "desc" as const };
 
-  const [fetched, total] = await Promise.all([
+  // avgRating / bookmarkCount are denormalized columns now → sort + paginate in
+  // the DB (no fetch-all + JS sort).
+  const [mangas, total] = await Promise.all([
     prisma.manga.findMany({
       where,
       orderBy,
-      take: isRatingSort ? undefined : take,
-      skip: isRatingSort ? undefined : skip,
-      include: {
-        genres: { include: { genre: true } },
-        chapters: { orderBy: { chapterNum: "desc" }, take: 1 },
-        ratings: { select: { score: true } },
-      },
+      take,
+      skip,
+      include: { genres: { include: { genre: true } } },
     }),
     prisma.manga.count({ where }),
   ]);
-
-  let mangas = fetched;
-  if (isRatingSort) {
-    mangas.sort((a, b) => {
-      const avgA = a.ratings.length > 0 ? a.ratings.reduce((s, r) => s + r.score, 0) / a.ratings.length : 0;
-      const avgB = b.ratings.length > 0 ? b.ratings.reduce((s, r) => s + r.score, 0) / b.ratings.length : 0;
-      return avgB - avgA;
-    });
-    mangas = mangas.slice(skip, skip + take);
-  }
 
   const totalPages = Math.ceil(total / take);
 
@@ -169,19 +157,14 @@ export default async function DiscoverPage({
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {mangas.map((manga, i) => {
-              const avgRating =
-                manga.ratings.length > 0
-                  ? manga.ratings.reduce((a, b) => a + b.score, 0) /
-                    manga.ratings.length
-                  : 0;
               return (
                 <div key={manga.id} className={`fade-in stagger-${Math.min(i + 1, 6) as 1|2|3|4|5|6}`}>
                   <MangaCard
                     slug={manga.slug}
                     title={manga.title}
                     coverUrl={manga.coverUrl}
-                    latestChapter={manga.chapters[0]?.chapterNum}
-                    rating={avgRating}
+                    latestChapter={manga.latestChapterNum ?? undefined}
+                    rating={manga.avgRating}
                     views={manga.totalViews}
                     status={manga.status}
                     type={manga.type}

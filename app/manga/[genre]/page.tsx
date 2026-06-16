@@ -46,10 +46,6 @@ export default async function GenrePage({ params, searchParams }: Props) {
       orderBy: { totalViews: "desc" },
       take,
       skip: (page - 1) * take,
-      include: {
-        chapters: { orderBy: { chapterNum: "desc" }, take: 1 },
-        ratings: { select: { score: true } },
-      },
     }),
     prisma.manga.count({ where }),
   ]);
@@ -70,19 +66,14 @@ export default async function GenrePage({ params, searchParams }: Props) {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {mangas.map((manga, i) => {
-          const avgRating =
-            manga.ratings.length > 0
-              ? manga.ratings.reduce((a, b) => a + b.score, 0) /
-                manga.ratings.length
-              : 0;
           return (
             <div key={manga.id} className={`fade-in stagger-${Math.min(i + 1, 6) as 1|2|3|4|5|6}`}>
               <MangaCard
                 slug={manga.slug}
                 title={manga.title}
                 coverUrl={manga.coverUrl}
-                latestChapter={manga.chapters[0]?.chapterNum}
-                rating={avgRating}
+                latestChapter={manga.latestChapterNum ?? undefined}
+                rating={manga.avgRating}
                 views={manga.totalViews}
                 status={manga.status}
                 type={manga.type}

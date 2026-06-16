@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { renderNovel, novelStats } from "@/lib/markdown";
 import { isChapterLive } from "@/lib/chapters";
+import { syncMangaLatestChapter } from "@/lib/mangaStats";
 import { notifyNewChapter } from "@/lib/notifications";
 import { revalidateMangaCache } from "@/lib/revalidate";
 import { apiError } from "@/lib/apiError";
@@ -117,6 +118,8 @@ export async function PATCH(
   try {
     const wasLive = isChapterLive(chapter);
     const updated = await prisma.chapter.update({ where: { id }, data });
+    // Status / publishAt / chapterNum edits can change the latest live chapter.
+    await syncMangaLatestChapter(chapter.manga.id);
     // Reflect the edit immediately on the story page + home feed.
     revalidateMangaCache(chapter.manga.slug);
     // Notify bookmarkers only when a chapter first becomes live (not on draft saves).
@@ -148,6 +151,7 @@ export async function DELETE(
 
   // Cascades to pages, unlocked records, read history and comments.
   await prisma.chapter.delete({ where: { id } });
+  await syncMangaLatestChapter(chapter.manga.id);
   revalidateMangaCache(chapter.manga.slug);
   return NextResponse.json({ ok: true });
 }
