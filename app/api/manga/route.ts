@@ -93,15 +93,14 @@ export async function POST(req: NextRequest) {
 
   const userId = (session.user as { id: string }).id;
 
-  // Resolve translator record (ADMIN may not have one)
-  let translatorId: string | null = null;
-  if (role === "TRANSLATOR") {
-    const translator = await prisma.translator.findUnique({ where: { userId } });
-    if (!translator) {
-      return apiError("AUTH-008", 403, { message: "ไม่พบโปรไฟล์ครีเอเตอร์" });
-    }
-    translatorId = translator.id;
+  // Link the work to the creator's translator profile so it shows in their
+  // dashboard. A TRANSLATOR must have one; an ADMIN links to theirs if they have
+  // one (otherwise the work stays unowned = platform content).
+  const translator = await prisma.translator.findUnique({ where: { userId } });
+  if (role === "TRANSLATOR" && !translator) {
+    return apiError("AUTH-008", 403, { message: "ไม่พบโปรไฟล์ครีเอเตอร์" });
   }
+  const translatorId: string | null = translator?.id ?? null;
 
   const body = await req.json();
   const { title, slug, description, originCountry, status, type, coverUrl, genreIds, contentRating, tags } = body;
