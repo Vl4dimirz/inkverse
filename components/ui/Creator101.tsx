@@ -8,7 +8,8 @@ import {
   Heading2, List, ListOrdered, Quote, Minus, Link2, Image as ImageIcon,
   AlignLeft, AlignCenter, AlignRight, Undo2, Redo2, Save, Send, Clock, Coins,
   Wallet, Upload, GripVertical, Megaphone, Type, Target, Maximize2, Search,
-  ArrowRight, BadgeCheck,
+  ArrowRight, BadgeCheck, History, RotateCcw, Library, BarChart3, FileDown,
+  Sparkles, Eye, Users, MapPin, BookOpen,
 } from "lucide-react";
 
 /* ---------- visual building blocks ---------- */
@@ -97,6 +98,9 @@ function EditorTools() {
           <ToolBtn icon={AlignRight} name="ชิดขวา" />
           <ToolBtn icon={Undo2} name="ย้อนกลับ" />
           <ToolBtn icon={Redo2} name="ทำซ้ำ" />
+          <ToolBtn icon={Search} name="ค้นหา-แทนที่" />
+          <ToolBtn icon={History} name="ประวัติเวอร์ชัน" />
+          <ToolBtn icon={Maximize2} name="โหมดโฟกัส" />
         </div>
       </Mock>
       <div className="mt-3 grid sm:grid-cols-2 gap-2">
@@ -171,6 +175,141 @@ function EarningsBlock() {
   );
 }
 
+/* ---------- new pro-toolkit visual blocks ---------- */
+
+function VersionHistoryBlock() {
+  return (
+    <Mock label="ประวัติเวอร์ชัน (กู้คืนงาน)">
+      <div className="space-y-1.5">
+        {[
+          { d: "วันนี้ 14:32", w: "3,120 คำ", now: true },
+          { d: "วันนี้ 11:05", w: "2,740 คำ" },
+          { d: "เมื่อวาน 21:18", w: "1,990 คำ" },
+        ].map((v) => (
+          <div key={v.d} className="flex items-center gap-3 border border-[var(--border)] px-3 py-2 text-xs">
+            <History className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+            <span className="text-[var(--text-primary)]">{v.d}</span>
+            <span className="text-[10px] text-[var(--text-muted)]">· {v.w}</span>
+            <span className="flex-1" />
+            {v.now ? (
+              <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">ปัจจุบัน</span>
+            ) : (
+              <span className="inline-flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 text-[10px] text-[var(--text-secondary)] border border-[var(--border)] px-2 py-0.5"><Eye className="w-3 h-3" /> ดู</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-[var(--text-primary)] border border-[var(--border)] px-2 py-0.5"><RotateCcw className="w-3 h-3" /> กู้คืน</span>
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </Mock>
+  );
+}
+
+function StoryBibleBlock() {
+  return (
+    <Mock label="Story Bible — คลังข้อมูลเรื่อง">
+      <div className="grid sm:grid-cols-2 gap-2">
+        {[
+          { icon: Users, t: "ตัวละคร", d: "อาริน — นางเอก ผมเงิน ตาสีฟ้า อายุ 17" },
+          { icon: MapPin, t: "สถานที่", d: "เมืองเวล — เมืองท่าเหนือ หมอกตลอดปี" },
+          { icon: BookOpen, t: "ปูมเรื่อง", d: "กติกาเวท: ใช้พลังได้ 3 ครั้ง/วัน" },
+          { icon: Library, t: "ไอเทม/อื่นๆ", d: "ดาบจันทรา — สืบทอดตระกูล" },
+        ].map((c) => (
+          <div key={c.t} className="border border-[var(--border)] p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <c.icon className="w-3.5 h-3.5 text-[var(--text-primary)]" />
+              <span className="text-xs font-semibold text-[var(--text-primary)]">{c.t}</span>
+            </div>
+            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">{c.d}</p>
+          </div>
+        ))}
+      </div>
+    </Mock>
+  );
+}
+
+function AnalyticsBlock() {
+  return (
+    <Mock label="สถิติรายเรื่อง (Analytics)">
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {[
+          { k: "ยอดอ่าน", v: "48.2K" },
+          { k: "ผู้ติดตาม", v: "1,204" },
+          { k: "ปลดล็อก", v: "362" },
+        ].map((s) => (
+          <div key={s.k} className="border border-[var(--border)] p-2.5 text-center">
+            <p className="font-bebas text-2xl text-[var(--text-primary)] leading-none">{s.v}</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1">{s.k}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-end gap-1 h-16 border-b border-[var(--border)] pb-px">
+        {[35, 52, 44, 68, 60, 82, 95].map((h, i) => (
+          <div key={i} className="flex-1 bg-[var(--text-primary)]/70" style={{ height: `${h}%` }} />
+        ))}
+      </div>
+      <p className="text-[10px] text-[var(--text-muted)] mt-2">ยอดอ่าน 7 วันล่าสุด · ดูได้ว่าตอนไหนปังหรือร่วง เพื่อวางแผนเขียนต่อ</p>
+    </Mock>
+  );
+}
+
+function ExportBlock() {
+  return (
+    <Mock label="ส่งออกต้นฉบับ (Backup)">
+      <div className="flex flex-wrap items-center gap-2">
+        <FakeBtn><FileDown className="w-3.5 h-3.5" /> .TXT</FakeBtn>
+        <FakeBtn><FileDown className="w-3.5 h-3.5" /> .EPUB</FakeBtn>
+        <ArrowRight className="w-4 h-4 text-[var(--text-muted)]" />
+        <span className="text-xs text-[var(--text-muted)]">โหลดทั้งเรื่องเก็บไว้ในเครื่อง</span>
+      </div>
+      <p className="text-[11px] text-[var(--text-muted)] mt-3">
+        งานเขียนเป็นของคุณ 100% — ส่งออกเก็บสำรอง หรือเอา .epub ไปอ่านบนเครื่องอ่าน e-book ได้เลย
+      </p>
+    </Mock>
+  );
+}
+
+/* ---------- ad banner: new writer toolkit ---------- */
+
+function WriterToolkitBanner() {
+  const tools = [
+    { icon: Type, t: "เอดิเตอร์ WYSIWYG" },
+    { icon: History, t: "ประวัติเวอร์ชัน" },
+    { icon: Library, t: "Story Bible" },
+    { icon: BarChart3, t: "สถิติรายเรื่อง" },
+    { icon: FileDown, t: "ส่งออก .epub" },
+    { icon: Maximize2, t: "โหมดโฟกัส" },
+  ];
+  return (
+    <div className="relative overflow-hidden border border-[var(--text-primary)] bg-[var(--bg-card)] p-6 mb-10">
+      {/* glow accent */}
+      <div className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full bg-[var(--text-primary)]/10 blur-2xl" />
+      <div className="relative">
+        <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em] text-[var(--text-primary)] font-semibold">
+          <Sparkles className="w-3.5 h-3.5" /> ใหม่! เครื่องมือนักเขียนระดับโปร
+        </span>
+        <h2 className="font-bebas text-3xl sm:text-4xl text-[var(--text-primary)] tracking-wide mt-2 leading-none">
+          เครื่องมือเขียนครบ จบในที่เดียว
+        </h2>
+        <p className="text-sm text-[var(--text-secondary)] mt-2 max-w-lg leading-relaxed">
+          INKVERSE อัปเกรดชุดเครื่องมือนักเขียนใหม่หมด — เขียนลื่น เก็บงานปลอดภัย วางโครงเรื่องเป็นระบบ
+          และดูสถิติเพื่อโตได้จริง สิ่งที่แพลตฟอร์มอื่นไม่มีให้
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-5">
+          {tools.map((t) => (
+            <div key={t.t} className="flex items-center gap-2.5 border border-[var(--border)] bg-[var(--bg-primary)]/40 px-3 py-2.5">
+              <t.icon className="w-4 h-4 text-[var(--text-primary)] shrink-0" />
+              <span className="text-xs font-semibold text-[var(--text-primary)]">{t.t}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] text-[var(--text-muted)] mt-4">เลื่อนลงดูวิธีใช้ทุกตัวแบบทีละขั้น ↓</p>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- the page ---------- */
 
 type Role = "writer" | "translator";
@@ -240,6 +379,8 @@ export default function Creator101() {
 function WriterGuide() {
   return (
     <>
+      <WriterToolkitBanner />
+
       <Step n={1} title="สมัครเป็นนักเขียน">
         <p>เข้าเมนู <b className="text-[var(--text-primary)]">ครีเอเตอร์ → สมัครนักเขียน</b> กรอกใบสมัครสั้นๆ</p>
         <Mock label="ใบสมัครนักเขียน">
@@ -266,8 +407,9 @@ function WriterGuide() {
       </Step>
 
       <Step n={3} title="เขียนตอนด้วยเครื่องมือเขียน">
-        <p>หน้าเขียนตอนมีเครื่องมือครบเหมือนโปรแกรมเขียนมืออาชีพ จัดรูปแบบข้อความได้เต็มที่</p>
+        <p>หน้าเขียนตอนมีเครื่องมือครบเหมือนโปรแกรมเขียนมืออาชีพ จัดรูปแบบข้อความได้เต็มที่ — เลือกข้อความแล้วกดปุ่มบนแถบเครื่องมือเพื่อจัดรูปแบบ</p>
         <EditorTools />
+        <Tip><b className="text-[var(--text-primary)]">บันทึกอัตโนมัติทุก 2 วินาที</b> — ไม่ต้องกดเซฟเอง เน็ตหลุด/ปิดหน้าไปงานก็ไม่หาย</Tip>
       </Step>
 
       <Step n={4} title="แทรกรูปในตอน">
@@ -275,7 +417,19 @@ function WriterGuide() {
         <Mock><div className="flex items-center gap-2"><FakeBtn><ImageIcon className="w-3.5 h-3.5" /> แทรกรูป</FakeBtn><ArrowRight className="w-4 h-4 text-[var(--text-muted)]" /><span className="text-xs text-[var(--text-muted)]">เลือกไฟล์ → อัปอัตโนมัติ → แทรกในตอน</span></div></Mock>
       </Step>
 
-      <Step n={5} title="บันทึกร่าง · เผยแพร่ · ตั้งเวลาโพสต์">
+      <Step n={5} title="ประวัติเวอร์ชัน — ย้อน & กู้คืนงาน">
+        <p>กดไอคอน <b className="text-[var(--text-primary)]">ประวัติเวอร์ชัน</b> <History className="inline w-3.5 h-3.5 align-text-bottom" /> บนแถบเครื่องมือ ระบบเก็บสแน็ปช็อตงานให้เป็นช่วงๆ อัตโนมัติ เผลอลบทั้งย่อหน้า หรืออยากกลับไปเวอร์ชันก่อน — <b className="text-[var(--text-primary)]">กู้คืนได้ในคลิกเดียว</b></p>
+        <VersionHistoryBlock />
+        <Tip>กด <b className="text-[var(--text-primary)]">ดู</b> เพื่อพรีวิวเวอร์ชันเก่าก่อน แล้วค่อย <b className="text-[var(--text-primary)]">กู้คืน</b> — เวอร์ชันปัจจุบันจะถูกเก็บเข้าประวัติให้ก่อนเสมอ ไม่มีทางพลาด</Tip>
+      </Step>
+
+      <Step n={6} title="Story Bible — คลังข้อมูลเรื่อง">
+        <p>เปิดจากหน้าจัดการเรื่อง → <b className="text-[var(--text-primary)]">Story Bible</b> ที่เก็บข้อมูลตัวละคร สถานที่ ปูมเรื่อง และกติกาโลก ไว้ที่เดียว เขียนเรื่องยาวหลายร้อยตอนก็ไม่หลุดรายละเอียด ชื่อตัวละคร/สีตาไม่เพี้ยน</p>
+        <StoryBibleBlock />
+        <Tip>เหมาะมากกับนิยายแฟนตาซี/ระบบเวท ที่มีตัวละครเยอะ — เปิดอ่านอ้างอิงระหว่างเขียนได้ตลอด ไม่ต้องเลื่อนหาในตอนเก่า</Tip>
+      </Step>
+
+      <Step n={7} title="บันทึกร่าง · เผยแพร่ · ตั้งเวลาโพสต์">
         <Mock>
           <div className="flex flex-wrap gap-2">
             <FakeBtn><Save className="w-3.5 h-3.5" /> บันทึกร่าง</FakeBtn>
@@ -286,12 +440,23 @@ function WriterGuide() {
         <p><b className="text-[var(--text-primary)]">ร่าง</b> = เก็บไว้ ยังไม่โชว์ · <b className="text-[var(--text-primary)]">เผยแพร่</b> = ขึ้นทันที + แจ้งเตือนคนติดตาม · <b className="text-[var(--text-primary)]">ตั้งเวลา</b> = ตั้งให้ขึ้นเองในอนาคต</p>
       </Step>
 
-      <Step n={6} title="ตั้งตอนพรีเมียม / อ่านล่วงหน้า">
+      <Step n={8} title="ตั้งตอนพรีเมียม / อ่านล่วงหน้า">
         <p>หาเงินจากตอนของคุณ — ตั้งราคาเหรียญต่อตอน หรือทำ “อ่านล่วงหน้า” (ติดเหรียญช่วงแรก แล้วปลดฟรีตามเวลา)</p>
         <MonetizeBlock />
       </Step>
 
-      <Step n={7} title="รับรายได้ + ถอนเงิน" last>
+      <Step n={9} title="ดูสถิติรายเรื่อง (Analytics)">
+        <p>เปิดจากหน้าจัดการเรื่อง → <b className="text-[var(--text-primary)]">สถิติ</b> ดูยอดอ่าน ผู้ติดตาม การปลดล็อก และกราฟย้อนหลัง รู้ว่าตอนไหนคนชอบ จะได้เขียนต่อให้ตรงใจคนอ่าน</p>
+        <AnalyticsBlock />
+      </Step>
+
+      <Step n={10} title="ส่งออกต้นฉบับ (.txt / .epub)">
+        <p>กด <b className="text-[var(--text-primary)]">ส่งออก</b> เพื่อโหลดทั้งเรื่องเก็บไว้ในเครื่อง เป็นไฟล์ <b className="text-[var(--text-primary)]">.txt</b> หรือ <b className="text-[var(--text-primary)]">.epub</b> (e-book) — สำรองงานหรือเอาไปอ่าน/แก้ที่อื่นได้</p>
+        <ExportBlock />
+        <Tip>นิสัยดี: ส่งออกเก็บไว้เป็นระยะ งานเขียนคือทรัพย์สินของคุณ มีสำเนาของตัวเองอุ่นใจกว่า</Tip>
+      </Step>
+
+      <Step n={11} title="รับรายได้ + ถอนเงิน" last>
         <EarningsBlock />
       </Step>
     </>
