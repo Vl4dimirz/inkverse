@@ -72,8 +72,21 @@ export default function NovelEditor({
     forceTimer.current = setTimeout(() => { forceTimer.current = null; force((n) => n + 1); }, 200);
   }, []);
   // Latest field values for the debounced autosave closure.
-  const stateRef = useRef({ chapterId, title, num, isPremium, coinCost, authorNote });
-  stateRef.current = { chapterId, title, num, isPremium, coinCost, authorNote };
+  const stateRef = useRef({ chapterId, title, num, isPremium, coinCost, authorNote, status });
+  stateRef.current = { chapterId, title, num, isPremium, coinCost, authorNote, status };
+  // The created chapter id, tracked synchronously so back-to-back saves never
+  // race into a second CREATE (which would 409 on the unique chapterNum).
+  const chapterIdRef = useRef<string | null>(existing?.id ?? null);
+  // Serializes overlapping saves so a debounced autosave + an explicit publish
+  // run in order (create first, then patch) instead of both trying to create.
+  const inFlight = useRef<Promise<boolean> | null>(null);
+
+  // Don't let a debounced autosave fire after the editor unmounts (e.g. right
+  // after publish navigates away) — it could re-create or downgrade the chapter.
+  useEffect(() => () => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    if (forceTimer.current) clearTimeout(forceTimer.current);
+  }, []);
 
   useEffect(() => {
     try { const g = localStorage.getItem("novelWordGoal"); if (g) setGoal(parseInt(g) || 0); } catch {}
@@ -95,47 +108,61 @@ export default function NovelEditor({
 
   // ── Save (create-or-patch) ───────────────────────────────────
   const doSave = useCallback(
-    async (override?: { status?: string; publishAt?: string | null; freeAt?: string | null }) => {
-      if (!editor) return;
-      const st = stateRef.current;
-      const n = parseFloat(st.num);
-      if (!Number.isFinite(n) || n < 0) { setSaveState("error"); setError("เลขตอนไม่ถูกต้อง"); return; }
-      setSaveState("saving"); setError("");
-      const payload = {
-        title: st.title.trim(),
-        content: editor.getHTML(),
-        isPremium: st.isPremium,
-        coinCost: st.isPremium ? Math.max(1, parseInt(st.coinCost) || 1) : 0,
-        authorNote: st.authorNote.trim(),
-        status: override?.status ?? "DRAFT",
-        publishAt: override?.publishAt ?? null,
-        ...(override?.freeAt !== undefined ? { freeAt: override.freeAt } : {}),
+    async (override?: { status?: string; publishAt?: string | null; freeAt?: string | null }): Promise<boolean> => {
+      if (!editor) return false;
+      // An explicit save/publish supersedes any pending debounced autosave.
+      if (saveTimer.current) { clearTimeout(saveTimer.current); saveTimer.current = null; }
+      // If a save is already running, wait for it so we PATCH the (now-created)
+      // chapter instead of firing a second CREATE that collides on chapterNum.
+      if (inFlight.current) { try { await inFlight.current; } catch {} }
+
+      const run = async (): Promise<boolean> => {
+        const st = stateRef.current;
+        const n = parseFloat(st.num);
+        if (!Number.isFinite(n) || n < 0) { setSaveState("error"); setError("เลขตอนไม่ถูกต้อง"); return false; }
+        setSaveState("saving"); setError("");
+        const payload = {
+          title: st.title.trim(),
+          content: editor.getHTML(),
+          isPremium: st.isPremium,
+          coinCost: st.isPremium ? Math.max(1, parseInt(st.coinCost) || 1) : 0,
+          authorNote: st.authorNote.trim(),
+          // A bare autosave must never downgrade an already-published chapter.
+          status: override?.status ?? st.status ?? "DRAFT",
+          publishAt: override?.publishAt ?? null,
+          ...(override?.freeAt !== undefined ? { freeAt: override.freeAt } : {}),
+        };
+        try {
+          let res: Response;
+          const cid = chapterIdRef.current;
+          if (cid) {
+            res = await fetch(`/api/chapters/${cid}`, {
+              method: "PATCH", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...payload, chapterNum: n }),
+            });
+          } else {
+            res = await fetch(`/api/manga/${mangaSlug}/chapters`, {
+              method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chapterNum: n, ...payload }),
+            });
+          }
+          if (!res.ok) {
+            const d = await res.json().catch(() => ({}));
+            setSaveState("error"); setError(d.error || "บันทึกไม่สำเร็จ"); return false;
+          }
+          const saved = await res.json();
+          if (saved?.id && !chapterIdRef.current) { chapterIdRef.current = saved.id; setChapterId(saved.id); }
+          if (override?.status) setStatus(override.status);
+          setSaveState("saved");
+          return true;
+        } catch {
+          setSaveState("error"); setError("เครือข่ายขัดข้อง"); return false;
+        }
       };
-      try {
-        let res: Response;
-        if (st.chapterId) {
-          res = await fetch(`/api/chapters/${st.chapterId}`, {
-            method: "PATCH", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...payload, chapterNum: n }),
-          });
-        } else {
-          res = await fetch(`/api/manga/${mangaSlug}/chapters`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chapterNum: n, ...payload }),
-          });
-        }
-        if (!res.ok) {
-          const d = await res.json().catch(() => ({}));
-          setSaveState("error"); setError(d.error || "บันทึกไม่สำเร็จ"); return false;
-        }
-        const saved = await res.json();
-        if (saved?.id && !st.chapterId) setChapterId(saved.id);
-        if (override?.status) setStatus(override.status);
-        setSaveState("saved");
-        return true;
-      } catch {
-        setSaveState("error"); setError("เครือข่ายขัดข้อง"); return false;
-      }
+
+      const p = run();
+      inFlight.current = p;
+      try { return await p; } finally { if (inFlight.current === p) inFlight.current = null; }
     },
     [editor, mangaSlug]
   );
