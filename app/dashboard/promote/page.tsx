@@ -29,7 +29,7 @@ export default async function PromotePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
       <h1 className="font-bebas text-4xl text-[var(--text-primary)] tracking-wider mb-1">โปรโมตผลงาน</h1>
-      <p className="text-sm text-[var(--text-secondary)] mb-8">ดึงแฟนของคุณเข้ามา — แชร่ผลงานง่ายๆ พร้อมลิงก์ + แคปชั่น</p>
+      <p className="text-sm text-[var(--text-secondary)] mb-8">ดึงแฟนของคุณเข้ามา — แชร์ลิงก์ + แคปชั่น และดาวน์โหลดการ์ดโปรโมทไปโพสต์ IG / TikTok ได้เลย</p>
       <PromoteKit works={user?.translator?.mangas ?? []} />
     </div>
   );
