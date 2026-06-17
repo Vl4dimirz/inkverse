@@ -17,6 +17,7 @@ import { getUserCoins } from "@/lib/coins";
 import { getUserRankBadge, getRankBadges } from "@/lib/ranks";
 import { liveChapterWhere, isChapterLocked } from "@/lib/chapters";
 import CommentSection from "@/components/ui/CommentSection";
+import MangaCard from "@/components/ui/MangaCard";
 import RankChip from "@/components/ui/RankChip";
 import {
   BookOpen,
@@ -97,6 +98,34 @@ function getMangaProfile(slug: string) {
         },
       });
       if (!m) return null;
+
+      // Related works — share ≥1 genre, ranked by views (denormalized fields, so
+      // no per-title ratings/chapters loads). Fall back to top works of the same
+      // type if the genre overlap is thin. Hide ADULT unless this work is ADULT.
+      const relSelect = {
+        id: true, slug: true, title: true, coverUrl: true, type: true,
+        status: true, avgRating: true, latestChapterNum: true, totalViews: true,
+      };
+      const notAdult = m.contentRating === "ADULT" ? {} : { contentRating: { not: "ADULT" } };
+      const genreIds = m.genres.map((g) => g.genreId);
+      let related = genreIds.length
+        ? await prisma.manga.findMany({
+            where: { id: { not: m.id }, ...notAdult, genres: { some: { genreId: { in: genreIds } } } },
+            orderBy: { totalViews: "desc" },
+            take: 8,
+            select: relSelect,
+          })
+        : [];
+      if (related.length < 4) {
+        const fill = await prisma.manga.findMany({
+          where: { id: { notIn: [m.id, ...related.map((r) => r.id)] }, ...notAdult, type: m.type },
+          orderBy: { totalViews: "desc" },
+          take: 8 - related.length,
+          select: relSelect,
+        });
+        related = [...related, ...fill];
+      }
+
       return {
         ...m,
         createdAt: m.createdAt.toISOString(),
@@ -106,6 +135,7 @@ function getMangaProfile(slug: string) {
           publishedAt: c.publishedAt.toISOString(),
           freeAt: c.freeAt ? c.freeAt.toISOString() : null,
         })),
+        related,
       };
     },
     ["manga-profile", slug],
@@ -579,6 +609,31 @@ export default async function MangaProfilePage({ params }: Props) {
         </div>
       </div>
     </div>
+
+      {/* Related works — keep readers browsing (shared genres, view-ranked) */}
+      {manga.related.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-4">
+          <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-[0.18em] uppercase flex items-center gap-3 mb-4">
+            <span className="w-6 h-px bg-[var(--text-primary)]" />
+            เรื่องที่เกี่ยวข้อง
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {manga.related.map((r) => (
+              <MangaCard
+                key={r.id}
+                slug={r.slug}
+                title={r.title}
+                coverUrl={r.coverUrl}
+                latestChapter={r.latestChapterNum ?? undefined}
+                rating={r.avgRating}
+                views={r.totalViews}
+                status={r.status}
+                type={r.type}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Work-level comments — readers discuss the whole story (key for novels) */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-16">
