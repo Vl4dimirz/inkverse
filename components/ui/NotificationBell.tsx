@@ -124,7 +124,15 @@ export default function NotificationBell() {
   }
 
   function handleOpen() {
-    setOpen((v) => !v);
+    const next = !open;
+    setOpen(next);
+    // Opening the bell counts as "seen": clear the badge immediately and mark
+    // everything read server-side — no need to click into each item. The unread
+    // highlight on the items is kept for this glance; the next poll reconciles it.
+    if (next && unreadCount > 0) {
+      setUnreadCount(0);
+      fetch("/api/notifications", { method: "PATCH" }).catch(() => {});
+    }
   }
 
   return (
