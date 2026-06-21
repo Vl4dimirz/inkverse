@@ -1,5 +1,14 @@
 import type { NextConfig } from "next";
 
+// 'unsafe-eval' is only needed by Turbopack's dev runtime. Production builds
+// don't need it, so we drop it there to tighten XSS protection. 'unsafe-inline'
+// is still required by Next.js' inline bootstrap script (would need nonces to
+// remove — tracked as a separate hardening task).
+const scriptSrc =
+  process.env.NODE_ENV === "production"
+    ? "script-src 'self' 'unsafe-inline' https://cdn.omise.co https://challenges.cloudflare.com"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.omise.co https://challenges.cloudflare.com";
+
 // Security response headers applied to every route.
 const securityHeaders = [
   // Force HTTPS for 2 years (ignored by browsers on plain http, e.g. localhost).
@@ -10,12 +19,14 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   // Don't leak full URLs to other origins.
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // Isolate our browsing context from cross-origin windows (XS-Leaks). Use the
+  // allow-popups variant so the Google sign-in popup/redirect still works.
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   // Drop powerful browser features we don't use.
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
   { key: "X-DNS-Prefetch-Control", value: "off" },
-  // Content Security Policy. 'unsafe-inline'/'unsafe-eval' are required by
-  // Next.js' inline bootstrap + Turbopack; the value still locks down which
-  // *external* origins may load scripts, connect, or frame us.
+  // Content Security Policy. The value locks down which *external* origins may
+  // load scripts, connect, or frame us. See scriptSrc note re: unsafe-* above.
   {
     key: "Content-Security-Policy",
     value: [
@@ -27,9 +38,9 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.omise.co",
-      "frame-src 'self' https://cdn.omise.co",
-      "connect-src 'self' https://api.omise.co https://vault.omise.co https://developer.easyslip.com https://api.easyslip.com",
+      scriptSrc,
+      "frame-src 'self' https://cdn.omise.co https://challenges.cloudflare.com",
+      "connect-src 'self' https://api.omise.co https://vault.omise.co https://developer.easyslip.com https://api.easyslip.com https://challenges.cloudflare.com",
     ].join("; "),
   },
 ];
