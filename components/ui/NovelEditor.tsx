@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ThaiSpellcheck, thaiSpellcheckKey, type MappedIssue } from "./extensions/ThaiSpellcheck";
 import { checkThaiRules } from "@/lib/thaiSpellcheck/rules";
+import { showThaiMarks } from "@/lib/thaiSpellcheck/display";
 
 interface Existing {
   id: string;
@@ -578,10 +579,10 @@ export default function NovelEditor({
                       >
                         {issue.severity === "error" ? "ผิด" : "เตือน"}
                       </span>
-                      <span className="text-[var(--text-primary)] font-medium">&ldquo;{issue.offendingText}&rdquo;</span>
+                      <span className="text-[var(--text-primary)] font-medium">&ldquo;{showThaiMarks(issue.offendingText)}&rdquo;</span>
                       <span className="text-[var(--text-secondary)] ml-1.5">{issue.message}</span>
                       {issue.suggestion && (
-                        <span className="text-[var(--text-muted)] ml-1">→ &ldquo;{issue.suggestion}&rdquo;</span>
+                        <span className="text-[var(--text-muted)] ml-1">→ &ldquo;{showThaiMarks(issue.suggestion)}&rdquo;</span>
                       )}
                     </span>
                     <span className="flex items-center gap-1 shrink-0 mt-0.5">
