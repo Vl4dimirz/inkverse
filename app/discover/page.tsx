@@ -176,6 +176,8 @@ export default async function DiscoverPage({
                     status={manga.status}
                     type={manga.type}
                     contentRating={manga.contentRating}
+                    // First 4 items = first 2 rows on mobile (2-col grid) — above fold.
+                    priority={i < 4}
                   />
                 </div>
               );

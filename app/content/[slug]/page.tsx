@@ -164,18 +164,24 @@ export default async function MangaProfilePage({ params }: Props) {
 
   const isOwner = !!userId && manga.translator?.userId === userId;
 
+  // Scope the per-user chapter lookups to THIS manga's chapters (PK-bounded `in`)
+  // instead of scanning the reader's entire site-wide unlock/read history. A heavy
+  // reader can have thousands of unlocked/read rows; we only ever need the ones
+  // for the chapters rendered on this page.
+  const chapterIds = manga.chapters.map((c) => c.id);
+
   // One parallel round-trip for everything that depends on the loaded manga:
   // balance, unlocked/read sets, work-level comments, uploader rank, view bump.
   const [userCoins, unlockedSet, readSet, workComments, translatorRank, bookmarkRow] = await Promise.all([
     userId ? getUserCoins(userId) : Promise.resolve(0),
-    userId
+    userId && chapterIds.length
       ? prisma.unlockedChapter
-          .findMany({ where: { userId }, select: { chapterId: true } })
+          .findMany({ where: { userId, chapterId: { in: chapterIds } }, select: { chapterId: true } })
           .then((rows) => new Set(rows.map((r) => r.chapterId)))
       : Promise.resolve(new Set<string>()),
-    userId
+    userId && chapterIds.length
       ? prisma.readHistory
-          .findMany({ where: { userId, chapter: { mangaId: manga.id } }, select: { chapterId: true } })
+          .findMany({ where: { userId, chapterId: { in: chapterIds } }, select: { chapterId: true } })
           .then((rows) => new Set(rows.map((r) => r.chapterId)))
       : Promise.resolve(new Set<string>()),
     prisma.comment.findMany({
@@ -320,8 +326,15 @@ export default async function MangaProfilePage({ params }: Props) {
                   fill
                   unoptimized
                   className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 40vw, 25vw"
+                  // `preload` is the Next.js 16 replacement for deprecated `priority`.
+                  // This is the hero cover and the LCP element on this page.
+                  preload
+                  fetchPriority="high"
+                  loading="eager"
+                  // The cover column is capped at 180 px (max-w-[180px] on mobile;
+                  // a 180 px grid column on md+). The previous "40vw" overstated the
+                  // rendered width on tablets (307 px for a 180 px slot).
+                  sizes="180px"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-[var(--bg-card)] text-6xl opacity-20">

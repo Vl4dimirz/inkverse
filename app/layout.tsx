@@ -120,6 +120,21 @@ export default function RootLayout({
               "(function(){try{var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();",
           }}
         />
+        {/*
+          Start the TLS handshake to the cover CDN as early as possible so
+          that cover images (the LCP element on list/detail pages) don't stall
+          on connection setup. dns-prefetch is the safe fallback for browsers
+          that don't support preconnect.
+        */}
+        <link
+          rel="preconnect"
+          href="https://pub-71c2f92dfc5248a4a41ed07fa75d1a05.r2.dev"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://pub-71c2f92dfc5248a4a41ed07fa75d1a05.r2.dev"
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] font-[family-name:var(--font-noto)]">
         <WebsiteJsonLd />

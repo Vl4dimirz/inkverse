@@ -70,6 +70,8 @@ async function MangaGrid({ searchParams }: { searchParams: SearchParams }) {
                 views={manga.totalViews}
                 status={manga.status}
                 type={manga.type}
+                // First 4 items = first 2 rows on mobile (2-col grid) — above fold.
+                priority={i < 4}
               />
             </div>
           );

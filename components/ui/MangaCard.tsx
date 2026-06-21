@@ -19,6 +19,16 @@ interface MangaCardProps {
   contentRating?: string;
   className?: string;
   variant?: "default" | "compact" | "large";
+  /**
+   * Set true for above-the-fold cards (first row on the list pages).
+   * Passes `preload` + `fetchPriority="high"` + `loading="eager"` to the
+   * underlying <Image> so the cover starts loading without waiting for the
+   * browser's lazy-load threshold — critical for LCP.
+   *
+   * `priority` is the deprecated Next.js 15 name; `preload` is the Next.js 16
+   * replacement. We accept `priority` from callers for backward compat but
+   * forward it as `preload` internally.
+   */
   priority?: boolean;
 }
 
@@ -67,12 +77,23 @@ function MangaCard({
             alt={title}
             fill
             unoptimized
-            priority={priority}
+            // `preload` is the Next.js 16 replacement for deprecated `priority`.
+            // It fires ReactDOM.preload() so the browser fetches the image early.
+            // `fetchPriority="high"` sets the browser's own fetch-priority hint.
+            // `loading="eager"` disables lazy-loading for above-fold cards.
+            // Below-fold cards get the default lazy loading (preload=false).
+            preload={priority}
+            fetchPriority={priority ? "high" : "auto"}
+            loading={priority ? "eager" : "lazy"}
             className={clsx(
               "object-cover transition-transform duration-500 group-hover:scale-105",
               isLarge && "opacity-60"
             )}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            // Accurate sizes for the 2/3/4/6-col grid used on list pages.
+            // Mobile (< 640 px viewport): 2 columns → each card ≈ 50 vw minus gaps.
+            // Tablet (640–1024 px): 3–4 columns → 33 vw / 25 vw.
+            // Desktop (≥ 1024 px): 6 columns → ≈ 17 vw.
+            sizes="(max-width: 639px) calc(50vw - 24px), (max-width: 767px) calc(33vw - 20px), (max-width: 1023px) calc(25vw - 20px), calc(17vw - 20px)"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--bg-card)] to-[var(--bg-surface)]">
