@@ -5,7 +5,15 @@ import { apiError } from "@/lib/apiError";
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user) return apiError("AUTH-007", 401);
+  // Anonymous visitors get an empty (non-error) payload — this endpoint is
+  // polled globally by AchievementToaster/NotificationBell on every page, and a
+  // 401 only spams the console + wastes requests for the logged-out majority.
+  if (!session?.user) {
+    return NextResponse.json(
+      { notifications: [], unreadCount: 0 },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  }
 
   const userId = (session.user as { id: string }).id;
 
