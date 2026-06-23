@@ -43,7 +43,9 @@ export default async function DiscoverPage({
   const hasConsent = cookieStore.get("adult_consent")?.value === "1";
   const showAdult = adult === "1" && hasConsent;
 
-  const genres = await prisma.genre.findMany({ orderBy: { name: "asc" } });
+  // The genre list (for the filter UI) is independent of the results — start it
+  // now and await it alongside the manga query instead of serially before it.
+  const genresPromise = prisma.genre.findMany({ orderBy: { name: "asc" } });
 
   const where: Record<string, unknown> = { ...listedMangaWhere() };
   if (q) {
@@ -71,7 +73,8 @@ export default async function DiscoverPage({
 
   // avgRating / bookmarkCount are denormalized columns now → sort + paginate in
   // the DB (no fetch-all + JS sort).
-  const [mangas, total] = await Promise.all([
+  const [genres, mangas, total] = await Promise.all([
+    genresPromise,
     prisma.manga.findMany({
       where,
       orderBy,
