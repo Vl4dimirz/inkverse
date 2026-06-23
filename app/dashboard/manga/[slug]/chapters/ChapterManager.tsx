@@ -410,6 +410,10 @@ export default function ChapterManager({
   const router = useRouter();
   const isNovel = mangaType === "NOVEL";
 
+  // Render rows in batches — a 200-chapter work shouldn't mount 200 heavy
+  // editable rows at once. Owners rarely manage past the first batch in one go.
+  const [visible, setVisible] = useState(50);
+
   const premiumCount = chapters.filter((c) => c.isPremium).length;
   const freeCount = chapters.length - premiumCount;
 
@@ -532,7 +536,7 @@ export default function ChapterManager({
         </div>
       ) : (
         <div className="space-y-2">
-          {[...chapters].sort((a, b) => a.chapterNum - b.chapterNum).map((ch) => (
+          {[...chapters].sort((a, b) => a.chapterNum - b.chapterNum).slice(0, visible).map((ch) => (
             <ChapterRow
               key={ch.id}
               chapter={ch}
@@ -546,6 +550,15 @@ export default function ChapterManager({
               }
             />
           ))}
+          {chapters.length > visible && (
+            <button
+              type="button"
+              onClick={() => setVisible((v) => v + 100)}
+              className="w-full py-2.5 border border-[var(--border)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-primary)]/50 transition-colors"
+            >
+              ดูเพิ่ม (เหลืออีก {(chapters.length - visible).toLocaleString()} ตอน)
+            </button>
+          )}
         </div>
       )}
 
