@@ -2,99 +2,80 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Settings, User, Mail, Shield, Calendar } from "lucide-react";
+import { Settings } from "lucide-react";
 import SignOutButton from "@/components/ui/SignOutButton";
-import CreatorProfileForm from "@/components/ui/CreatorProfileForm";
+import SettingsTabs from "@/components/ui/SettingsTabs";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "ตั้งค่าบัญชี" };
-
-const roleLabel: Record<string, string> = {
-  READER: "นักอ่าน",
-  TRANSLATOR: "นักแปล",
-  ADMIN: "ผู้ดูแลระบบ",
-};
+export const metadata: Metadata = { title: "ตั้งค่าบัญชี — INKVERSE" };
 
 export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user) redirect("/auth/signin?callbackUrl=/settings");
 
   const userId = (session.user as { id: string }).id;
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { username: true, email: true, role: true, createdAt: true },
-  });
-  if (!user) redirect("/auth/signin");
-
-  const translator =
-    user.role === "TRANSLATOR" || user.role === "ADMIN"
-      ? await prisma.translator.findUnique({
-          where: { userId },
-          select: { bio: true, socialLinks: true, kind: true },
-        })
-      : null;
-
-  const roleText =
-    user.role === "TRANSLATOR" && translator?.kind === "WRITER"
-      ? "นักเขียน"
-      : roleLabel[user.role] ?? user.role;
-
-  const rows = [
-    { icon: User, label: "ชื่อผู้ใช้", value: user.username },
-    { icon: Mail, label: "อีเมล", value: user.email },
-    { icon: Shield, label: "บทบาท", value: roleText },
-    {
-      icon: Calendar,
-      label: "เข้าร่วมเมื่อ",
-      value: new Date(user.createdAt).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" }),
+    select: {
+      username: true,
+      name: true,
+      bio: true,
+      website: true,
+      location: true,
+      phone: true,
+      recoveryEmail: true,
+      avatarUrl: true,
+      coverUrl: true,
+      twoFactorEnabled: true,
+      verifiedAt: true,
     },
-  ];
+  });
+
+  if (!user) redirect("/auth/signin");
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <div className="flex items-center gap-3">
-        <Settings className="w-6 h-6 text-[var(--text-primary)]" />
-        <h1 className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider">ตั้งค่าบัญชี</h1>
+      {/* Page header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Settings className="w-5 h-5 text-[var(--text-primary)]" />
+          <h1 className="font-bebas text-3xl text-[var(--text-primary)] tracking-wider">
+            ตั้งค่าบัญชี
+          </h1>
+        </div>
+        {user.verifiedAt && (
+          <span className="text-[10px] uppercase tracking-widest border border-[var(--text-primary)] text-[var(--text-primary)] px-2 py-1">
+            ยืนยันแล้ว
+          </span>
+        )}
       </div>
 
-      {/* Account info */}
-      <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] divide-y divide-[var(--border)]">
-        {rows.map(({ icon: Icon, label, value }) => (
-          <div key={label} className="flex items-center gap-3 px-4 py-3">
-            <Icon className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
-            <span className="text-sm text-[var(--text-secondary)] w-28 shrink-0">{label}</span>
-            <span className="text-sm text-[var(--text-primary)] truncate">{value}</span>
-          </div>
-        ))}
-      </div>
+      {/* Tabbed settings */}
+      <SettingsTabs user={user} />
 
-      {/* Creator profile (translators/admins) */}
-      {translator && (
-        <CreatorProfileForm
-          initialBio={translator.bio ?? ""}
-          initialSocials={(translator.socialLinks as Record<string, string>) ?? {}}
-        />
-      )}
-
-      {/* Theme hint */}
-      <p className="text-xs text-[var(--text-secondary)]">
-        สลับโหมดสว่าง/มืดได้ที่ปุ่ม 🌙/☀️ บนแถบเมนูด้านบน
-      </p>
-
-      {/* Quick links */}
-      <div className="flex flex-wrap gap-2">
-        <Link href={`/profile/${user.username}`} className="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[var(--text-primary)]/40 transition-colors">
-          ดูโปรไฟล์ของฉัน
-        </Link>
-        <Link href="/topup" className="px-4 py-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[var(--text-primary)]/40 transition-colors">
-          เติมเหรียญ
-        </Link>
-      </div>
-
-      {/* Account actions */}
-      <div className="pt-2 border-t border-[var(--border)]">
+      {/* Footer quick links */}
+      <div className="pt-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={`/profile/${user.username}`}
+            className="px-4 py-2 border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[var(--text-primary)]/60 transition-colors"
+          >
+            ดูโปรไฟล์
+          </Link>
+          <Link
+            href="/topup"
+            className="px-4 py-2 border border-[var(--border)] text-sm text-[var(--text-primary)] hover:border-[var(--text-primary)]/60 transition-colors"
+          >
+            เติมเหรียญ
+          </Link>
+        </div>
         <SignOutButton />
       </div>
+
+      <p className="text-xs text-[var(--text-muted)]">
+        สลับโหมดสว่าง/มืดได้ที่ปุ่มบนแถบเมนูด้านบน
+      </p>
     </div>
   );
 }

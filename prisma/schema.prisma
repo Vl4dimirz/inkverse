@@ -15,6 +15,13 @@ model User {
   avatarUrl        String?
   coverUrl         String?           // profile banner image (R2 URL)
   bio              String?           // short profile bio (readers; translators use Translator.bio)
+  website          String?           // optional profile link (credibility)
+  location         String?           // optional
+  phone            String?           // contact / recovery (SMS recovery needs a provider; stored only for now)
+  recoveryEmail    String?           // alternate email for account recovery
+  twoFactorEnabled Boolean           @default(false)
+  twoFactorSecret  String?           // TOTP secret (base32) — set only while 2FA is on
+  twoFactorBackupCodes String?       // JSON array of bcrypt-hashed one-time backup codes
   verifiedAt       DateTime?         // identity-verified translator (paid + admin-approved)
   coins            Int               @default(0)
   vipExpiresAt     DateTime?         // active VIP while in the future (coin stipend + unlock discount)
@@ -45,6 +52,24 @@ model User {
   pushTokens              PushToken[]
   emailVerificationTokens EmailVerificationToken[]
   serviceOrders           ServiceOrder[]
+  userSessions            UserSession[]
+}
+
+// Device/session tracking for the JWT auth strategy (no DB sessions otherwise).
+// Each login creates a row; its id is embedded in the JWT as `sid`. The auth
+// callback rejects a token whose sid row is gone → that's how "log out this
+// device" / "log out everywhere" works. lastSeenAt is refreshed on use.
+model UserSession {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ip         String?
+  device     String?  // friendly label e.g. "Chrome · Windows"
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // A reader following a creator. followingId = the creator's user id.

@@ -8,6 +8,16 @@ import bcrypt from "bcryptjs";
 import { OAuth2Client } from "google-auth-library";
 import { authConfig } from "./auth.config";
 import { rateLimit } from "@/lib/rate-limit";
+import { createUserSession, sessionValid, touchSession } from "@/lib/deviceSessions";
+import { verifyTotp, verifyBackupCode } from "@/lib/twoFactor";
+
+// Pull device info from the sign-in request (for the device/session list).
+function reqInfo(req: Request | undefined) {
+  return {
+    userAgent: req?.headers?.get("user-agent") ?? null,
+    ip: req?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+  };
+}
 
 const googleVerifier = new OAuth2Client();
 
@@ -86,6 +96,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.remember = (user as { remember?: boolean }).remember !== false;
         token.loginAt = Date.now();
         token.refreshedAt = Date.now(); // login data is fresh — skip refresh for a bit
+        // Device session id: credentials providers set it in authorize; the web
+        // Google (adapter) path doesn't, so create one here (no req headers).
+        token.sid = (user as { sid?: string }).sid;
+        if (!token.sid && user.id) token.sid = await createUserSession(user.id, {});
       }
       // Refresh role + username from the DB at most once a minute (not on every
       // request) so an approved writer becomes TRANSLATOR within ~60s without a
@@ -98,6 +112,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // after creator auto-approval) — refresh the role NOW, bypassing the 60s
         // throttle, so a just-approved creator can enter /dashboard immediately.
         if (trigger === "update" || now - last > 60_000) {
+          // Device revocation: if this token's session row was deleted ("log out
+          // this device" / "log out everywhere"), neuter the token → logged out.
+          // Throttled to ~60s so it isn't a DB hit on every request.
+          if (token.sid && !(await sessionValid(token.sid as string))) {
+            return {};
+          }
           const u = await prisma.user.findUnique({
             where: { id: token.id as string },
             select: { username: true, role: true },
@@ -106,16 +126,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.username = u.username;
             token.role = u.role;
           }
+          if (token.sid) await touchSession(token.sid as string);
           token.refreshedAt = now;
         }
       }
       return token;
     },
     async session({ session, token }) {
+      // Token was neutered (device revoked) → present as logged out.
+      if (!token.id) {
+        (session as { user?: unknown }).user = undefined;
+        return session;
+      }
       if (session.user) {
         (session.user as { role?: string }).role = token.role as string;
         (session.user as { id?: string }).id = token.id as string;
         (session.user as { username?: string }).username = token.username as string;
+        (session.user as { sid?: string }).sid = token.sid as string | undefined;
       }
       // "Remember me" unticked → expire the session 1 day after login instead of
       // the default 30 days. We shorten session.expires so the client treats the
@@ -145,7 +172,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       id: "google-native",
       name: "Google",
       credentials: { idToken: { label: "idToken", type: "text" } },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         const idToken = credentials?.idToken as string | undefined;
         if (!idToken) return null;
         try {
@@ -160,6 +187,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: payload.name,
             picture: payload.picture,
           });
+          const sid = await createUserSession(user.id, reqInfo(req as Request | undefined));
           return {
             id: user.id,
             email: user.email,
@@ -167,6 +195,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             image: user.avatarUrl,
             role: user.role,
             remember: true,
+            sid,
           };
         } catch {
           return null;
@@ -179,8 +208,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         remember: { label: "Remember", type: "text" },
+        totp: { label: "2FA", type: "text" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) return null;
 
         // Throttle password guesses per account (brute-force protection).
@@ -201,6 +231,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // someone else's email is useless (can't log in) even after a Google
         // sign-in links to it. Existing users were grandfathered to verified.
         if (!user.emailVerified) return null;
+
+        // Two-factor gate: a 2FA-enabled account must supply a valid TOTP code
+        // (or a one-time backup code) on top of the password.
+        if (user.twoFactorEnabled) {
+          const code = (credentials.totp as string | undefined)?.trim();
+          if (!code) return null;
+          let ok = user.twoFactorSecret ? verifyTotp(user.twoFactorSecret, code) : false;
+          if (!ok) {
+            const r = await verifyBackupCode(user.twoFactorBackupCodes, code);
+            if (r.ok) {
+              ok = true;
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { twoFactorBackupCodes: r.remainingJson },
+              });
+            }
+          }
+          if (!ok) return null;
+        }
+
+        const sid = await createUserSession(user.id, reqInfo(req as Request | undefined));
         return {
           id: user.id,
           email: user.email,
@@ -209,6 +260,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: user.role,
           // "Remember me" unticked → a short-lived session (see jwt/session below).
           remember: credentials.remember !== "0" && credentials.remember !== "false",
+          sid,
         };
       },
     }),
