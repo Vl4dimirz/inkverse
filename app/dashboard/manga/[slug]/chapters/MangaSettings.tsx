@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Settings, Check, Loader2, Trash2, AlertTriangle, ChevronDown, Upload, ImageIcon, EyeOff, Send } from "lucide-react";
 import clsx from "clsx";
 import TagInput from "@/components/ui/TagInput";
+import Adult18ConfirmModal from "@/components/ui/Adult18ConfirmModal";
 
 interface MangaData {
   title: string;
@@ -82,6 +83,7 @@ export default function MangaSettings({
   const [genreIds, setGenreIds] = useState<string[]>(initialGenreIds);
   const [published, setPublished] = useState(manga.published ?? true);
   const [togglingPublish, setTogglingPublish] = useState(false);
+  const [showAdultConfirm, setShowAdultConfirm] = useState(false);
 
   async function togglePublish() {
     const next = !published;
@@ -153,7 +155,16 @@ export default function MangaSettings({
     } finally { setUploadingCover(false); }
   }
 
-  async function save() {
+  function save() {
+    // Newly marking the work 18+ → confirm (where it shows / is hidden + why) first.
+    if (form.contentRating === "ADULT" && manga.contentRating !== "ADULT") {
+      setShowAdultConfirm(true);
+      return;
+    }
+    void doSave();
+  }
+
+  async function doSave() {
     setSaving(true); setError(""); setSaved(false);
     try {
       const res = await fetch(`/api/manga/${slug}`, {
@@ -181,6 +192,15 @@ export default function MangaSettings({
 
   return (
     <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <Adult18ConfirmModal
+        open={showAdultConfirm}
+        loading={saving}
+        onCancel={() => setShowAdultConfirm(false)}
+        onConfirm={() => {
+          setShowAdultConfirm(false);
+          void doSave();
+        }}
+      />
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-3 text-left"

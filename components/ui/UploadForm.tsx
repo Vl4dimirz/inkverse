@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { slugify } from "@/lib/slug";
+import Adult18ConfirmModal from "@/components/ui/Adult18ConfirmModal";
 
 const mangaSchema = z.object({
   title: z.string().min(1, "กรุณากรอกชื่อเรื่อง"),
@@ -340,6 +341,8 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
     resolver: zodResolver(mangaSchema),
     defaultValues: { originCountry: "JP", status: "ONGOING", type: "MANGA", contentRating: "EVERYONE" },
   });
+  // Holds the pending manga data while the 18+ confirmation modal is open.
+  const [pendingManga, setPendingManga] = useState<MangaForm | null>(null);
 
   useEffect(() => {
     if (tab === "chapter" && !mangasFetched) {
@@ -500,7 +503,17 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
     pausedRef.current = false; setPaused(false);
   };
 
-  const onSubmitManga = async (data: MangaForm) => {
+  // 18+ works show a confirmation (where they appear / are hidden + why) before
+  // saving. The form's submit runs this gate; it defers to doCreateManga.
+  const onSubmitManga = (data: MangaForm) => {
+    if (data.contentRating === "ADULT") {
+      setPendingManga(data);
+      return;
+    }
+    void doCreateManga(data);
+  };
+
+  const doCreateManga = async (data: MangaForm) => {
     setMangaLoading(true);
     setMangaError("");
     setMangaSuccess(null);
@@ -650,6 +663,16 @@ export default function UploadForm({ genres }: { genres: Genre[] }) {
 
   return (
     <div>
+      <Adult18ConfirmModal
+        open={!!pendingManga}
+        loading={mangaLoading}
+        onCancel={() => setPendingManga(null)}
+        onConfirm={() => {
+          const d = pendingManga;
+          setPendingManga(null);
+          if (d) void doCreateManga(d);
+        }}
+      />
       {/* Tab switcher */}
       <div className="flex gap-2 mb-6">
         {(["manga", "chapter"] as const).map((t) => (
