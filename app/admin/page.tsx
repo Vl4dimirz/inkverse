@@ -113,6 +113,9 @@ export default async function AdminPage() {
       {/* Traffic */}
       <h2 className="font-bebas text-2xl text-[var(--text-primary)] tracking-[0.18em] uppercase flex items-center gap-3 mb-4">
         <span className="w-6 h-px bg-[var(--text-primary)]" /> ยอดเข้าชม <span className="text-[10px] text-[var(--text-muted)] normal-case tracking-normal">(ไม่นับแอดมิน)</span>
+        <Link href="/admin/analytics" className="ml-auto text-xs normal-case tracking-normal font-normal text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-1">
+          ภาพรวม Funnel →
+        </Link>
       </h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {[
