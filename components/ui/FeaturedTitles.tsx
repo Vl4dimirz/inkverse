@@ -63,6 +63,7 @@ export default function FeaturedTitles({ items }: { items: FeaturedItem[] }) {
                 alt=""
                 fill
                 unoptimized
+                loading={idx === 0 ? "eager" : "lazy"}
                 className="object-cover opacity-20 blur-2xl scale-110"
                 sizes="100vw"
               />

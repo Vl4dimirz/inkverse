@@ -4,8 +4,18 @@ import Pagination from "@/components/ui/Pagination";
 import { notFound } from "next/navigation";
 import { listedMangaWhere } from "@/lib/chapters";
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 
 const BASE_URL = process.env.SITE_URL || process.env.NEXTAUTH_URL || "https://inksverse.com";
+
+// Cached genre lookup — shared by generateMetadata + the page (was queried twice
+// per request) and across users.
+const getGenre = (slug: string) =>
+  unstable_cache(
+    () => prisma.genre.findUnique({ where: { slug } }),
+    ["genre-by-slug", slug],
+    { revalidate: 3600, tags: ["genre-list"] }
+  )();
 
 interface Props {
   params: Promise<{ genre: string }>;
@@ -14,7 +24,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { genre } = await params;
-  const g = await prisma.genre.findUnique({ where: { slug: genre } });
+  const g = await getGenre(genre);
   if (!g) return { title: "หมวดหมู่" };
   const name = g.name;
   const title = `อ่าน${name} แปลไทย ออนไลน์ฟรี — มังงะ มังฮวา นิยาย`;
@@ -34,7 +44,7 @@ export default async function GenrePage({ params, searchParams }: Props) {
   const page = Math.max(1, Math.floor(Number((await searchParams).page) || 1));
   const take = 24;
 
-  const genreRecord = await prisma.genre.findUnique({ where: { slug: genre } });
+  const genreRecord = await getGenre(genre);
   if (!genreRecord) notFound();
 
   const where = {
@@ -42,15 +52,15 @@ export default async function GenrePage({ params, searchParams }: Props) {
     genres: { some: { genreId: genreRecord.id } },
     contentRating: { not: "ADULT" as const },
   };
-  const [mangas, total] = await Promise.all([
-    prisma.manga.findMany({
-      where,
-      orderBy: { totalViews: "desc" },
-      take,
-      skip: (page - 1) * take,
-    }),
-    prisma.manga.count({ where }),
-  ]);
+  const [mangas, total] = await unstable_cache(
+    () =>
+      Promise.all([
+        prisma.manga.findMany({ where, orderBy: { totalViews: "desc" }, take, skip: (page - 1) * take }),
+        prisma.manga.count({ where }),
+      ]),
+    ["genre-manga-list", genre, String(page)],
+    { revalidate: 300, tags: ["manga-list"] }
+  )();
   const totalPages = Math.ceil(total / take);
 
   return (

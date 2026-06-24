@@ -107,12 +107,6 @@ export default async function ProfilePage({ params }: Props) {
 
   const isOwner = !!session?.user && (session.user as { id?: string }).id === user.id;
   const viewerId = session?.user ? (session.user as { id?: string }).id : null;
-  const isFollowing =
-    viewerId && viewerId !== user.id
-      ? !!(await prisma.follow.findUnique({
-          where: { followerId_followingId: { followerId: viewerId, followingId: user.id } },
-        }))
-      : false;
   const socials = (user.translator?.socialLinks as Record<string, string> | null) ?? {};
   const role = ROLES[user.role as keyof typeof ROLES] ?? ROLES.READER;
   const RoleIcon = role.icon;
@@ -137,11 +131,28 @@ export default async function ProfilePage({ params }: Props) {
   const bio = user.translator?.bio || user.bio;
   const joined = new Date(user.createdAt).toLocaleDateString("th-TH", { year: "numeric", month: "short" });
 
-  // Reader rank (derived from chapters read + coins spent unlocking) + achievements.
-  const [coinSpentAgg, unlockedAch] = await Promise.all([
+  // Everything that depends only on the loaded user — the follow check, the reader
+  // rank aggregate, achievements, and the top-fans groupBy — is independent, so
+  // run it in ONE parallel round-trip instead of a 3-query waterfall.
+  const [followRow, coinSpentAgg, unlockedAch, fanAgg] = await Promise.all([
+    viewerId && viewerId !== user.id
+      ? prisma.follow.findUnique({
+          where: { followerId_followingId: { followerId: viewerId, followingId: user.id } },
+        })
+      : Promise.resolve(null),
     prisma.unlockedChapter.aggregate({ where: { userId: user.id }, _sum: { coinSpent: true } }),
     getUnlockedAchievements(user.id, 6),
+    user.translator
+      ? prisma.translatorEarning.groupBy({
+          by: ["userId"],
+          where: { translatorId: user.translator.id },
+          _sum: { coinsSpent: true },
+          orderBy: { _sum: { coinsSpent: "desc" } },
+          take: 10,
+        })
+      : Promise.resolve([] as { userId: string; _sum: { coinsSpent: number | null } }[]),
   ]);
+  const isFollowing = !!followRow;
   const coinsSpent = coinSpentAgg._sum.coinSpent ?? 0;
   const rank = getReaderRank(user._count.readHistory, coinsSpent);
   const RankIcon = RANK_ICONS[rank.current.icon] ?? BookOpen;
@@ -157,28 +168,19 @@ export default async function ProfilePage({ params }: Props) {
 
   // Top Fans — readers who spent the most coins on this creator's work (incl. tips).
   let topFans: { id: string; username: string; avatarUrl: string | null; coins: number }[] = [];
-  if (user.translator) {
-    const fanAgg = await prisma.translatorEarning.groupBy({
-      by: ["userId"],
-      where: { translatorId: user.translator.id },
-      _sum: { coinsSpent: true },
-      orderBy: { _sum: { coinsSpent: "desc" } },
-      take: 10,
+  const fanIds = fanAgg.map((f) => f.userId);
+  if (fanIds.length) {
+    const fanUsers = await prisma.user.findMany({
+      where: { id: { in: fanIds } },
+      select: { id: true, username: true, avatarUrl: true },
     });
-    const fanIds = fanAgg.map((f) => f.userId);
-    if (fanIds.length) {
-      const fanUsers = await prisma.user.findMany({
-        where: { id: { in: fanIds } },
-        select: { id: true, username: true, avatarUrl: true },
-      });
-      const fanMap = new Map(fanUsers.map((u) => [u.id, u]));
-      topFans = fanAgg
-        .map((f) => {
-          const u = fanMap.get(f.userId);
-          return u ? { ...u, coins: f._sum.coinsSpent ?? 0 } : null;
-        })
-        .filter((f): f is NonNullable<typeof f> => !!f && f.coins > 0);
-    }
+    const fanMap = new Map(fanUsers.map((u) => [u.id, u]));
+    topFans = fanAgg
+      .map((f) => {
+        const u = fanMap.get(f.userId);
+        return u ? { ...u, coins: f._sum.coinsSpent ?? 0 } : null;
+      })
+      .filter((f): f is NonNullable<typeof f> => !!f && f.coins > 0);
   }
   const fanBadges = await getRankBadges(topFans.map((f) => f.id));
 

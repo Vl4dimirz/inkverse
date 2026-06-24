@@ -11,8 +11,15 @@ export default function WelcomePopup() {
   // user is NOT a creator, the effect below may schedule the popup.
   const [isCreator, setIsCreator] = useState(true);
 
-  // Fetch auth state once on mount.
+  // Fetch auth state once on mount — but only if the popup could still show.
+  // Returning visitors who already dismissed it skip the /api/me call entirely
+  // (it otherwise duplicated the Navbar's own /api/me on every page load).
   useEffect(() => {
+    try {
+      if (localStorage.getItem("ivRecruitSeen")) return;
+    } catch {
+      return;
+    }
     let alive = true;
     fetch("/api/me")
       .then((r) => r.json())

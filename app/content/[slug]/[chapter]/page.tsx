@@ -53,13 +53,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ReaderPage({ params }: Props) {
   const { slug: rawSlug, chapter } = await params;
   const slug = decodeSlug(rawSlug);
-  const session = await auth();
   const chapterNum = parseFloat(chapter);
 
-  const manga = await prisma.manga.findUnique({
-    where: { slug },
-    select: { id: true, title: true, slug: true, type: true, coverUrl: true, published: true, translator: { select: { userId: true } } },
-  });
+  // auth() and the manga lookup are independent → run them together.
+  const [session, manga] = await Promise.all([
+    auth(),
+    prisma.manga.findUnique({
+      where: { slug },
+      select: { id: true, title: true, slug: true, type: true, coverUrl: true, published: true, translator: { select: { userId: true } } },
+    }),
+  ]);
   if (!manga) notFound();
 
   const userId = session?.user ? (session.user as { id: string }).id : null;
@@ -70,12 +73,26 @@ export default async function ReaderPage({ params }: Props) {
   // owner/admin (live preview) — mirrors the per-chapter draft gate below.
   if (!manga.published && !isOwnerPreview) notFound();
 
-  const chapterData = await prisma.chapter.findUnique({
-    where: { mangaId_chapterNum: { mangaId: manga.id, chapterNum } },
-    include: {
-      pages: { orderBy: { pageNum: "asc" } },
-    },
-  });
+  // The chapter body and the adjacent-chapter (prev/next) lookups both depend
+  // only on manga.id + chapterNum, not on each other → fetch all three at once.
+  const [chapterData, [prevChapter, nextChapter]] = await Promise.all([
+    prisma.chapter.findUnique({
+      where: { mangaId_chapterNum: { mangaId: manga.id, chapterNum } },
+      include: { pages: { orderBy: { pageNum: "asc" } } },
+    }),
+    Promise.all([
+      prisma.chapter.findFirst({
+        where: { mangaId: manga.id, chapterNum: { lt: chapterNum }, ...liveChapterWhere() },
+        orderBy: { chapterNum: "desc" },
+        select: { chapterNum: true },
+      }),
+      prisma.chapter.findFirst({
+        where: { mangaId: manga.id, chapterNum: { gt: chapterNum }, ...liveChapterWhere() },
+        orderBy: { chapterNum: "asc" },
+        select: { chapterNum: true },
+      }),
+    ]),
+  ]);
   if (!chapterData) notFound();
 
   // ── Premium gate ──────────────────────────────────────────────
@@ -90,9 +107,13 @@ export default async function ReaderPage({ params }: Props) {
     if (!userId) {
       redirect(`/auth/signin?callbackUrl=/content/${slug}/${chapter}`);
     }
-    const unlocked = await hasUnlockedChapter(userId, chapterData.id);
+    // Fetch the unlock check + the coin balance together — the gate (shown when
+    // not unlocked) needs both; one extra cheap read on the already-unlocked path.
+    const [unlocked, userCoins] = await Promise.all([
+      hasUnlockedChapter(userId, chapterData.id),
+      getUserCoins(userId),
+    ]);
     if (!unlocked) {
-      const userCoins = await getUserCoins(userId);
       return (
         <PremiumGate
           chapterId={chapterData.id}
@@ -107,20 +128,6 @@ export default async function ReaderPage({ params }: Props) {
     }
   }
   // ─────────────────────────────────────────────────────────────
-
-  // Adjacent chapters
-  const [prevChapter, nextChapter] = await Promise.all([
-    prisma.chapter.findFirst({
-      where: { mangaId: manga.id, chapterNum: { lt: chapterNum }, ...liveChapterWhere() },
-      orderBy: { chapterNum: "desc" },
-      select: { chapterNum: true },
-    }),
-    prisma.chapter.findFirst({
-      where: { mangaId: manga.id, chapterNum: { gt: chapterNum }, ...liveChapterWhere() },
-      orderBy: { chapterNum: "asc" },
-      select: { chapterNum: true },
-    }),
-  ]);
 
   // Count views from readers only — never the creator viewing their own work.
   const isOwner = !!userId && manga.translator?.userId === userId;

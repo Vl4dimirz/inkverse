@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
 import { after } from "next/server";
@@ -44,10 +45,9 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = decodeSlug(rawSlug);
-  const manga = await prisma.manga.findUnique({
-    where: { slug },
-    include: { genres: { include: { genre: true } } },
-  });
+  // Reuse the cached profile (shared with the page body) instead of a second,
+  // uncached manga query on every request.
+  const manga = await getMangaProfile(slug);
   if (!manga) return { title: "ไม่พบมังงะ", description: "ไม่พบมังงะที่ต้องการ" };
   // Story unpublished → don't leak its title/description in <head> (the page
   // body already 404s for non-owners; metadata runs before that gate).
@@ -182,7 +182,7 @@ export default async function MangaProfilePage({ params }: Props) {
 
   // One parallel round-trip for everything that depends on the loaded manga:
   // balance, unlocked/read sets, work-level comments, uploader rank, view bump.
-  const [userCoins, unlockedSet, readSet, workComments, translatorRank, bookmarkRow] = await Promise.all([
+  const [userCoins, unlockedSet, readSet, translatorRank, bookmarkRow] = await Promise.all([
     userId ? getUserCoins(userId) : Promise.resolve(0),
     userId && chapterIds.length
       ? prisma.unlockedChapter
@@ -194,23 +194,6 @@ export default async function MangaProfilePage({ params }: Props) {
           .findMany({ where: { userId, chapterId: { in: chapterIds } }, select: { chapterId: true } })
           .then((rows) => new Set(rows.map((r) => r.chapterId)))
       : Promise.resolve(new Set<string>()),
-    prisma.comment.findMany({
-      where: { mangaId: manga.id, parentId: null },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-      include: {
-        user: { select: { id: true, username: true, avatarUrl: true } },
-        likedBy: userId ? { where: { userId }, select: { id: true } } : false,
-        replies: {
-          include: {
-            user: { select: { id: true, username: true, avatarUrl: true } },
-            likedBy: userId ? { where: { userId }, select: { id: true } } : false,
-          },
-          orderBy: { createdAt: "asc" },
-          take: 10,
-        },
-      },
-    }),
     manga.translator
       ? getUserRankBadge(manga.translator.userId, manga.translator.user.role)
       : Promise.resolve(null),
@@ -279,30 +262,9 @@ export default async function MangaProfilePage({ params }: Props) {
     .filter((ch) => isChapterLocked(ch, unlockedSet.has(ch.id)))
     .map((ch) => ({ id: ch.id, chapterNum: ch.chapterNum, coinCost: ch.coinCost }));
 
-  // Rank badges for the thread — skip the (multi-query) lookup entirely when
-  // there are no comments yet (common, and the single biggest content-page cost).
-  const rankIds = [
-    ...workComments.map((c) => c.user.id),
-    ...workComments.flatMap((c) => c.replies.map((r) => r.user.id)),
-  ];
-  const commentRankMap =
-    rankIds.length > 0
-      ? await getRankBadges([...rankIds, ...(userId ? [userId] : [])])
-      : new Map();
-  const currentUserRank = userId ? commentRankMap.get(userId) ?? null : null;
-  const workCommentData = workComments.map((c) => ({
-    ...c,
-    createdAt: c.createdAt.toISOString(),
-    likedByMe: Array.isArray(c.likedBy) && c.likedBy.length > 0,
-    user: { username: c.user.username, avatarUrl: c.user.avatarUrl, rank: commentRankMap.get(c.user.id) ?? null },
-    replies: c.replies.map((r) => ({
-      ...r,
-      createdAt: r.createdAt.toISOString(),
-      likedByMe: Array.isArray(r.likedBy) && r.likedBy.length > 0,
-      user: { username: r.user.username, avatarUrl: r.user.avatarUrl, rank: commentRankMap.get(r.user.id) ?? null },
-      replies: [],
-    })),
-  }));
+  // Work-level comments (heavy: nested replies + rank-badge multi-query) now
+  // stream in their own <Suspense> boundary below — they no longer block the
+  // page's first paint.
 
   const statusLabel: Record<string, string> = {
     ONGOING: "กำลังดำเนินเรื่อง",
@@ -702,16 +664,97 @@ export default async function MangaProfilePage({ params }: Props) {
         </section>
       )}
 
-      {/* Work-level comments — readers discuss the whole story (key for novels) */}
+      {/* Work-level comments — readers discuss the whole story (key for novels).
+          Streamed so the heavy comment + rank-badge queries never delay paint. */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pb-16">
-        <CommentSection
-          mangaId={manga.id}
-          comments={workCommentData}
-          currentUserId={userId ?? undefined}
-          currentUsername={session?.user?.name ?? undefined}
-          currentUserRank={currentUserRank}
-        />
+        <Suspense fallback={<CommentsSkeleton />}>
+          <WorkComments
+            mangaId={manga.id}
+            userId={userId}
+            username={session?.user?.name ?? undefined}
+          />
+        </Suspense>
       </section>
     </>
+  );
+}
+
+// Heavy work-level comment query (nested replies + rank badges) split into its
+// own streamed boundary so the title page paints without waiting on it.
+async function WorkComments({
+  mangaId,
+  userId,
+  username,
+}: {
+  mangaId: string;
+  userId: string | null;
+  username?: string;
+}) {
+  const comments = await prisma.comment.findMany({
+    where: { mangaId, parentId: null },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    include: {
+      user: { select: { id: true, username: true, avatarUrl: true } },
+      likedBy: userId ? { where: { userId }, select: { id: true } } : false,
+      replies: {
+        include: {
+          user: { select: { id: true, username: true, avatarUrl: true } },
+          likedBy: userId ? { where: { userId }, select: { id: true } } : false,
+        },
+        orderBy: { createdAt: "asc" },
+        take: 10,
+      },
+    },
+  });
+
+  // Skip the (multi-query) rank lookup entirely when there are no comments yet.
+  const rankMap =
+    comments.length > 0
+      ? await getRankBadges([
+          ...comments.map((c) => c.user.id),
+          ...comments.flatMap((c) => c.replies.map((r) => r.user.id)),
+          ...(userId ? [userId] : []),
+        ])
+      : new Map();
+  const currentUserRank = userId ? rankMap.get(userId) ?? null : null;
+
+  return (
+    <CommentSection
+      mangaId={mangaId}
+      comments={comments.map((c) => ({
+        ...c,
+        createdAt: c.createdAt.toISOString(),
+        likedByMe: Array.isArray(c.likedBy) && c.likedBy.length > 0,
+        user: { username: c.user.username, avatarUrl: c.user.avatarUrl, rank: rankMap.get(c.user.id) ?? null },
+        replies: c.replies.map((r) => ({
+          ...r,
+          createdAt: r.createdAt.toISOString(),
+          likedByMe: Array.isArray(r.likedBy) && r.likedBy.length > 0,
+          user: { username: r.user.username, avatarUrl: r.user.avatarUrl, rank: rankMap.get(r.user.id) ?? null },
+          replies: [],
+        })),
+      }))}
+      currentUserId={userId ?? undefined}
+      currentUsername={username}
+      currentUserRank={currentUserRank}
+    />
+  );
+}
+
+function CommentsSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="h-5 w-32 bg-[var(--bg-surface)] rounded animate-pulse" />
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="flex gap-3">
+          <div className="w-9 h-9 rounded-full bg-[var(--bg-surface)] animate-pulse shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-24 bg-[var(--bg-surface)] rounded animate-pulse" />
+            <div className="h-3 w-full bg-[var(--bg-surface)] rounded animate-pulse" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

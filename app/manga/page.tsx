@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 import MangaCard from "@/components/ui/MangaCard";
 import Pagination from "@/components/ui/Pagination";
 import { Suspense } from "react";
@@ -45,10 +46,17 @@ async function MangaGrid({ searchParams }: { searchParams: SearchParams }) {
       ? { totalViews: "desc" }
       : { updatedAt: "desc" };
 
-  const [mangas, total] = await Promise.all([
-    prisma.manga.findMany({ where, orderBy, take, skip }),
-    prisma.manga.count({ where }),
-  ]);
+  // Cache per filter+page combo so popular list views are shared across users
+  // instead of re-hitting Postgres on every navigation. Short TTL keeps it fresh.
+  const [mangas, total] = await unstable_cache(
+    () =>
+      Promise.all([
+        prisma.manga.findMany({ where, orderBy, take, skip }),
+        prisma.manga.count({ where }),
+      ]),
+    ["manga-list", searchParams.status || "", searchParams.type || "", searchParams.tag || "", searchParams.sort || "", String(page)],
+    { revalidate: 300, tags: ["manga-list"] }
+  )();
 
   const totalPages = Math.ceil(total / take);
 
@@ -101,7 +109,6 @@ export default async function MangaPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const genres = await prisma.genre.findMany({ orderBy: { name: "asc" } });
 
   const statusOptions = ["ONGOING", "COMPLETED", "HIATUS"];
   const typeOptions = ["MANGA", "MANHWA", "MANHUA", "NOVEL"];

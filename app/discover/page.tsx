@@ -191,23 +191,23 @@ export default async function DiscoverPage({
           {totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-10">
               {pageNum > 1 && (
-                <a
+                <Link
                   href={buildUrl({ page: String(pageNum - 1) })}
                   className="px-4 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   ← ก่อนหน้า
-                </a>
+                </Link>
               )}
               <span className="px-4 py-2 rounded-lg bal-btn text-sm">
                 {pageNum} / {totalPages}
               </span>
               {pageNum < totalPages && (
-                <a
+                <Link
                   href={buildUrl({ page: String(pageNum + 1) })}
                   className="px-4 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   ถัดไป →
-                </a>
+                </Link>
               )}
             </div>
           )}
