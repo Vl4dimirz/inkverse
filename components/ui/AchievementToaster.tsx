@@ -13,17 +13,26 @@ interface Toast {
 
 const LS_KEY = "inkverse_toasted_ach";
 const FRESH_MS = 10 * 60 * 1000; // only pop achievements unlocked in the last 10 min
+const FETCH_THROTTLE_MS = 90 * 1000; // at most one /api/notifications hit per 90s
+
+// Module-level so it survives client navigations (the component stays mounted in
+// the layout). Throttles the per-route-change fetch — without this, a user
+// browsing N pages fired N notification queries, a real DB-compute drain.
+let lastToasterFetch = 0;
 
 /**
  * Pops a toast when an achievement unlocks. Reads ACHIEVEMENT notifications
  * (created server-side on unlock), dedupes via localStorage, and re-checks on
- * every route change so a chapter-read unlock pops as you move between pages.
+ * route change (throttled) so a chapter-read unlock pops as you move around.
  */
 export default function AchievementToaster() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const pathname = usePathname();
 
   useEffect(() => {
+    // Skip if we fetched recently — caps notification queries under heavy nav.
+    if (Date.now() - lastToasterFetch < FETCH_THROTTLE_MS) return;
+    lastToasterFetch = Date.now();
     let alive = true;
     fetch("/api/notifications")
       .then((r) => (r.ok ? r.json() : { notifications: [] }))

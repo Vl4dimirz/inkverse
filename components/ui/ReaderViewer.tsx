@@ -212,7 +212,6 @@ export default function ReaderViewer({
   // Reading-progress persistence refs.
   const pendingPage = useRef(initialPage ?? 1);
   const lastSent = useRef(initialPage ?? 1);
-  const debTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const goTo = useCallback(
     (idx: number) => {
@@ -254,24 +253,14 @@ export default function ReaderViewer({
     }
   }, [mode, initialPage]);
 
-  // ── Reading-progress reporting (debounced) ───────────────────────────────
+  // ── Reading-progress reporting ───────────────────────────────────────────
+  // Don't write to the DB while reading — on a free Neon tier that's a flood of
+  // tiny writes under load. Just remember the latest page; it's persisted ONCE
+  // on tab-hide / unmount via sendBeacon (below), which is all "resume" needs.
   const report = useCallback(
     (page: number) => {
       if (!chapterId || onBack) return;
       pendingPage.current = page;
-      if (debTimer.current) clearTimeout(debTimer.current);
-      debTimer.current = setTimeout(() => {
-        const p = pendingPage.current;
-        if (p && p !== lastSent.current) {
-          lastSent.current = p;
-          fetch("/api/reading-progress", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chapterId, page: p }),
-            keepalive: true,
-          }).catch(() => {});
-        }
-      }, 1500);
     },
     [chapterId, onBack]
   );
@@ -302,7 +291,6 @@ export default function ReaderViewer({
     document.addEventListener("visibilitychange", onVis);
     return () => {
       document.removeEventListener("visibilitychange", onVis);
-      if (debTimer.current) clearTimeout(debTimer.current);
       flush();
     };
   }, [chapterId, onBack]);

@@ -88,11 +88,14 @@ export default function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications();
+    // Poll gently (every 2 min) — notifications aren't time-critical and web
+    // push covers the urgent "new chapter" case. A short interval × every
+    // logged-in open tab was a major DB-compute drain on the free Neon tier.
     const interval = setInterval(() => {
       if (document.visibilityState !== "hidden") {
         fetchNotifications();
       }
-    }, 30000);
+    }, 120000);
 
     function onVisibilityChange() {
       if (document.visibilityState === "visible") {
