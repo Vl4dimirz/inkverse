@@ -334,7 +334,11 @@ export default async function HomePage() {
               ดูนิยายทั้งหมด <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {/* The "ยอดนิยม" manga grid sits in a 3/4 column (ranking sidebar beside
+              it on xl), so its 4-col cards are smaller. This novels section is
+              full-width, so at xl we go to 5 cols to keep the covers the SAME
+              size as the manga cards (md/lg already match — no sidebar there). */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
             {novels.slice(0, 8).map((n) => (
               <MangaCard
                 key={n.slug}
